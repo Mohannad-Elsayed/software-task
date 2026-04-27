@@ -19,29 +19,29 @@ CREATE TABLE User (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE User_Role (
+CREATE TABLE UserRole (
     user_id INT,
     role_name VARCHAR(100),
     PRIMARY KEY (user_id, role_name),
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE
 );
 
-CREATE TABLE Eco_Impact (
+CREATE TABLE EcoImpact (
     impact_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     co2_saved DECIMAL(10, 2) DEFAULT 0.00,
     waste_reduced DECIMAL(10, 2) DEFAULT 0.00,
     water_saved DECIMAL(10, 2) DEFAULT 0.00,
     eco_points INT DEFAULT 0,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE
 );
 
 -- Material Taxonomy
-CREATE TABLE Material_Taxonomy (
+CREATE TABLE MaterialTaxonomy (
     material_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     parent_material_id INT NULL,
-    FOREIGN KEY (parent_material_id) REFERENCES Material_Taxonomy(material_id) ON DELETE SET NULL
+    FOREIGN KEY (parent_material_id) REFERENCES MaterialTaxonomy(material_id) ON DELETE SET NULL
 );
 
 -- Listings & Transformations
@@ -56,11 +56,11 @@ CREATE TABLE Listing (
     condition_status VARCHAR(100),
     listing_type VARCHAR(100),
     status VARCHAR(50) DEFAULT 'active',
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (material_id) REFERENCES Material_Taxonomy(material_id) ON DELETE SET NULL
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (material_id) REFERENCES MaterialTaxonomy(material_id) ON DELETE SET NULL
 );
 
-CREATE TABLE Upcycle_Transformation (
+CREATE TABLE UpcycleTransformation (
     transformation_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     listing_id INT NOT NULL,
@@ -68,8 +68,8 @@ CREATE TABLE Upcycle_Transformation (
     after_image_url VARCHAR(255),
     steps TEXT,
     materials_used TEXT,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (listing_id) REFERENCES Listings(listing_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (listing_id) REFERENCES Listing(listing_id) ON DELETE CASCADE
 );
 
 CREATE TABLE Review (
@@ -77,7 +77,17 @@ CREATE TABLE Review (
     listing_id INT NOT NULL,
     rating INT CHECK (rating >= 1 AND rating <= 5),
     comment TEXT,
-    FOREIGN KEY (listing_id) REFERENCES Listings(listing_id) ON DELETE CASCADE
+    FOREIGN KEY (listing_id) REFERENCES Listing(listing_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Comment (
+    comment_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    listing_id INT NOT NULL,
+    content TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (listing_id) REFERENCES Listing(listing_id) ON DELETE CASCADE
 );
 
 CREATE TABLE Report (
@@ -88,7 +98,8 @@ CREATE TABLE Report (
     reason TEXT NOT NULL,
     status VARCHAR(50) DEFAULT 'pending',
     FOREIGN KEY (initiator_id) REFERENCES User(user_id),
-    FOREIGN KEY (listing_id) REFERENCES Listing(listing_id)
+    FOREIGN KEY (listing_id) REFERENCES Listing(listing_id),
+    FOREIGN KEY (comment_id) REFERENCES Comment(comment_id)
 );
 
 -- Transactions: Orders & Swaps
@@ -103,14 +114,14 @@ CREATE TABLE [Order] (
     FOREIGN KEY (buyer_id) REFERENCES User(user_id)
 );
 
-CREATE TABLE Order_Item (
+CREATE TABLE OrderItem (
     order_item_id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
     listing_id INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
     subtotal DECIMAL(10, 2) GENERATED ALWAYS AS (price * quantity), -- Handles calculateSubtotal() at DB level
-    FOREIGN KEY (order_id) REFERENCES Order(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES [Order](order_id) ON DELETE CASCADE,
     FOREIGN KEY (listing_id) REFERENCES Listing(listing_id)
 );
 
@@ -119,18 +130,18 @@ CREATE TABLE Payment (
     order_id INT NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
     status VARCHAR(50) DEFAULT 'unpaid',
-    FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE
+    FOREIGN KEY (order_id) REFERENCES [Order](order_id) ON DELETE CASCADE
 );
 
-CREATE TABLE Swap_Request (
+CREATE TABLE SwapRequest (
     request_id INT AUTO_INCREMENT PRIMARY KEY,
     initiator_id INT NOT NULL,
     partner_id INT NOT NULL,
     requested_listing_id INT NOT NULL,
     status VARCHAR(50) DEFAULT 'pending',
-    FOREIGN KEY (initiator_id) REFERENCES Users(user_id),
-    FOREIGN KEY (partner_id) REFERENCES Users(user_id),
-    FOREIGN KEY (requested_listing_id) REFERENCES Listings(listing_id)
+    FOREIGN KEY (initiator_id) REFERENCES User(user_id),
+    FOREIGN KEY (partner_id) REFERENCES User(user_id),
+    FOREIGN KEY (requested_listing_id) REFERENCES Listing(listing_id)
 );
 
 CREATE TABLE Offer (
@@ -139,8 +150,8 @@ CREATE TABLE Offer (
     initiator_id INT NOT NULL,
     offer_value VARCHAR(255),
     status VARCHAR(50) DEFAULT 'pending',
-    FOREIGN KEY (request_id) REFERENCES Swap_Requests(request_id) ON DELETE CASCADE,
-    FOREIGN KEY (initiator_id) REFERENCES Users(user_id)
+    FOREIGN KEY (request_id) REFERENCES SwapRequest(request_id) ON DELETE CASCADE,
+    FOREIGN KEY (initiator_id) REFERENCES User(user_id)
 );
 
 -- Support & Operations
@@ -151,9 +162,9 @@ CREATE TABLE Dispute (
     request_id INT NULL,
     reason TEXT NOT NULL,
     status VARCHAR(50) DEFAULT 'open',
-    FOREIGN KEY (initiator_id) REFERENCES Users(user_id),
-    FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE SET NULL,
-    FOREIGN KEY (request_id) REFERENCES Swap_Requests(request_id) ON DELETE SET NULL
+    FOREIGN KEY (initiator_id) REFERENCES User(user_id),
+    FOREIGN KEY (order_id) REFERENCES [Order](order_id) ON DELETE SET NULL,
+    FOREIGN KEY (request_id) REFERENCES SwapRequest(request_id) ON DELETE SET NULL
 );
 
 CREATE TABLE Notification (
@@ -163,7 +174,7 @@ CREATE TABLE Notification (
     message TEXT NOT NULL,
     is_read BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE
 );
 
 SQL;
