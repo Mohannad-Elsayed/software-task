@@ -4,17 +4,43 @@ if (php_sapi_name() !== 'cli') {
     header('Content-Type: text/plain');
 }
 
+$conn = new mysqli("localhost", "root", "", "");
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// ✅ create + select DB manually
+$conn->query("CREATE DATABASE IF NOT EXISTS eco_project");
+$conn->select_db("eco_project");
+
 $schema = <<<SQL
--- Initialize database
-CREATE DATABASE IF NOT EXISTS eco_project;
-USE eco_project;
+
+-- Drop Before Any Edits
+
+DROP TABLE IF EXISTS Notification;
+DROP TABLE IF EXISTS Dispute;
+DROP TABLE IF EXISTS Offer;
+DROP TABLE IF EXISTS SwapRequest;
+DROP TABLE IF EXISTS Payment;
+DROP TABLE IF EXISTS OrderItem;
+DROP TABLE IF EXISTS Orders;
+DROP TABLE IF EXISTS Report;
+DROP TABLE IF EXISTS Comment;
+DROP TABLE IF EXISTS Review;
+DROP TABLE IF EXISTS UpcycleTransformation;
+DROP TABLE IF EXISTS Listing;
+DROP TABLE IF EXISTS MaterialTaxonomy;
+DROP TABLE IF EXISTS EcoImpact;
+DROP TABLE IF EXISTS UserRole;
+DROP TABLE IF EXISTS User;
 
 -- Core User Tables
 CREATE TABLE User (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL, 
     trust_score INT DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -103,7 +129,7 @@ CREATE TABLE Report (
 );
 
 -- Transactions: Orders & Swaps
-CREATE TABLE [Order] (
+CREATE TABLE Orders (
     order_id INT AUTO_INCREMENT PRIMARY KEY,
     buyer_id INT NOT NULL,
     total_amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
@@ -121,7 +147,7 @@ CREATE TABLE OrderItem (
     price DECIMAL(10, 2) NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
     subtotal DECIMAL(10, 2) GENERATED ALWAYS AS (price * quantity), -- Handles calculateSubtotal() at DB level
-    FOREIGN KEY (order_id) REFERENCES [Order](order_id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE,
     FOREIGN KEY (listing_id) REFERENCES Listing(listing_id)
 );
 
@@ -130,7 +156,7 @@ CREATE TABLE Payment (
     order_id INT NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
     status VARCHAR(50) DEFAULT 'unpaid',
-    FOREIGN KEY (order_id) REFERENCES [Order](order_id) ON DELETE CASCADE
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE
 );
 
 CREATE TABLE SwapRequest (
@@ -163,7 +189,7 @@ CREATE TABLE Dispute (
     reason TEXT NOT NULL,
     status VARCHAR(50) DEFAULT 'open',
     FOREIGN KEY (initiator_id) REFERENCES User(user_id),
-    FOREIGN KEY (order_id) REFERENCES [Order](order_id) ON DELETE SET NULL,
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE SET NULL,
     FOREIGN KEY (request_id) REFERENCES SwapRequest(request_id) ON DELETE SET NULL
 );
 
@@ -179,7 +205,34 @@ CREATE TABLE Notification (
 
 SQL;
 
-// Write output directly to standard output
-fwrite(STDOUT, $schema);
-echo "\n-- Schema generation complete. Pipe this output directly into your DB client.\n";
+$conn = new mysqli("localhost", "root", "", "");
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// ✅ create DB
+$conn->query("CREATE DATABASE IF NOT EXISTS eco_project");
+
+// ✅ select DB
+$conn->select_db("eco_project");
+
+// ✅ execute schema
+if ($conn->multi_query($schema)) {
+    do {
+        if ($result = $conn->store_result()) {
+            $result->free();
+        }
+    } while ($conn->more_results() && $conn->next_result());
+
+    echo "Database schema generated successfully.";
+} else {
+    echo "Error: " . $conn->error;
+}
+
+$conn->close();
+
+// // Write output directly to standard output
+// fwrite(STDOUT, $schema);
+// echo "\n-- Schema generation complete. Pipe this output directly into your DB client.\n";
 ?>
