@@ -63,6 +63,3 @@ if (preg_match('#^/api/order-items/?$#', $requestUri)) {
     }
     exit;
 }
-    }
-    exit;
-}
