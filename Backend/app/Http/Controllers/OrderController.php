@@ -15,12 +15,25 @@ class OrderController
         $this->orderService = new OrderService();
     }
 
-    // GET /api/orders
+    // GET /api/orders or GET /api/orders?order_id=xyz
     public function index()
     {
-        $orders = $this->orderService->getOrders();
-        header('Content-Type: application/json');
-        echo json_encode($orders);
+        $order_id = $_GET['order_id'] ?? null;
+
+        if ($order_id) {
+            $order = $this->orderService->getOrderById($order_id);
+            header('Content-Type: application/json');
+            if ($order) {
+                echo json_encode($order);
+            } else {
+                http_response_code(404);
+                echo json_encode(["error" => "Order not found"]);
+            }
+        } else {
+            $orders = $this->orderService->getOrders();
+            header('Content-Type: application/json');
+            echo json_encode($orders);
+        }
     }
 
     // POST /api/orders

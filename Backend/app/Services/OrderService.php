@@ -32,6 +32,22 @@ class OrderService
         return $orders;
     }
 
+    public function getOrderById($orderId)
+    {
+        $sql = "SELECT * FROM Orders WHERE order_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $orderId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $order = null;
+        if ($result && $result->num_rows > 0) {
+            $order = $result->fetch_assoc();
+        }
+        $stmt->close();
+        return $order;
+    }
+
     public function createOrder($data)
     {
         $buyer_id = $data['buyer_id'] ?? null;
