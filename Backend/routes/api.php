@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\ListingController;
-use App\Http\Controllers\OrderController;
+use app\Http\Controllers\ListingController;
+use app\Http\Controllers\OrderController;
 
 require_once __DIR__ . '/../app/Http/Controllers/ListingController.php';
 require_once __DIR__ . '/../app/Http/Controllers/OrderController.php';

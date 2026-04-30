@@ -1,5 +1,5 @@
 <?php
-namespace App\Services;
+namespace app\Services;
 
 class ListingService {
     
@@ -21,7 +21,7 @@ class ListingService {
         
         if ($result && $result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
-                $listing = new \App\Models\Listing($row);
+                $listing = new \app\Models\Listing($row);
                 $listing->user = ['user_id' => $row['user_id'], 'username' => $row['username']];
                 if ($row['material_name']) {
                     $listing->material = ['material_id' => $row['material_id'], 'name' => $row['material_name']];
@@ -47,7 +47,7 @@ class ListingService {
         
         if ($result && $result->num_rows > 0) {
             $row = $result->fetch_assoc();
-            $listing = new \App\Models\Listing($row);
+            $listing = new \app\Models\Listing($row);
             $listing->user = ['user_id' => $row['user_id'], 'username' => $row['username']];
             
             if ($row['material_name']) {
@@ -62,7 +62,7 @@ class ListingService {
                 $upcycleResult = $upcycleStmt->get_result();
                 
                 if ($upcycleResult && $upcycleResult->num_rows > 0) {
-                    $listing->upcycle_transformation = new \App\Models\UpcycleTransformation($upcycleResult->fetch_assoc());
+                    $listing->upcycle_transformation = new \app\Models\UpcycleTransformation($upcycleResult->fetch_assoc());
                 }
             }
             

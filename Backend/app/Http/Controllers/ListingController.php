@@ -1,7 +1,7 @@
 <?php
-namespace App\Http\Controllers;
+namespace app\Http\Controllers;
 
-use App\Services\ListingService;
+use app\Services\ListingService;
 
 class ListingController {
     

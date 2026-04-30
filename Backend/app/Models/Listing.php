@@ -1,5 +1,5 @@
 <?php
-namespace App\Models;
+namespace app\Models;
 
 class Listing {
     public $listing_id;

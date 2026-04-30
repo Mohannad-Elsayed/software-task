@@ -1,7 +1,7 @@
 <?php
 // Autoloader to avoid manual require_once everywhere
 spl_autoload_register(function ($class) {
-    $prefix = 'App\\';
+    $prefix = 'app\\';
     $base_dir = __DIR__ . '/app/';
 
     $len = strlen($prefix);
