@@ -35,7 +35,6 @@ class OrderService
     public function createOrder($data)
     {
         $buyer_id = $data['buyer_id'] ?? null;
-        $total_amount = $data['total_amount'] ?? 0.00;
         $status = $data['status'] ?? 'pending';
         $shipping_street = $data['shipping_street'] ?? null;
         $shipping_city = $data['shipping_city'] ?? null;
@@ -44,8 +43,9 @@ class OrderService
             return ["error" => "buyer_id is required"];
         }
 
-        $stmt = $this->conn->prepare("INSERT INTO Orders (buyer_id, total_amount, status, shipping_street, shipping_city) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("idsss", $buyer_id, $total_amount, $status, $shipping_street, $shipping_city);
+        // total_amount is omitted. The database schema sets it to DEFAULT 0.00
+        $stmt = $this->conn->prepare("INSERT INTO Orders (buyer_id, status, shipping_street, shipping_city) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("isss", $buyer_id, $status, $shipping_street, $shipping_city);
 
         if ($stmt->execute()) {
             $insert_id = $stmt->insert_id;
@@ -94,6 +94,14 @@ class OrderService
         if ($stmt->execute()) {
             $insert_id = $stmt->insert_id;
             $stmt->close();
+            
+            // Auto-calculate and add subtotal to the parent Order's total_amount
+            $subtotal = $price * $quantity;
+            $updateStmt = $this->conn->prepare("UPDATE Orders SET total_amount = total_amount + ? WHERE order_id = ?");
+            $updateStmt->bind_param("di", $subtotal, $order_id);
+            $updateStmt->execute();
+            $updateStmt->close();
+
             return ["success" => true, "order_item_id" => $insert_id];
         } else {
             $error = $stmt->error;
