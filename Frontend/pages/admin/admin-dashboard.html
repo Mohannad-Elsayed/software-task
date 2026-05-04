@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Portal - Order Flow</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h2>Order System</h2>
+        <button class="toggle-btn" id="toggleBtn">☰</button>
+    </div>
+    <div class="menu-category">Order Flow</div>
+    <ul>
+        <li><a href="#" class="nav-link active" data-target="cart"><span class="icon">🛒</span><span class="text">Cart</span></a></li>
+        <li><a href="#" class="nav-link" data-target="checkout"><span class="icon">💳</span><span class="text">Checkout</span></a></li>
+        <li><a href="#" class="nav-link" data-target="orderDetails"><span class="icon">📄</span><span class="text">Order Details</span></a></li>
+        <li><a href="#" class="nav-link" data-target="shipping"><span class="icon">📦</span><span class="text">Shipping Label</span></a></li>
+    </ul>
+</nav>
+
+<main class="main-content" id="mainContent">
+    
+    <!-- Step 1: Cart Section -->
+    <section id="cart" class="section-tab active">
+        <div class="card">
+            <h2 class="page-header">Shopping Cart</h2>
+            <table>
+                <thead>
+                    <tr><th>Product</th><th>Qty</th><th>Price</th><th>Action</th></tr>
+                </thead>
+                <tbody id="cartTableBody">
+                    <tr><td>Vinted Inspired Jacket</td><td>1</td><td>$50.00</td><td><button class="btn btn-danger">Remove</button></td></tr>
+                </tbody>
+            </table>
+            <button class="btn" id="proceedToCheckout">Proceed to Checkout</button>
+        </div>
+    </section>
+
+    <!-- Step 2: Checkout & Payment -->
+    <section id="checkout" class="section-tab">
+        <div class="card">
+            <h2 class="page-header">Checkout</h2>
+            <div class="form-group">
+                <label>Shipping Method:</label>
+                <select id="shippingMethod">
+                    <option value="home">Home Delivery (+$10.00)</option>
+                    <option value="pickup">Pick-up Point (+$2.00) - Most Sustainable</option>
+                </select>
+            </div>
+            
+            <div id="pickupPoints" class="form-group" style="display:none; background: #f0fdf4; padding: 10px; border-radius: 5px;">
+                <label>Select Pick-up Point:</label>
+                <select id="pickupPointSelect">
+                    <option value="1">Locker #502 - Cairo Mall</option>
+                    <option value="2">Smart Point - Dokki</option>
+                </select>
+            </div>
+
+            <!-- Fee Breakdown -->
+            <div class="card" style="background: #fafafa;">
+                <h3 style="margin-top:0;">Summary</h3>
+                <div class="fee-row"><span>Item Price</span><span>$50.00</span></div>
+                <div class="fee-row"><span>Buyer Protection Fee (Escrow)</span><span>$2.50</span></div>
+                <div class="fee-row"><span>Shipping</span><span id="shippingPrice">$10.00</span></div>
+                <div class="fee-row total"><span>Total to Pay</span><span id="totalPrice">$62.50</span></div>
+            </div>
+
+            <div class="form-group">
+                <label>Payment Method:</label>
+                <select id="paymentMethod">
+                    <option value="escrow">Escrow (Money held until you confirm)</option>
+                </select>
+            </div>
+
+            <div class="payment-box" id="paymentSection">
+                <button class="btn" id="payNowBtn">Pay Securely</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step 3: Order Details -->
+    <section id="orderDetails" class="section-tab">
+        <div class="card">
+            <h2 class="page-header">Order Tracking #10025</h2>
+            
+            <!-- Visual Timeline -->
+            <div class="stepper">
+                <div class="step completed"><div class="step-icon">✓</div><div class="step-text">Paid</div></div>
+                <div class="step active"><div class="step-icon">2</div><div class="step-text">Sent</div></div>
+                <div class="step"><div class="step-icon">3</div><div class="step-text">Arrived</div></div>
+                <div class="step"><div class="step-icon">4</div><div class="step-text">Completed</div></div>
+            </div>
+
+            <div class="card" style="border: 1px solid var(--primary-green);">
+                <h3>Manage Order</h3>
+                <p>Status: The seller has shipped your item. Please wait for arrival.</p>
+                <button class="btn" id="everythingOkBtn" disabled>Everything is OK</button>
+                <button class="btn btn-outline">I have an issue</button>
+                <p style="font-size: 0.8rem; color: gray;">Note: Only click "OK" after inspecting the item.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step 4: Shipping Label -->
+    <section id="shipping" class="section-tab">
+        <div class="card" style="max-width: 400px; margin: 0 auto; border: 2px solid #000; text-align: center; padding: 20px;">
+            <div class="prepaid-badge">PREPAID LABEL</div>
+            <h2 style="margin:0;">EXPRESS LOGISTICS</h2>
+            <hr>
+            <p style="text-align: left;"><strong>FROM:</strong> Seller #502<br><strong>TO:</strong> Customer Point #L502</p>
+            <div style="background: #000; height: 60px; margin: 20px 0;"></div>
+            <p><strong>TRACKING:</strong> VNTD-99821-EG</p>
+            <small>No cash payment required at drop-off.</small>
+        </div>
+    </section>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
