@@ -2,12 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Order;
-use App\Models\OrderItem;
-
 require_once __DIR__ . '/../../database/connection.php';
-require_once __DIR__ . '/../Models/Order.php';
-require_once __DIR__ . '/../Models/OrderItem.php';
 
 class OrderService
 {
@@ -18,111 +13,260 @@ class OrderService
         $this->conn = db();
     }
 
+    /*
+    =========================================
+    GET ALL ORDERS
+    =========================================
+    */
     public function getOrders()
     {
-        $sql = "SELECT * FROM Orders";
-        $result = $this->conn->query($sql);
+        $result = $this->conn->query("SELECT * FROM Orders");
 
         $orders = [];
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $orders[] = $row;
-            }
+        while ($row = $result->fetch_assoc()) {
+            $orders[] = $row;
         }
+
         return $orders;
     }
 
+    /*
+    =========================================
+    GET ORDER BY ID
+    =========================================
+    */
     public function getOrderById($orderId)
     {
-        $sql = "SELECT * FROM Orders WHERE order_id = ?";
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->conn->prepare("
+            SELECT * FROM Orders WHERE order_id = ?
+        ");
         $stmt->bind_param("i", $orderId);
         $stmt->execute();
-        $result = $stmt->get_result();
 
-        $order = null;
-        if ($result && $result->num_rows > 0) {
-            $order = $result->fetch_assoc();
-        }
-        $stmt->close();
-        return $order;
+        return $stmt->get_result()->fetch_assoc();
     }
 
-    public function createOrder($data)
-    {
-        $buyer_id = $data['buyer_id'] ?? null;
-        $status = $data['status'] ?? 'pending';
-        $shipping_street = $data['shipping_street'] ?? null;
-        $shipping_city = $data['shipping_city'] ?? null;
-
-        if (!$buyer_id) {
-            return ["error" => "buyer_id is required"];
-        }
-
-        // total_amount is omitted. The database schema sets it to DEFAULT 0.00
-        $stmt = $this->conn->prepare("INSERT INTO Orders (buyer_id, status, shipping_street, shipping_city) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("isss", $buyer_id, $status, $shipping_street, $shipping_city);
-
-        if ($stmt->execute()) {
-            $insert_id = $stmt->insert_id;
-            $stmt->close();
-            return ["success" => true, "order_id" => $insert_id];
-        } else {
-            $error = $stmt->error;
-            $stmt->close();
-            return ["error" => $error];
-        }
-    }
-
+    /*
+    =========================================
+    GET ORDER ITEMS
+    =========================================
+    */
     public function getOrderItems($orderId)
     {
-        $sql = "SELECT * FROM OrderItem WHERE order_id = ?";
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->conn->prepare("
+            SELECT * FROM OrderItem WHERE order_id = ?
+        ");
         $stmt->bind_param("i", $orderId);
         $stmt->execute();
+
         $result = $stmt->get_result();
 
         $items = [];
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $items[] = $row;
-            }
+        while ($row = $result->fetch_assoc()) {
+            $items[] = $row;
         }
-        $stmt->close();
+
         return $items;
     }
 
-    public function createOrderItem($data)
+    /*
+    =========================================
+    PLACE ORDER (MULTI-LISTING CART)
+    =========================================
+    */
+    public function placeOrder($buyerId, $items, $shippingStreet = null, $shippingCity = null)
     {
-        $order_id = $data['order_id'] ?? null;
-        $listing_id = $data['listing_id'] ?? null;
-        $price = $data['price'] ?? 0.00;
-        $quantity = $data['quantity'] ?? 1;
-
-        if (!$order_id || !$listing_id) {
-            return ["error" => "order_id and listing_id are required"];
+        if (!$buyerId || empty($items)) {
+            return ["error" => "buyer_id and items are required"];
         }
 
-        // Note: subtotal is generally GENERATED ALWAYS AS (price * quantity) in DB schema
-        $stmt = $this->conn->prepare("INSERT INTO OrderItem (order_id, listing_id, price, quantity) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iidi", $order_id, $listing_id, $price, $quantity);
+        // 1. Create order
+        $stmt = $this->conn->prepare("
+            INSERT INTO Orders (buyer_id, status, total_amount, shipping_street, shipping_city)
+            VALUES (?, 'pending', 0, ?, ?)
+        ");
+        $stmt->bind_param("iss", $buyerId, $shippingStreet, $shippingCity);
 
-        if ($stmt->execute()) {
-            $insert_id = $stmt->insert_id;
+        if (!$stmt->execute()) {
+            return ["error" => $stmt->error];
+        }
+
+        $orderId = $stmt->insert_id;
+        $stmt->close();
+
+        $total = 0;
+
+        // 2. Process items
+        foreach ($items as $item) {
+
+            $listingId = $item['listing_id'];
+            $quantity = $item['quantity'] ?? 1;
+
+            // get listing
+            $stmt = $this->conn->prepare("
+                SELECT * FROM Listing WHERE listing_id = ?
+            ");
+            $stmt->bind_param("i", $listingId);
+            $stmt->execute();
+
+            $listing = $stmt->get_result()->fetch_assoc();
             $stmt->close();
-            
-            // Auto-calculate and add subtotal to the parent Order's total_amount
+
+            if (!$listing) {
+                return ["error" => "Listing not found: $listingId"];
+            }
+
+            $price = $listing['price'];
             $subtotal = $price * $quantity;
-            $updateStmt = $this->conn->prepare("UPDATE Orders SET total_amount = total_amount + ? WHERE order_id = ?");
-            $updateStmt->bind_param("di", $subtotal, $order_id);
-            $updateStmt->execute();
-            $updateStmt->close();
 
-            return ["success" => true, "order_item_id" => $insert_id];
-        } else {
-            $error = $stmt->error;
+            // insert order item
+            $stmt = $this->conn->prepare("
+                INSERT INTO OrderItem (order_id, listing_id, price, quantity)
+                VALUES (?, ?, ?, ?)
+            ");
+            $stmt->bind_param("iidi", $orderId, $listingId, $price, $quantity);
+            $stmt->execute();
             $stmt->close();
-            return ["error" => $error];
+
+            // lock listing (important business rule)
+            $stmt = $this->conn->prepare("
+                UPDATE Listing 
+                SET status = 'locked'
+                WHERE listing_id = ?
+            ");
+            $stmt->bind_param("i", $listingId);
+            $stmt->execute();
+            $stmt->close();
+
+            $total += $subtotal;
         }
+
+        // 3. update total_amount
+        $stmt = $this->conn->prepare("
+            UPDATE Orders 
+            SET total_amount = ?
+            WHERE order_id = ?
+        ");
+        $stmt->bind_param("di", $total, $orderId);
+        $stmt->execute();
+        $stmt->close();
+
+        return [
+            "success" => true,
+            "order_id" => $orderId,
+            "total_amount" => $total
+        ];
     }
+
+    /*
+    =========================================
+    CANCEL ORDER
+    =========================================
+    */
+    public function cancelOrder($orderId)
+    {
+        // 1. get items
+        $items = $this->getOrderItems($orderId);
+
+        // 2. unlock listings
+        foreach ($items as $item) {
+            $stmt = $this->conn->prepare("
+                UPDATE Listing 
+                SET status = 'available'
+                WHERE listing_id = ?
+            ");
+            $stmt->bind_param("i", $item['listing_id']);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        // 3. update order status
+        $stmt = $this->conn->prepare("
+            UPDATE Orders 
+            SET status = 'cancelled'
+            WHERE order_id = ?
+        ");
+        $stmt->bind_param("i", $orderId);
+        $stmt->execute();
+        $stmt->close();
+
+        return ["success" => true];
+    }
+    public function processEscrowPayment($orderId, $paymentMethod = 'mock')
+{
+    if (!$orderId) {
+        return ["error" => "order_id is required"];
+    }
+
+    // 1. Get order
+    $stmt = $this->conn->prepare("
+        SELECT * FROM Orders WHERE order_id = ?
+    ");
+    $stmt->bind_param("i", $orderId);
+    $stmt->execute();
+
+    $order = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if (!$order) {
+        return ["error" => "Order not found"];
+    }
+
+    if ($order['status'] !== 'pending') {
+        return ["error" => "Order is not pending"];
+    }
+
+    $amount = $order['total_amount'];
+
+    // 2. Create Payment record
+    $stmt = $this->conn->prepare("
+        INSERT INTO Payment (order_id, amount, status, payment_method)
+        VALUES (?, ?, 'successful', ?)
+    ");
+    $stmt->bind_param("ids", $orderId, $amount, $paymentMethod);
+    $stmt->execute();
+    $stmt->close();
+
+    // 3. Update order → PAID
+    $stmt = $this->conn->prepare("
+        UPDATE Orders SET status = 'paid'
+        WHERE order_id = ?
+    ");
+    $stmt->bind_param("i", $orderId);
+    $stmt->execute();
+    $stmt->close();
+
+    // 4. Get order items
+    $stmt = $this->conn->prepare("
+        SELECT listing_id FROM OrderItem WHERE order_id = ?
+    ");
+    $stmt->bind_param("i", $orderId);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+
+    // 5. Mark listings as SOLD
+    while ($row = $result->fetch_assoc()) {
+
+        $listingId = $row['listing_id'];
+
+        $stmt2 = $this->conn->prepare("
+            UPDATE listing 
+            SET status = 'sold'
+            WHERE listing_id = ?
+        ");
+        $stmt2->bind_param("i", $listingId);
+        $stmt2->execute();
+        $stmt2->close();
+    }
+
+    $stmt->close();
+
+    return [
+        "success" => true,
+        "message" => "Payment processed successfully",
+        "order_id" => $orderId,
+        "amount" => $amount
+    ];
+}
 }

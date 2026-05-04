@@ -4,17 +4,22 @@ namespace App\Models;
 
 class Payment
 {
-    private $id;
-    private $amount;
-    private $currency;
-    private $status;
-    private $createdAt;
-
-    public function __construct($id = null, $amount = null, $currency = null, $status = null, $createdAt = null)
-    {
+    public $id;
+    public $order_id;
+    public $amount;
+    public $status;
+    public $createdAt;
+    public $paymentMethod;
+    public function getOrder($db)
+        {
+            $stmt = $db->prepare("SELECT * FROM orders WHERE id = ?");
+            $stmt->execute([$this->order_id]);
+            return $stmt->fetch();
+        }
+        public function __construct($id = null, $amount = null, $status = null, $createdAt = null)
+        {
         $this->id = $id;
         $this->amount = $amount;
-        $this->currency = $currency;
         $this->status = $status;
         $this->createdAt = $createdAt;
     }
@@ -38,16 +43,6 @@ class Payment
     {
        return $this->amount = $amount;
         
-    }
-
-    public function getCurrency()
-    {
-        return $this->currency;
-    }
-
-    public function setCurrency($currency)
-    {
-       return $this->currency = $currency;
     }
 
     public function getStatus()
