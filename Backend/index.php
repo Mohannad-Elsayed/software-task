@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/routes/api.php';
 // Autoloader to avoid manual require_once everywhere
 spl_autoload_register(function ($class) {
     $prefix = 'App\\';

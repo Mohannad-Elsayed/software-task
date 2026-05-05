@@ -94,7 +94,7 @@ class OrderController
         );
     }
 
-        public function processPayment($orderId)
+    public function processPayment($orderId)
     {
         return $this->orderService->processEscrowPayment($orderId);
     }
@@ -120,5 +120,14 @@ class OrderController
         $result = $this->orderService->cancelOrder($orderId);
 
         echo json_encode($result);
+    }
+    public function generateShipping($orderId)
+    {
+        return $this->orderService->generateShippingLabel($orderId);
+    }
+
+    public function releasePayment($orderId)
+    {
+        return $this->orderService->releasePayment($orderId);
     }
 }

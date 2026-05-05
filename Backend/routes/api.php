@@ -1,7 +1,5 @@
 <?php
 
-
-
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdminController;
@@ -12,8 +10,13 @@ require_once __DIR__ . '/../app/Http/Controllers/OrderController.php';
 require_once __DIR__ . '/../app/Http/Controllers/AdminController.php';
 require_once __DIR__ . '/../app/Http/Controllers/ReportController.php';
 
-// Basic router wrapper
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+$basePath = dirname($_SERVER['SCRIPT_NAME']);
+$requestUri = substr($requestUri, strlen($basePath));
+
+$requestUri = str_replace('/index.php', '', $requestUri);
+
 $method = $_SERVER['REQUEST_METHOD'];
 
 
@@ -52,6 +55,69 @@ if (preg_match('#^/api/listings/(\d+)$#', $requestUri, $matches)) {
 // ORDERS endpoints
 // =========================
 
+// payment
+if (preg_match('#^/api/orders/pay/?$#', $requestUri)) {
+    $controller = new OrderController();
+
+    if ($method === 'POST') {
+        $data = json_decode(file_get_contents("php://input"), true);
+        $result = $controller->processPayment($data['order_id'] ?? null);
+        header('Content-Type: application/json');
+        if (isset($result['error'])) {
+            http_response_code(400);
+        }
+        echo json_encode($result);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+// cancel
+if (preg_match('#^/api/orders/cancel/?$#', $requestUri)) {
+    $controller = new OrderController();
+
+    if ($method === 'POST') {
+        $controller->cancel();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+// shipping label
+if (preg_match('#^/api/orders/ship/?$#', $requestUri)) {
+    $controller = new OrderController();
+
+    if ($method === 'POST') {
+        $data = json_decode(file_get_contents("php://input"), true);
+        echo json_encode(
+            $controller->generateShipping($data['order_id'])
+        );
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+// release payment
+if (preg_match('#^/api/orders/release/?$#', $requestUri)) {
+    $controller = new OrderController();
+
+    if ($method === 'POST') {
+        $data = json_decode(file_get_contents("php://input"), true);
+        echo json_encode(
+            $controller->releasePayment($data['order_id'])
+        );
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
 
 if (preg_match('#^/api/orders/?$#', $requestUri)) {
     $controller = new OrderController();
@@ -66,31 +132,8 @@ if (preg_match('#^/api/orders/?$#', $requestUri)) {
     }
     exit;
 }
-//payment 
-    if (preg_match('#^/api/orders/pay/?$#', $requestUri)) {
 
-    $controller = new OrderController();
 
-    if ($method === 'POST') {
-
-        $data = json_decode(file_get_contents("php://input"), true);
-
-        $result = $controller->processPayment($data['order_id'] ?? null);
-
-        header('Content-Type: application/json');
-
-        if (isset($result['error'])) {
-            http_response_code(400);
-        }
-
-        echo json_encode($result);
-    } else {
-        http_response_code(405);
-        echo json_encode(["error" => "Method Not Allowed"]);
-    }
-
-    exit;
-}
 // =========================
 // ORDER ITEMS endpoints
 // =========================
@@ -100,7 +143,7 @@ if (preg_match('#^/api/order-items/?$#', $requestUri)) {
     if ($method === 'GET') {
         $controller->getItems();
     } elseif ($method === 'POST') {
-        $controller->storeItem();
+        $controller->store();
     } else {
         http_response_code(405);
         echo json_encode(["error" => "Method Not Allowed"]);
@@ -112,21 +155,14 @@ if (preg_match('#^/api/payments/?$#', $requestUri)) {
     $controller = new OrderController();
 
     if ($method === 'POST') {
-
         $data = json_decode(file_get_contents("php://input"), true);
-
         $orderId = $data['order_id'] ?? null;
-
         $result = $controller->processPayment($orderId);
-
         header('Content-Type: application/json');
-
         if (isset($result['error'])) {
             http_response_code(400);
         }
-
         echo json_encode($result);
-
     } else {
         http_response_code(405);
         echo json_encode(["error" => "Method Not Allowed"]);
@@ -134,11 +170,11 @@ if (preg_match('#^/api/payments/?$#', $requestUri)) {
     exit;
 }
 
+
 // =========================
 // ADMIN endpoints
 // =========================
 
-// GET /api/admin/users
 if (preg_match('#^/api/admin/users/?$#', $requestUri)) {
     $controller = new AdminController();
 
@@ -151,8 +187,6 @@ if (preg_match('#^/api/admin/users/?$#', $requestUri)) {
     exit;
 }
 
-// GET /api/admin/user?user_id=1
-// DELETE /api/admin/user?user_id=1
 if (preg_match('#^/api/admin/user/?$#', $requestUri)) {
     $controller = new AdminController();
 
@@ -167,7 +201,6 @@ if (preg_match('#^/api/admin/user/?$#', $requestUri)) {
     exit;
 }
 
-// GET /api/admin/reports
 if (preg_match('#^/api/admin/reports/?$#', $requestUri)) {
     $controller = new AdminController();
 
@@ -180,7 +213,6 @@ if (preg_match('#^/api/admin/reports/?$#', $requestUri)) {
     exit;
 }
 
-// PUT /api/admin/report?report_id=1
 if (preg_match('#^/api/admin/report/?$#', $requestUri)) {
     $controller = new AdminController();
 
@@ -198,11 +230,6 @@ if (preg_match('#^/api/admin/report/?$#', $requestUri)) {
 // REPORTS endpoints
 // =========================
 
-// GET /api/reports
-// POST /api/reports
-// GET /api/reports?report_id=1
-// PUT /api/reports?report_id=1
-// DELETE /api/reports?report_id=1
 if (preg_match('#^/api/reports/?$#', $requestUri)) {
     $controller = new ReportController();
 
