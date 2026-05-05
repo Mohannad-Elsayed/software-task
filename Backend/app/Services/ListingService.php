@@ -123,4 +123,67 @@ class ListingService {
             throw $e;
         }
     }
+
+    public function editListing($id, $data) {
+        $stmt = $this->db->prepare("
+            UPDATE Listing 
+            SET title = ?, description = ?, price = ?, category = ?, condition_status = ?, listing_type = ?, status = ?
+            WHERE listing_id = ?
+        ");
+        
+        $title = $data['title'] ?? null;
+        $description = $data['description'] ?? null;
+        $price = $data['price'] ?? null;
+        $category = $data['category'] ?? null;
+        $condition_status = $data['condition_status'] ?? null;
+        $listing_type = $data['listing_type'] ?? null;
+        $status = $data['status'] ?? null;
+
+        $stmt->bind_param("ssdssssi", 
+            $title, 
+            $description, 
+            $price, 
+            $category, 
+            $condition_status, 
+            $listing_type, 
+            $status,
+            $id
+        );
+        
+        return $stmt->execute();
+    }
+
+    public function deleteListing($id) {
+        $stmt = $this->db->prepare("DELETE FROM Listing WHERE listing_id = ?");
+        $stmt->bind_param("i", $id);
+        return $stmt->execute();
+    }
+
+    public function assessCondition($id, $conditionData) {
+        $stmt = $this->db->prepare("UPDATE Listing SET condition_status = ? WHERE listing_id = ?");
+        $stmt->bind_param("si", $conditionData['condition_status'], $id);
+        return $stmt->execute();
+    }
+
+    public function generateCareInstructions($id) {
+        // Mock generation
+        return "Wash with cold water. Dry on low heat.";
+    }
+
+    public function logUpcycleTransformation($id, $upcycleData) {
+        $stmt = $this->db->prepare("
+            INSERT INTO UpcycleTransformation 
+            (listing_id, user_id, before_image_url, after_image_url, steps, materials_used) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->bind_param("iissss", 
+            $id,
+            $upcycleData['user_id'],
+            $upcycleData['before_image_url'],
+            $upcycleData['after_image_url'],
+            $upcycleData['steps'],
+            $upcycleData['materials_used']
+        );
+        return $stmt->execute();
+    }
 }

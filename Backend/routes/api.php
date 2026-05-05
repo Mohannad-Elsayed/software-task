@@ -24,11 +24,51 @@ if (preg_match('#^/api/listings/?$#', $requestUri)) {
     exit;
 }
 
+if (preg_match('#^/api/listings/(\d+)/condition$#', $requestUri, $matches)) {
+    $controller = new ListingController();
+    $id = $matches[1];
+    if ($method === 'POST') {
+        $controller->assessCondition($id);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/listings/(\d+)/care$#', $requestUri, $matches)) {
+    $controller = new ListingController();
+    $id = $matches[1];
+    if ($method === 'POST' || $method === 'GET') {
+        $controller->generateCareInstructions($id);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/listings/(\d+)/upcycle$#', $requestUri, $matches)) {
+    $controller = new ListingController();
+    $id = $matches[1];
+    if ($method === 'POST') {
+        $controller->logUpcycleTransformation($id);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
 if (preg_match('#^/api/listings/(\d+)$#', $requestUri, $matches)) {
     $controller = new ListingController();
     $id = $matches[1];
     if ($method === 'GET') {
         $controller->show($id);
+    } elseif ($method === 'PUT') {
+        $controller->editListing($id);
+    } elseif ($method === 'DELETE') {
+        $controller->deleteListing($id);
     } else {
         http_response_code(405);
         echo json_encode(["error" => "Method Not Allowed"]);
