@@ -1,6 +1,9 @@
 <?php
 
-namespace App\Services;
+namespace app\Services;
+
+use app\Models\Order;
+use app\Models\OrderItem;
 
 require_once __DIR__ . '/../../database/connection.php';
 

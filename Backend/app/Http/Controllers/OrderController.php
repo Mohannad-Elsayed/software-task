@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace app\Http\Controllers;
 
-use App\Services\OrderService;
+use app\Services\OrderService;
 
 require_once __DIR__ . '/../../Services/OrderService.php';
 

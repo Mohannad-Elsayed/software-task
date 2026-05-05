@@ -36,7 +36,7 @@ php -S localhost:3000 -t Frontend/
 ```
 *(Alternatively, if you have Python installed, you can run: `python3 -m http.server 3000 --directory Frontend`)*
 
-### 4. View the Application
+### 4. View the application
 Once both servers are running, open your web browser and navigate to:
 
 ```text

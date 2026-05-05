@@ -37,12 +37,52 @@ if (preg_match('#^/api/listings/?$#', $requestUri)) {
     exit;
 }
 
+if (preg_match('#^/api/listings/(\d+)/condition$#', $requestUri, $matches)) {
+    $controller = new ListingController();
+    $id = $matches[1];
+    if ($method === 'POST') {
+        $controller->assessCondition($id);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/listings/(\d+)/care$#', $requestUri, $matches)) {
+    $controller = new ListingController();
+    $id = $matches[1];
+    if ($method === 'POST' || $method === 'GET') {
+        $controller->generateCareInstructions($id);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/listings/(\d+)/upcycle$#', $requestUri, $matches)) {
+    $controller = new ListingController();
+    $id = $matches[1];
+    if ($method === 'POST') {
+        $controller->logUpcycleTransformation($id);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
 if (preg_match('#^/api/listings/(\d+)$#', $requestUri, $matches)) {
     $controller = new ListingController();
     $id = $matches[1];
 
     if ($method === 'GET') {
         $controller->show($id);
+    } elseif ($method === 'PUT') {
+        $controller->editListing($id);
+    } elseif ($method === 'DELETE') {
+        $controller->deleteListing($id);
     } else {
         http_response_code(405);
         echo json_encode(["error" => "Method Not Allowed"]);
@@ -245,6 +285,102 @@ if (preg_match('#^/api/reports/?$#', $requestUri)) {
         $controller->update();
     } elseif ($method === 'DELETE') {
         $controller->destroy();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+// Swap Requests endpoints
+if (preg_match('#^/api/swap-requests/?$#', $requestUri)) {
+    $controller = new SwapController();
+    if ($method === 'POST') {
+        $controller->sendSwapRequest();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/swap-requests/(\d+)/accept$#', $requestUri, $matches)) {
+    $controller = new SwapController();
+    $requestId = $matches[1];
+    if ($method === 'POST') {
+        $controller->acceptSwapRequest($requestId);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/swap-requests/(\d+)/reject$#', $requestUri, $matches)) {
+    $controller = new SwapController();
+    $requestId = $matches[1];
+    if ($method === 'POST') {
+        $controller->rejectSwapRequest($requestId);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/swap-requests/(\d+)/offers$#', $requestUri, $matches)) {
+    $controller = new SwapController();
+    $requestId = $matches[1];
+    if ($method === 'POST') {
+        $controller->makeOffer($requestId);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/swap-requests/(\d+)/counter-offer$#', $requestUri, $matches)) {
+    $controller = new SwapController();
+    $requestId = $matches[1];
+    if ($method === 'POST') {
+        $controller->counterOffer($requestId);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/swap-requests/(\d+)/balance$#', $requestUri, $matches)) {
+    $controller = new SwapController();
+    $requestId = $matches[1];
+    if ($method === 'GET') {
+        $controller->balanceSwapValue($requestId);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/swap-requests/(\d+)/lock$#', $requestUri, $matches)) {
+    $controller = new SwapController();
+    $requestId = $matches[1];
+    if ($method === 'POST') {
+        $controller->lockSwapAgreement($requestId);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/swap-requests/(\d+)/expire$#', $requestUri, $matches)) {
+    $controller = new SwapController();
+    $requestId = $matches[1];
+    if ($method === 'POST') {
+        $controller->expirePendingSwap($requestId);
     } else {
         http_response_code(405);
         echo json_encode(["error" => "Method Not Allowed"]);
