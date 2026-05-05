@@ -86,4 +86,84 @@ class ListingController {
             echo json_encode(["status" => "error", "message" => "Server error: " . $e->getMessage()]);
         }
     }
+
+    public function editListing($id) {
+        $input = file_get_contents("php://input");
+        $data = json_decode($input, true);
+
+        if (!$data) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Invalid JSON payload."]);
+            return;
+        }
+
+        try {
+            $success = $this->listingService->editListing($id, $data);
+            if ($success) {
+                http_response_code(200);
+                echo json_encode(["status" => "success", "message" => "Listing updated successfully."]);
+            } else {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Failed to update listing."]);
+            }
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+        }
+    }
+
+    public function deleteListing($id) {
+        try {
+            $success = $this->listingService->deleteListing($id);
+            if ($success) {
+                http_response_code(200);
+                echo json_encode(["status" => "success", "message" => "Listing deleted successfully."]);
+            } else {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Failed to delete listing."]);
+            }
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+        }
+    }
+
+    public function assessCondition($id) {
+        $input = file_get_contents("php://input");
+        $data = json_decode($input, true);
+
+        try {
+            $success = $this->listingService->assessCondition($id, $data);
+            http_response_code(200);
+            echo json_encode(["status" => "success", "message" => "Condition assessed successfully."]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+        }
+    }
+
+    public function generateCareInstructions($id) {
+        try {
+            $instructions = $this->listingService->generateCareInstructions($id);
+            http_response_code(200);
+            echo json_encode(["status" => "success", "data" => ["instructions" => $instructions]]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+        }
+    }
+
+    public function logUpcycleTransformation($id) {
+        $input = file_get_contents("php://input");
+        $data = json_decode($input, true);
+
+        try {
+            $success = $this->listingService->logUpcycleTransformation($id, $data);
+            http_response_code(201);
+            echo json_encode(["status" => "success", "message" => "Upcycle transformation logged successfully."]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+        }
+    }
 }
