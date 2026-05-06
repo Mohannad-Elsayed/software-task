@@ -156,6 +156,8 @@ CREATE TABLE Payment (
     order_id INT NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
     status VARCHAR(50) DEFAULT 'unpaid',
+    payment_method VARCHAR(50),
+    Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE
 );
 
