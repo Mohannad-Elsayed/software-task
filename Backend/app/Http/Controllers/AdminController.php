@@ -3,16 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Services\AdminService;
-
-//require_once __DIR__ . '/../../app/Services/AdminService.php';
+use App\Middleware\RoleMiddleware;
 require_once __DIR__ . '/../../Services/AdminService.php';
 class AdminController
 {
+    private $conn;
     
     private $adminService;
 
     public function __construct()
     {
+        $this->conn = db();
         $this->adminService = new AdminService();
     }
 
@@ -100,4 +101,81 @@ class AdminController
 
         echo json_encode($result);
     }
+
+    public function banUser()
+{
+    header('Content-Type: application/json');
+
+    $data = json_decode(file_get_contents("php://input"), true);
+    $userId = $data['user_id'] ?? null;
+
+    if (!$userId) {
+        http_response_code(400);
+        echo json_encode(["error" => "user_id is required"]);
+        return;
+    }
+
+    // check user exists
+    $stmt = $this->conn->prepare("
+        SELECT user_id FROM User WHERE user_id = ?
+    ");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+
+    $user = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if (!$user) {
+        http_response_code(404);
+        echo json_encode(["error" => "User not found"]);
+        return;
+    }
+
+    // REAL BAN (persistent)
+    $stmt = $this->conn->prepare("
+        UPDATE User 
+        SET is_banned = 1 
+        WHERE user_id = ?
+    ");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $stmt->close();
+
+    echo json_encode([
+        "success" => true,
+        "message" => "User banned successfully",
+        "user_id" => $userId
+    ]);
+}
+    public function resolveDispute()
+{
+    header('Content-Type: application/json');
+
+    $data = json_decode(file_get_contents("php://input"), true);
+    $disputeId = $data['dispute_id'] ?? null;
+
+    if (!$disputeId) {
+        http_response_code(400);
+        echo json_encode(["error" => "dispute_id is required"]);
+        return;
+    }
+
+    echo json_encode(
+        $this->adminService->resolveDispute($disputeId)
+    );
+}
+
+public function sellerAnalytics()
+{
+    echo json_encode(
+        $this->adminService->generateSellerAnalytics()
+    );
+}
+
+public function sustainabilityReport()
+{
+    echo json_encode(
+        $this->adminService->generateSustainabilityReport()
+    );
+}
 }
