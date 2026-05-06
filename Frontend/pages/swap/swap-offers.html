@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swap Management | EcoSwap</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+
+        .app-container {
+            display: flex;
+            flex: 1; /* تأخذ باقي ارتفاع الصفحة */
+            margin-top: 90px; /* نفس ارتفاع الهيدر */
+            transition: margin-left 0.4s ease;
+            overflow: hidden;
+        }
+
+        :root {
+            --primary: #09b1ba;
+            --pending: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0;  }
+        .dashboard-container { max-width: 1000px; margin: 0 auto; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        
+        /* Tabs Style */
+        .tabs { display: flex; gap: 30px; border-bottom: 2px solid var(--border); margin-bottom: 25px; }
+        .tab { padding: 12px 5px; cursor: pointer; font-weight: 600; color: #64748b; position: relative; transition: 0.3s; }
+        .tab.active { color: var(--primary); }
+        .tab.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: var(--primary); }
+
+        /* Offer Card */
+        .offer-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 20px;
+            transition: 0.2s;
+        }
+        .offer-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+        .swap-visual { display: flex; align-items: center; gap: 12px; }
+        .mini-img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; border: 2px solid #f1f5f9; }
+        .exchange-icon { color: var(--primary); font-size: 20px; background: #f0fdfa; padding: 8px; border-radius: 50%; }
+
+        .offer-details h4 { margin: 0 0 5px 0; font-size: 16px; }
+        .offer-details p { margin: 0; font-size: 13px; color: #64748b; }
+        
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        .status-pending { background: #fffbeb; color: #92400e; }
+        .status-accepted { background: #dcfce7; color: #166534; }
+
+        .action-group { display: flex; gap: 10px; }
+        .btn-action { 
+            padding: 10px 18px; 
+            border-radius: 8px; 
+            border: none; 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 14px; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px;
+        }
+        .btn-view { background: var(--primary); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: #f8fafc; }
+
+        @media (max-width: 768px) {
+            .offer-card { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+            .action-group { width: 100%; justify-content: center; }
+        }
+
+        /* تحسين شكل الـ Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        /* حركة عند تمرير الماوس على الكارت */
+        .offer-card {
+            border: 1px solid #edf2f7;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .offer-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-color: var(--primary);
+        }
+
+        /* شكل الأزرار داخل الكارت */
+        .btn-view {
+            background: var(--primary);
+            color: white;
+            transition: 0.3s;
+        }
+
+        .btn-view:hover {
+            background: #089ba3;
+            box-shadow: 0 4px 10px rgba(9, 177, 186, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+   <!-- ── Header ── -->
+    <header class="header">
+        <!-- Left: hamburger + logo -->
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h2>EcoSwap</h2>
+        </div>
+        <!-- Center: main nav links -->
+        <nav class="header-nav">          
+            <a href="../listings/marketplace.html">Marketplace</a>
+            <a href="community.html">Community</a>
+            <a href="../swap/swap-request.html">Swap</a>
+            <a href="../orders/cart.html">Cart</a>
+        </nav>
+        <!-- Right: profile + logout -->
+        <div class="header-right">
+            <a href="profile.html" class="active">Profile</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+<div class="app-container" id="appContainer"> 
+    <div class="dashboard-container">
+    <div class="header">
+        <h1>Swap Control Center</h1>
+        <div class="impact-mini">
+            <span style="font-size: 14px; color: var(--success); font-weight: 700;">
+                <i class="ti ti-leaf"></i> 3 Pending Swaps
+            </span>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('incoming')">Received Offers</div>
+        <div class="tab" onclick="switchTab('outgoing')">Sent Requests</div>
+    </div>
+
+    <div id="offersList">
+        </div>
+</div>
+
+<!-- ── Sidebar Overlay ── -->
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- ── Sidebar ── -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo2"><b>Eco System</b></div>
+
+        <div class="module">
+            <button onclick="togglePages('admin', this)"><b>Admin</b></button>
+            <div class="pages" id="admin">
+                <a href="../admin/admin-dashboard.html">Admin Dashboard</a>
+                <a href="../admin/user-management.html">User Management</a>
+                <a href="../admin/dispute-management.html">Dispute Management</a>
+                <a href="../admin/reports.html">Reports</a>
+                <a href="../admin/seller-analytics.html">Seller Analytics</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('auth', this)"><b>Auth</b></button>
+            <div class="pages" id="auth">
+                <a href="../auth/login.html">Login</a>
+                <a href="../auth/register.html">Register</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('community', this)"><b>Community</b></button>
+            <div class="pages" id="community">
+                <a href="../community/community.html">Community</a>
+                <a href="../community/reviews.html">Reviews Section</a>
+                <a href="../community/comments.html">Comments Section</a>
+                <a href="../community/report-content.html">Report Content Form</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('listings', this)"><b>Listings</b></button>
+            <div class="pages" id="listings">
+                <a href="../listings/marketplace.html">Marketplace</a>
+                <a href="../listings/listing-details.html">Listing Details</a>
+                <a href="../listings/create-listing.html">Create Listing</a>
+                <a href="../listings/edit-listing.html">Edit Listing</a>
+                <a href="../listings/inventory.html">Inventory</a>
+                <a href="../listings/upcycle-log.html">Upcycle Log</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('orders', this)"><b>Orders</b></button>
+            <div class="pages" id="orders">
+                <a href="../orders/cart.html">Cart</a>
+                <a href="../orders/checkout.html">Checkout</a>
+                <a href="../orders/order-details.html">Order Details</a>
+                <a href="../orders/payment-simulation.html">Payment Simulation</a>
+                <a href="../orders/shipping-label.html">Shipping Label</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('swap', this)"><b>Swap</b></button>
+            <div class="pages" id="swap">
+                <a href="../swap/swap-request.html">Swap Request</a>
+                <a href="../swap/swap-offers.html">Swap Offers</a>
+                <a href="../swap/swap-negotiation.html">Swap Negotiation</a>
+                <a href="../swap/swap-lock-confirmation.html">Swap Lock Confirmation</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('user', this)"><b>User</b></button>
+            <div class="pages" id="user">
+                <a href="../user/profile.html">User Profile</a>
+                <a href="../user/eco-impact.html">EcoImpact Dashboard</a>
+                <a href="../user/trust-score.html">Trust Score</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+   document.addEventListener("DOMContentLoaded", () => {
+    const savedRequest = JSON.parse(localStorage.getItem("newSwapRequest"));
+
+        if (savedRequest) {
+            mockOffers.outgoing.push({
+                id: Date.now(),
+                user: "Mohanad",
+                myProduct: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150",
+                theirProduct: "https://images.unsplash.com/photo-1576871333019-220f1300c752?w=150",
+                status: "pending",
+                date: "Just now"
+            });
+
+            localStorage.removeItem("newSwapRequest");
+        }
+
+    
+
+    const listContainer = document.getElementById('offersList');
+
+    
+
+    // 4. الروابط (Actions)
+    window.goToNegotiation = (id) => {
+        // alert("Opening Negotiation Room for Offer #" + id);
+        Swal.fire({
+                title: 'Eco Marketplace',
+                text: "Opening Negotiation Room for Offer #" + id,
+                icon: 'success',
+                confirmButtonColor: '#111',
+                confirmButtonText: 'OK'
+        });
+        window.location.href = `swap-negotiation.html?id=${id}`;
+    };
+
+    window.declineOffer = (id) => {
+        if(confirm("Are you sure you want to decline this offer?")) {
+            // alert("Offer Declined.");
+            Swal.fire({
+                title: 'Eco Marketplace',
+                text: "Offer Declined.",
+                icon: 'success',
+                confirmButtonColor: '#111',
+                confirmButtonText: 'OK'
+            }); 
+            // Logic to update status in backend
+        }
+    };
+
+    // بيانات تجريبية للعروض
+const mockOffers = {
+    incoming: [
+        {
+            id: 1,
+            user: "Ahmed Ali",
+            myProduct: "../../assets/img/my-watch.jpg", // صورتك
+            theirProduct: "../../assets/img/nike-shoes.jpg", // حاجته
+            status: "pending",
+            date: "2 hours ago"
+        },
+        {
+            id: 2,
+            user: "Sara Smith",
+            myProduct: "../../assets/img/my-watch.jpg",
+            theirProduct: "../../assets/img/camera.jpg",
+            status: "accepted",
+            date: "Yesterday"
+        }
+    ],
+    outgoing: [
+        {
+            id: 3,
+            user: "Eco Store",
+            myProduct: "../../assets/img/old-bag.jpg",
+            theirProduct: "../../assets/img/eco-bottle.jpg",
+            status: "pending",
+            date: "3 days ago"
+        }
+    ]
+};
+
+// دالة تبديل الـ Tabs
+// function switchTab(type) {
+//     // 1. تحديث شكل الـ Tabs (Active class)
+//     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+//     event.target.classList.add('active');
+
+//     // 2. عرض البيانات
+//     renderOffers(type);
+// }
+
+// دالة رسم العروض في الصفحة
+function renderOffers(type) {
+    const listContainer = document.getElementById("offersList");
+    const offers = mockOffers[type];
+
+    if (offers.length === 0) {
+        listContainer.innerHTML = `<p style="text-align:center; color:#64748b; padding:40px;">No offers found.</p>`;
+        return;
+    }
+
+    listContainer.innerHTML = offers.map(offer => `
+        <div class="offer-card">
+            <div class="swap-visual">
+                <img src="${offer.myProduct}" class="mini-img" title="Your Item">
+                <div class="exchange-icon"><i class="ti ti-arrows-exchange"></i></div>
+                <img src="${offer.theirProduct}" class="mini-img" title="${offer.user}'s Item">
+            </div>
+            
+            <div class="offer-details">
+                <h4>Offer from ${offer.user}</h4>
+                <p><i class="ti ti-calendar"></i> ${offer.date}</p>
+                <div style="margin-top:8px;">
+                    <span class="status-badge ${offer.status === 'pending' ? 'status-pending' : 'status-accepted'}">
+                        ${offer.status === 'pending' ? '<i class="ti ti-clock"></i> Pending' : '<i class="ti ti-check"></i> Accepted'}
+                    </span>
+                </div>
+            </div>
+
+            <div class="action-group">
+                <a href="swap-negotiation.html?id=${offer.id}" class="btn-action btn-view">
+                    <i class="ti ti-message-dots"></i> View & Chat
+                </a>
+                <button class="btn-action btn-outline" title="Archive">
+                    <i class="ti ti-archive"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+ // 3. التبديل بين التبويبات
+    window.switchTab = (type) => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        renderOffers(type);
+    };
+
+// تشغيل أول ما الصفحة تفتح
+    renderOffers('incoming');
+});
+</script>
+
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/swap.js"></script>
+</body>
+</html>

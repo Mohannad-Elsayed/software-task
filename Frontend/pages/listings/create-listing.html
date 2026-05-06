@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Listing | EcoSwap</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <style>
+
+      
+
+        /* تعديل الـ app-container عشان السايد بار */
+         .app-container {
+            display: flex;
+             justify-content: center; /*سنترة الفورم */
+            padding: 20px;
+            transition: margin-left 0.4s ease;
+        } 
+
+        :root {
+            --primary: #09b1ba;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0 0 0 0;  }
+        /* body {
+            padding-top: 90px !important; مسافة عشان الهيدر الأساسي
+            background: #f8fafc;
+        } */
+
+        /* .form-container { max-width: 700px; margin: 0 auto; background: var(--white); padding: 30px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); } */
+        .form-container {
+            width: 100%;
+            max-width: 800px; /* تكبير بسيط للفورم عشان تبقى مريحة */
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        h1 { font-size: 24px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+
+        /* Photo Upload Area */
+        /* تأثيرات الـ Photo Upload */
+        .photo-upload {
+            border: 2px dashed #cbd5e1;
+            background: #fdfdfd;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .photo-upload:hover {
+            border-color: var(--primary);
+            background: #f0fdfe;
+            transform: translateY(-2px);
+        }
+        .photo-upload i { font-size: 40px; color: var(--primary); }
+
+        /* Form Layout */
+        .form-group { margin-bottom: 20px; }
+        /* شكل الـ Labels */
+        label {
+            color: #475569;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            outline: none;
+            transition: 0.2s;
+        }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(9, 177, 186, 0.1); }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        /* Swap Toggle */
+        .swap-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(9, 177, 186, 0.3);
+        }
+        .btn-submit:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+     <!-- ── Header ── -->
+    <header class="header">
+        <!-- Left: hamburger + logo -->
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h2>EcoSwap</h2>
+        </div>
+        <!-- Center: main nav links -->
+        <nav class="header-nav">          
+            <a href="../listings/marketplace.html">Marketplace</a>
+            <a href="community.html">Community</a>
+            <a href="../swap/swap-request.html">Swap</a>
+            <a href="../orders/cart.html">Cart</a>
+        </nav>
+        <!-- Right: profile + logout -->
+        <div class="header-right">
+            <a href="profile.html" class="active">Profile</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+  <div class="app-container" id="appContainer"> 
+
+    <div class="form-container">
+    <h1 style="margin-top: 15px;"><i class="ti ti-package-export" style="margin-top: 15px;"></i> List New Item</h1>
+
+    <div class="photo-upload" onclick="document.getElementById('fileInput').click()">
+        <i class="ti ti-camera-plus"></i>
+        <p style="margin-top: 10px;">Click to upload photos (Max 5)</p>
+        <input type="file" id="fileInput" hidden multiple>
+    </div>
+
+    <form id="listingForm">
+        <div class="form-group">
+            <label>Item Title</label>
+            <input type="text" placeholder="e.g., Vintage Oversized Denim Jacket" required>
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea rows="4" placeholder="Tell us about the fit, material, and any flaws..."></textarea>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Category</label>
+                <select>
+                    <option>Clothing</option>
+                    <option>Shoes</option>
+                    <option>Accessories</option>
+                    <option>Home</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Condition</label>
+                <select>
+                    <option>New with tags</option>
+                    <option>Excellent</option>
+                    <option>Good</option>
+                    <option>Fair (Upcyclable)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid-2">
+        <!-- حتة الـ Eco-Contribution -->
+          <div class="form-group">
+              <label><i class="ti ti-leaf"></i> Eco Contribution</label>
+              <select style="border-left: 4px solid #2e8b57;">
+                  <option>Standard Item</option>
+                  <option>100% Recycled Material</option>
+                  <option>Organic Fabric</option>
+                  <option>Upcycled Piece</option>
+              </select>
+          </div>
+          
+          <!-- حتة الـ Estimated Weight -->
+          <div class="form-group">
+              <label>Estimated Weight (kg)</label>
+              <input type="number" step="0.1" placeholder="0.5 kg">
+          </div>
+        </div>
+
+        <div class="swap-option">
+            <div>
+                <strong style="display: block;">Available for Swap</strong>
+                <span style="font-size: 12px; color: #64748b;">Allow other members to offer items in exchange.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" checked id="swapToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <button type="submit" class="btn-submit">List Item Now</button>
+    </form>
+</div>
+
+  <!-- ── Sidebar Overlay ── -->
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- ── Sidebar ── -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo2"><b>Eco System</b></div>
+
+        <div class="module">
+            <button onclick="togglePages('admin', this)"><b>Admin</b></button>
+            <div class="pages" id="admin">
+                <a href="../admin/admin-dashboard.html">Admin Dashboard</a>
+                <a href="../admin/user-management.html">User Management</a>
+                <a href="../admin/dispute-management.html">Dispute Management</a>
+                <a href="../admin/reports.html">Reports</a>
+                <a href="../admin/seller-analytics.html">Seller Analytics</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('auth', this)"><b>Auth</b></button>
+            <div class="pages" id="auth">
+                <a href="../auth/login.html">Login</a>
+                <a href="../auth/register.html">Register</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('community', this)"><b>Community</b></button>
+            <div class="pages" id="community">
+                <a href="../community/community.html">Community</a>
+                <a href="../community/reviews.html">Reviews Section</a>
+                <a href="../community/comments.html">Comments Section</a>
+                <a href="../community/report-content.html">Report Content Form</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('listings', this)"><b>Listings</b></button>
+            <div class="pages" id="listings">
+                <a href="../listings/marketplace.html">Marketplace</a>
+                <a href="../listings/listing-details.html">Listing Details</a>
+                <a href="../listings/create-listing.html">Create Listing</a>
+                <a href="../listings/edit-listing.html">Edit Listing</a>
+                <a href="../listings/inventory.html">Inventory</a>
+                <a href="../listings/upcycle-log.html">Upcycle Log</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('orders', this)"><b>Orders</b></button>
+            <div class="pages" id="orders">
+                <a href="../orders/cart.html">Cart</a>
+                <a href="../orders/checkout.html">Checkout</a>
+                <a href="../orders/order-details.html">Order Details</a>
+                <a href="../orders/payment-simulation.html">Payment Simulation</a>
+                <a href="../orders/shipping-label.html">Shipping Label</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('swap', this)"><b>Swap</b></button>
+            <div class="pages" id="swap">
+                <a href="../swap/swap-request.html">Swap Request</a>
+                <a href="../swap/swap-offers.html">Swap Offers</a>
+                <a href="../swap/swap-negotiation.html">Swap Negotiation</a>
+                <a href="../swap/swap-lock-confirmation.html">Swap Lock Confirmation</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('user', this)"><b>User</b></button>
+            <div class="pages" id="user">
+                <a href="../user/profile.html">User Profile</a>
+                <a href="../user/eco-impact.html">EcoImpact Dashboard</a>
+                <a href="../user/trust-score.html">Trust Score</a>
+            </div>
+        </div>
+    </div>
+  </div>
+  
+
+  
+
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/listings.js"></script>
+
+</body>
+</html>
