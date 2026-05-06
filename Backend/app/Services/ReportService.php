@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace app\Services;
 
 require_once __DIR__ . '/../../database/connection.php';
 require_once __DIR__ . '/../Models/Report.php';

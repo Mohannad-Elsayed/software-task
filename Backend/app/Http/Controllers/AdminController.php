@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace app\Http\Controllers;
 
-use App\Services\AdminService;
+use app\Services\AdminService;
 
 //require_once __DIR__ . '/../../app/Services/AdminService.php';
 require_once __DIR__ . '/../../Services/AdminService.php';
