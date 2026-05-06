@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swap Negotiation | EcoSwap</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        
+         :root {
+            --primary: #09b1ba;
+            --secondary: #4f46e5;
+            --bg: #f3f4f6;
+            --white: #ffffff;
+            --border: #e5e7eb;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            /* padding: 0; */
+            display: flex; /* غيرها من flex لـ block */
+            height: 100vh;  
+            overflow: hidden;
+            flex-direction: column; 
+        }
+
+        /* 2. ضبط الحاوية الرئيسية */
+        .app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            /* height: calc(100vh - 70px); طرح ارتفاع الهيدر (افترضنا إنه 70px) */
+            /* margin-top: 70px ; نفس ارتفاع الهيدر */
+            /* position: relative;
+            width: 100%; */
+        }
+
+        /* 3. ضبط الـ Items Panel (الجزء الشمال) */
+        .items-panel {
+            width: 320px;
+            flex-shrink: 0;
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            flex-shrink: 0; /* نمنع انكماش القائمة */
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .swap-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .item-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 3px solid var(--border);
+        }
+
+        .item-preview.active { border-color: var(--primary); }
+
+        .swap-icon-circle {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(9, 177, 186, 0.3);
+        }
+
+       
+        .chat-panel { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            background: #fff; 
+            /* position: relative; */
+            height: 100%;
+        }
+
+        /* 5. تصحيح مكان الهيدر بتاع الشات (اللي فيه اسم مهند) */
+        .chat-header { 
+            position: sticky; /* خليه sticky بدل absolute */
+            top: 0;
+            width: 100%;
+            padding: 10px 25px;
+            border-bottom: 1px solid var(--border); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: #fff;
+            z-index: 5;
+        }
+
+        /* 6. ضبط منطقة الرسائل عشان تاخد باقي المساحة وتعمل Scroll */
+        .chat-messages { 
+            flex: 1;
+            overflow-y: auto; 
+            padding: 20px;
+            background: #f9fafb;
+            /* display: flex;
+            flex-direction: column;
+            gap: 15px; */
+        }
+
+        /* 7. عشان الشات ميبقاش لازق في الهيدر */
+        #chatBox { margin-top: 0; }
+
+        .msg { max-width: 70%; padding: 12px 16px; border-radius: 15px; font-size: 14px; line-height: 1.5; }
+        .msg.received { background: #e5e7eb; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg.sent { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+
+        .offer-card { background: white; border: 1px dashed var(--primary); border-radius: 12px; padding: 15px; margin: 10px 0; }
+
+        .chat-input {height: 90px; padding: 20px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px;flex-shrink: 0;align-items: center; }
+
+        .chat-input input { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
+
+        /* Action Buttons */
+        .btn { border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-lock { background: var(--secondary); color: white; width: 100%; margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-lock:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .protection-info {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 5px;
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        /* تحسين كارت العرض */
+        .offer-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--primary); /* خط جانبي بلون الموقع */
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .offer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .offer-steps {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .offer-steps::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: 1;
+        }
+
+        .step {
+            width: 25px;
+            height: 25px;
+            background: #fff;
+            border: 2px solid #e5e7eb;
+            border-radius: 50%;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: #94a3b8;
+        }
+
+        .step.active {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #f0fdfa;
+        }
+
+        .offer-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .offer-details-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #4b5563;
+            background: #f9fafb;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 5px;
+        }
+
+        /* تنسيق الرسالة اللي فيها صورة */
+        .msg-image {
+            width: 200px;
+            height: auto;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .msg-image:hover {
+            transform: scale(1.05); /* حركة خفيفة لما تلمس الصورة */
+        }
+
+        .msg.sent.image-wrapper {
+            background: transparent; /* نشيل الخلفية الملونة لو هي صورة بس */
+            padding: 0;
+        }
+
+        .status-badge { font-size: 12px; padding: 4px 10px; border-radius: 20px; background: #fef3c7; color: #92400e; }
+    </style>
+</head>
+<body>
+
+         <!-- ── Header ── -->
+    <header class="header">
+        <!-- Left: hamburger + logo -->
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h2>EcoSwap</h2>
+        </div>
+        <!-- Center: main nav links -->
+        <nav class="header-nav">          
+            <a href="../listings/marketplace.html">Marketplace</a>
+            <a href="community.html">Community</a>
+            <a href="../swap/swap-request.html">Swap</a>
+            <a href="../orders/cart.html">Cart</a>
+        </nav>
+        <!-- Right: profile + logout -->
+        <div class="header-right">
+            <a href="profile.html" class="active">Profile</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    
+
+          <!-- ── Sidebar Overlay ── -->
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- ── Sidebar ── -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo2"><b>Eco System</b></div>
+
+        <div class="module">
+            <button onclick="togglePages('admin', this)"><b>Admin</b></button>
+            <div class="pages" id="admin">
+                <a href="../admin/admin-dashboard.html">Admin Dashboard</a>
+                <a href="../admin/user-management.html">User Management</a>
+                <a href="../admin/dispute-management.html">Dispute Management</a>
+                <a href="../admin/reports.html">Reports</a>
+                <a href="../admin/seller-analytics.html">Seller Analytics</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('auth', this)"><b>Auth</b></button>
+            <div class="pages" id="auth">
+                <a href="../auth/login.html">Login</a>
+                <a href="../auth/register.html">Register</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('community', this)"><b>Community</b></button>
+            <div class="pages" id="community">
+                <a href="../community/community.html">Community</a>
+                <a href="../community/reviews.html">Reviews Section</a>
+                <a href="../community/comments.html">Comments Section</a>
+                <a href="../community/report-content.html">Report Content Form</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('listings', this)"><b>Listings</b></button>
+            <div class="pages" id="listings">
+                <a href="../listings/marketplace.html">Marketplace</a>
+                <a href="../listings/listing-details.html">Listing Details</a>
+                <a href="../listings/create-listing.html">Create Listing</a>
+                <a href="../listings/edit-listing.html">Edit Listing</a>
+                <a href="../listings/inventory.html">Inventory</a>
+                <a href="../listings/upcycle-log.html">Upcycle Log</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('orders', this)"><b>Orders</b></button>
+            <div class="pages" id="orders">
+                <a href="../orders/cart.html">Cart</a>
+                <a href="../orders/checkout.html">Checkout</a>
+                <a href="../orders/order-details.html">Order Details</a>
+                <a href="../orders/payment-simulation.html">Payment Simulation</a>
+                <a href="../orders/shipping-label.html">Shipping Label</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('swap', this)"><b>Swap</b></button>
+            <div class="pages" id="swap">
+                <a href="../swap/swap-request.html">Swap Request</a>
+                <a href="../swap/swap-offers.html">Swap Offers</a>
+                <a href="../swap/swap-negotiation.html">Swap Negotiation</a>
+                <a href="../swap/swap-lock-confirmation.html">Swap Lock Confirmation</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('user', this)"><b>User</b></button>
+            <div class="pages" id="user">
+                <a href="../user/profile.html">User Profile</a>
+                <a href="../user/eco-impact.html">EcoImpact Dashboard</a>
+                <a href="../user/trust-score.html">Trust Score</a>
+            </div>
+        </div>
+    </div>
+  
+     <div class="app-container" id="appContainer"> 
+        <aside class="items-panel">
+            <h3 style="margin-top: 0;">Swap Summary</h3>
+            <div class="swap-visual">
+                <div class="text-center">
+                    <img src="https://images.unsplash.com/photo-1576871333019-220f1300c752?w=200" class="item-preview" alt="My Item">
+                    <p style="font-size: 12px; color: var(--muted); margin-top: 5px;">Your Item</p>
+                </div>
+                <div class="swap-icon-circle"><i class="ti ti-arrows-exchange"></i></div>
+                <div class="text-center">
+                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200" class="item-preview active" alt="Their Item">
+                    <p style="font-size: 12px; color: var(--muted); margin-top: 5px;">Their Item</p>
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid #eee; padding-top: 15px;">
+                <p><strong>Proposed Terms:</strong></p>
+                <p style="font-size: 14px; color: var(--muted);">- Straight Swap (No cash)</p>
+                <p style="font-size: 14px; color: var(--muted);">- Standard Shipping</p>
+            </div>
+
+            <button class="btn btn-lock" id="lockBtn">
+                <i class="ti ti-lock"></i> Lock Deal
+            </button>
+
+            <div class="protection-info">
+                <i class="ti ti-shield-check" style="color: var(--primary); font-size: 18px;"></i>
+                <span>Items are held under EcoSwap Protection until both parties confirm delivery.</span>
+            </div>
+        </aside>
+
+        <main class="chat-panel">
+            <!-- <header class="chat-header" style="flex-direction: column; gap: 5px;">
+                <img src="profile.jpg" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                <div>
+                    <h4>Mohanad Elsayyed</h4>
+                    <span class="text-muted">Online</span>
+                </div>
+                <span class="status-badge">Negotiating</span>
+            </header> -->
+            <header class="chat-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="profile.jpg" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary);">
+                    <div>
+                        <h4 style="margin:0;">Mohanad Elsayyed <i class="ti ti-circle-check-filled" style="color: #0ea5e9; font-size: 14px;"></i></h4>
+                        <span style="font-size: 12px; color: #22c55e;"><i class="ti ti-star-filled"></i> 4.8 (12 Swaps)</span>
+                    </div>
+                </div>
+                <span class="status-badge">Negotiating</span>
+            </header>
+
+            <div class="chat-messages" id="chatBox">
+                <div class="msg received">Hi! I saw your Denim Jacket. Would you be interested in swapping it for my Sneakers?</div>
+                <div class="msg sent">Hey! Your sneakers look cool. Is the size 42 fit true to size?</div>
+                <div class="msg received">Yes, it fits perfectly. I can send more photos if you want.</div>
+                
+                <!-- <div class="offer-card">
+                    <p style="margin:0; font-weight:700;"><i class="ti ti-package"></i> Swap Offer Updated</p>
+                    <p style="font-size: 13px; margin: 5px 0;">Item: Nike Classic Sneakers + $5.00 for your Jacket.</p>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn btn-primary" style="padding: 5px 12px; font-size: 12px;">Accept</button>
+                        <button class="btn" style="padding: 5px 12px; font-size: 12px; background: #eee;">Counter</button>
+                    </div>
+                </div> -->
+                <div class="offer-card" id="activeOffer">
+                    <div class="offer-header">
+                        <span style="font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 5px;">
+                            <i class="ti ti-file-certificate"></i> Official Swap Offer
+                        </span>
+                        <span style="font-size: 11px; color: #94a3b8;">Ref: #SW-9920</span>
+                    </div>
+
+                    <!-- Steps Timeline -->
+                    <div class="offer-steps">
+                        <div class="step active" title="Proposed">1</div>
+                        <div class="step" title="Accepted">2</div>
+                        <div class="step" title="Locked">3</div>
+                    </div>
+
+                    <div class="offer-body">
+                        <div class="offer-details-row">
+                            <i class="ti ti-package" style="color: #6366f1;"></i>
+                            <span><strong>Offered:</strong> Nike Classic Sneakers (Size 42)</span>
+                        </div>
+                        <div class="offer-details-row">
+                            <i class="ti ti-arrows-diff" style="color: #f59e0b;"></i>
+                            <span><strong>Balance:</strong> User pays + $5.00 cash</span>
+                        </div>
+                        <div class="offer-details-row">
+                            <i class="ti ti-truck" style="color: #10b981;"></i>
+                            <span><strong>Shipping:</strong> Aramex - Standard</span>
+                        </div>
+                    </div>
+
+                    <div class="offer-actions">
+                        <button class="btn btn-primary" onclick="acceptOffer()" style="flex: 2;">
+                            <i class="ti ti-check"></i> Accept Offer
+                        </button>
+                        <button class="btn" onclick="openCounterOffer()" style="flex: 1; background: #f1f5f9; color: #1e293b;">
+                            Counter
+                        </button>
+                        <button class="btn" style="padding: 10px; background: #fee2e2; color: #ef4444;" title="Decline">
+                            <i class="ti ti-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <!-- input مخفي لاختيار الصور -->
+                <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                
+                <!-- زرار الزائد اللي هيفتح الـ input -->
+                <button class="btn" id="plusBtn" style="background: #f3f4f6;">
+                    <i class="ti ti-plus"></i>
+                </button>
+
+                <input type="text" id="msgInput" placeholder="Type your message...">
+                <button class="btn btn-primary" id="sendBtn"><i class="ti ti-send"></i></button>
+            </div>
+        </main>
+   
+    </div>
+
+    <script>
+        let chatBox, msgInput, sendBtn, lockBtn, plusBtn, imageUpload;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    chatBox = document.getElementById("chatBox");
+    msgInput = document.getElementById("msgInput");
+    sendBtn = document.getElementById("sendBtn");
+    lockBtn = document.getElementById("lockBtn");
+    plusBtn = document.getElementById("plusBtn");
+    imageUpload = document.getElementById("imageUpload");
+
+    sendBtn?.addEventListener("click", sendMessage);
+
+    msgInput?.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendMessage();
+    });
+
+    lockBtn?.addEventListener("click", () => {
+        const isAccepted = localStorage.getItem("offerAccepted");
+
+        if (!isAccepted) {
+            alert("You must accept the offer first!");
+            return;
+        }
+
+        if (confirm("Are you sure?")) {
+            lockBtn.innerHTML = 'Locking...';
+            lockBtn.disabled = true;
+
+            setTimeout(() => {
+                window.location.href = "swap-lock-confirmation.html";
+            }, 1500);
+        }
+    });
+
+    if (plusBtn && imageUpload) {
+        plusBtn.addEventListener("click", () => imageUpload.click());
+
+        imageUpload.addEventListener("change", function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => sendImageMessage(e.target.result);
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+
+// ===== Functions =====
+
+function sendMessage() {
+    const text = msgInput.value.trim();
+    if (!text || !chatBox) return;
+
+    const msgDiv = document.createElement("div");
+    msgDiv.className = "msg sent";
+    msgDiv.textContent = text;
+    chatBox.appendChild(msgDiv);
+
+    msgInput.value = "";
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    setTimeout(() => {
+        receiveMessage("Got it! Let me check the shipping details.");
+    }, 1500);
+}
+
+function receiveMessage(text) {
+    if (!chatBox) return;
+
+    const msgDiv = document.createElement("div");
+    msgDiv.className = "msg received";
+    msgDiv.textContent = text;
+    chatBox.appendChild(msgDiv);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function sendImageMessage(src) {
+    if (!chatBox) return;
+
+    const msgDiv = document.createElement("div");
+    msgDiv.className = "msg sent image-wrapper";
+    msgDiv.innerHTML = `<img src="${src}" style="width:150px;border-radius:8px;cursor:pointer" onclick="window.open(this.src)">`;
+
+    chatBox.appendChild(msgDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    setTimeout(() => {
+        receiveMessage("Wow, the condition looks great! Thanks for the photo.");
+    }, 1500);
+}
+
+// ✅ أهم نقطة هنا
+function acceptOffer() {
+    const offerCard = document.getElementById('activeOffer');
+    if (!offerCard) return;
+
+    const steps = offerCard.querySelectorAll('.step');
+    if (steps[1]) {
+        steps[1].classList.add('active');
+        steps[1].innerHTML = '<i class="ti ti-check"></i>';
+    }
+
+    const actionArea = offerCard.querySelector('.offer-actions');
+    if (actionArea) {
+        actionArea.innerHTML = `
+            <div style="text-align:center;color:#059669;padding:10px;background:#dcfce7;border-radius:8px;">
+                You accepted this offer. Waiting for Lock.
+            </div>
+        `;
+    }
+
+    localStorage.setItem("offerAccepted", "true");
+
+    receiveMessage("Great! Let's lock the deal.");
+}
+    </script>
+
+     <script src="../../assets/js/api.js"></script>
+     <script src="../../assets/js/swap.js"></script>
+</body>
+</html>
+

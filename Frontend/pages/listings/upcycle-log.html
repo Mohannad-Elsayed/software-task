@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upcycle Log | EcoSwap</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #09b1ba;
+            --accent: #f59e0b;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0 0 0 0; padding: 20px; }
+
+        .container { max-width: 900px; margin: 0 auto; }
+
+        .header-section { margin-bottom: 40px; text-align: center; }
+        .header-section h1 { color: #1e293b; margin-bottom: 10px; }
+        .header-section p { color: #64748b; }
+
+        /* Upcycle Card */
+        .upcycle-card {
+            background: var(--white);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .transformation-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px;
+            background: var(--border);
+            height: 350px;
+        }
+
+        .image-container { position: relative; background: white; overflow: hidden; }
+        .image-container img { width: 100%; height: 100%; object-fit: cover; }
+        .label {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .label-before { background: #fee2e2; color: #991b1b; }
+        .label-after { background: #dcfce7; color: #166534; }
+
+        .content-body { padding: 25px; }
+        .meta-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .project-title { font-size: 20px; font-weight: 700; color: #1e293b; margin: 0; }
+        
+        .process-tags { display: flex; gap: 8px; margin: 15px 0; }
+        .tag { background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 12px; }
+
+        .impact-score {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 14px;
+            background: #f0fdfa;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        /* Create Button - Floating */
+        .btn-create {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--primary);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 30px;
+            border: none;
+            box-shadow: 0 10px 15px -3px rgba(9, 177, 186, 0.4);
+            cursor: pointer;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── Header ── -->
+    <header class="header">
+        <!-- Left: hamburger + logo -->
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h2>EcoSwap</h2>
+        </div>
+        <!-- Center: main nav links -->
+        <nav class="header-nav">          
+            <a href="../listings/marketplace.html">Marketplace</a>
+            <a href="community.html">Community</a>
+            <a href="../swap/swap-request.html">Swap</a>
+            <a href="../orders/cart.html">Cart</a>
+        </nav>
+        <!-- Right: profile + logout -->
+        <div class="header-right">
+            <a href="profile.html" class="active">Profile</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+    <div id="upcycleLogContainer"> 
+    <div class="container" >
+        <div class="header-section">
+            <h1>Creative Transformations</h1>
+            <p>See how old items are getting a second life in our community.</p>
+        </div>
+
+        <div id="logContainer">
+            </div>
+    </div>
+
+    <button class="btn-create" onclick="openNewLog()">
+        <i class="ti ti-plus"></i> Log New Transformation
+    </button>
+
+
+   <!-- ── Sidebar Overlay ── -->
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- ── Sidebar ── -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo2"><b>Eco System</b></div>
+
+        <div class="module">
+            <button onclick="togglePages('admin', this)"><b>Admin</b></button>
+            <div class="pages" id="admin">
+                <a href="../admin/admin-dashboard.html">Admin Dashboard</a>
+                <a href="../admin/user-management.html">User Management</a>
+                <a href="../admin/dispute-management.html">Dispute Management</a>
+                <a href="../admin/reports.html">Reports</a>
+                <a href="../admin/seller-analytics.html">Seller Analytics</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('auth', this)"><b>Auth</b></button>
+            <div class="pages" id="auth">
+                <a href="../auth/login.html">Login</a>
+                <a href="../auth/register.html">Register</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('community', this)"><b>Community</b></button>
+            <div class="pages" id="community">
+                <a href="../community/community.html">Community</a>
+                <a href="../community/reviews.html">Reviews Section</a>
+                <a href="../community/comments.html">Comments Section</a>
+                <a href="../community/report-content.html">Report Content Form</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('listings', this)"><b>Listings</b></button>
+            <div class="pages" id="listings">
+                <a href="../listings/marketplace.html">Marketplace</a>
+                <a href="../listings/listing-details.html">Listing Details</a>
+                <a href="../listings/create-listing.html">Create Listing</a>
+                <a href="../listings/edit-listing.html">Edit Listing</a>
+                <a href="../listings/inventory.html">Inventory</a>
+                <a href="../listings/upcycle-log.html">Upcycle Log</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('orders', this)"><b>Orders</b></button>
+            <div class="pages" id="orders">
+                <a href="../orders/cart.html">Cart</a>
+                <a href="../orders/checkout.html">Checkout</a>
+                <a href="../orders/order-details.html">Order Details</a>
+                <a href="../orders/payment-simulation.html">Payment Simulation</a>
+                <a href="../orders/shipping-label.html">Shipping Label</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('swap', this)"><b>Swap</b></button>
+            <div class="pages" id="swap">
+                <a href="../swap/swap-request.html">Swap Request</a>
+                <a href="../swap/swap-offers.html">Swap Offers</a>
+                <a href="../swap/swap-negotiation.html">Swap Negotiation</a>
+                <a href="../swap/swap-lock-confirmation.html">Swap Lock Confirmation</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('user', this)"><b>User</b></button>
+            <div class="pages" id="user">
+                <a href="../user/profile.html">User Profile</a>
+                <a href="../user/eco-impact.html">EcoImpact Dashboard</a>
+                <a href="../user/trust-score.html">Trust Score</a>
+            </div>
+        </div>
+    </div>
+  </div>
+  
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/listings.js"></script>
+     
+</body>
+</html>

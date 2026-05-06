@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item Details | EcoSwap</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+
+        /* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none; /* مخفي افتراضياً */
+    align-items: center; justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: white;
+    width: 90%; max-width: 500px;
+    border-radius: 20px;
+    padding: 25px;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted); }
+
+/* قائمة المنتجات داخل الـ Modal */
+.my-items-list {
+    max-height: 300px; overflow-y: auto;
+    display: grid; gap: 12px;
+}
+
+.selectable-item {
+    display: flex; align-items: center; gap: 15px;
+    padding: 10px; border: 2px solid #f1f5f9;
+    border-radius: 12px; cursor: pointer; transition: 0.2s;
+}
+
+.selectable-item:hover { border-color: var(--primary); background: #f0fdfa; }
+
+.selectable-item.selected {
+    border-color: var(--primary);
+    background: #f0fdfa;
+    box-shadow: 0 0 0 1px var(--primary);
+}
+
+.selectable-item img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+.item-details h4 { font-size: 14px; margin: 0; }
+.item-details p { font-size: 12px; color: var(--muted); margin: 4px 0 0 0; }
+
+.modal-footer { margin-top: 25px; display: flex; gap: 10px; justify-content: flex-end; }
+
+        :root {
+            --primary: #09b1ba;
+            --secondary: #4f46e5;
+            --text: #1e293b;
+            --muted: #64748b;
+            --bg: #ffffff;
+        }
+
+        body { font-family: 'Inter', sans-serif; margin: 0 0 0 0; background: #f8fafc; color: var(--text); }
+
+        .details-container {
+            max-width: 1100px;
+            margin: 40px auto;
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 40px;
+            padding: 0 20px;
+        }
+
+        /* Gallery Section */
+        .image-gallery { display: grid; gap: 10px; }
+        .main-img { width: 100%; border-radius: 12px; object-fit: cover; height: 600px; }
+        .thumb-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .thumb-grid img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
+        .thumb-grid img:hover { border-color: var(--primary); }
+
+        /* Info Section */
+        .info-sidebar { background: white; padding: 30px; border-radius: 16px; height: fit-content; border: 1px solid #e5e7eb; position: sticky; top: 100px; }
+        
+        .seller-info { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+        .seller-avatar { width: 45px; height: 45px; border-radius: 50%; background: #eee; }
+
+        .price-row { font-size: 28px; font-weight: 800; margin: 15px 0; }
+        .item-title { font-size: 22px; margin-bottom: 10px; }
+        
+        .tags-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0; }
+        .tag { background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+
+        .description { line-height: 1.6; color: #475569; font-size: 15px; margin-bottom: 25px; }
+
+        /* Buttons */
+        .actions { display: flex; flex-direction: column; gap: 12px; }
+        .btn { padding: 15px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
+        .btn-buy { background: var(--text); color: white; }
+        .btn-swap { background: var(--primary); color: white; border: 2px solid var(--primary); }
+        .btn-swap:hover { background: white; color: var(--primary); }
+        
+        .eco-benefit { background: #ecfdf5; color: #065f46; padding: 15px; border-radius: 10px; font-size: 13px; margin-top: 20px; border: 1px dashed #10b981; }
+
+        @media (max-width: 850px) {
+            .details-container { grid-template-columns: 1fr; }
+            .main-img { height: 400px; }
+        }
+    </style>
+</head>
+<body>
+
+     <!-- ── Header ── -->
+    <header class="header">
+        <!-- Left: hamburger + logo -->
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h2>EcoSwap</h2>
+        </div>
+        <!-- Center: main nav links -->
+        <nav class="header-nav">                   
+            <a href="../listings/marketplace.html">Marketplace</a>
+            <a href="community.html">Community</a>
+            <a href="../swap/swap-request.html">Swap</a>
+            <a href="../orders/cart.html">Cart</a>
+        </nav>
+        <!-- Right: profile + logout -->
+        <div class="header-right">
+            <a href="profile.html" class="active">Profile</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <div class="details-container">
+    <div class="image-gallery">
+        <img src="https://images.unsplash.com/photo-1576871333019-220f1300c752?w=800" class="main-img" id="mainDisplay">
+        <div class="thumb-grid">
+            <img src="https://images.unsplash.com/photo-1576871333019-220f1300c752?w=200" onclick="updateImg(this.src)">
+            <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=200" onclick="updateImg(this.src)">
+            <img src="https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=200" onclick="updateImg(this.src)">
+        </div>
+    </div>
+
+    <aside class="info-sidebar">
+        <div class="seller-info">
+            <img src="https://ui-avatars.com/api/?name=Mohanad+E&background=random" class="seller-avatar">
+            <div>
+                <div style="font-weight: 700;">Mohanad Elsayyed</div>
+                <div style="font-size: 12px; color: var(--muted);">⭐⭐⭐⭐⭐ (42 Reviews)</div>
+            </div>
+            <div style="background: #dcfce7; color: #166534; font-size: 10px; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-left: 5px;">
+                <i class="ti ti-shield-check"></i> Verified Seller
+            </div>
+        </div>
+
+        <h1 class="item-title">Vintage Oversized Denim Jacket</h1>
+        <div class="price-row">$55.00</div>
+
+        <div class="tags-row">
+            <div class="tag"><i class="ti ti-tag"></i> Levi's</div>
+            <div class="tag"><i class="ti ti-shirt"></i> Size L</div>
+            <div class="tag"><i class="ti ti-sparkles"></i> Excellent Condition</div>
+            <div class="tag"><i class="ti ti-leaf"></i> 100% Cotton</div>
+        </div>
+
+        <div class="description">
+            This is a rare 90s vintage find. The denim is heavy and high quality. No visible wear or tear. Perfect for layering in spring or autumn. 
+        </div>
+        <div class="item-specifications" style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px;">
+              <div style="color: var(--muted);">Category</div>
+              <div style="font-weight: 600;">Men's Outerwear</div>
+              
+              <div style="color: var(--muted);">Color</div>
+              <div style="font-weight: 600;">Classic Blue</div>
+              
+              <div style="color: var(--muted);">Uploaded</div>
+              <div style="font-weight: 600;">2 days ago</div>
+              
+              <div style="color: var(--muted);">Payment</div>
+              <div style="font-weight: 600;">Credit Card, EcoCoins</div>
+          </div>
+      </div>
+
+        <!-- <div class="actions">
+            <button class="btn btn-buy"><i class="ti ti-shopping-cart"></i> Buy Now</button>
+            <button class="btn btn-swap" id="swapBtn">
+                <i class="ti ti-arrows-exchange"></i> Propose a Swap
+            </button>
+        </div> -->
+        <div class="actions">
+            <!-- <button class="btn btn-buy"><i class="ti ti-shopping-cart"></i> Buy Now</button> -->
+             <button id="buyBtn" class="btn-buy" style="background: #111; color: #fff; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                <i class="ti ti-shopping-cart"></i> Buy Now
+            </button>
+            <button class="btn btn-swap" id="swapBtn"><i class="ti ti-arrows-exchange"></i> Propose a Swap</button>
+            
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                <button class="btn" style="flex: 1; background: #fff; border: 1px solid #e2e8f0; color: var(--text);">
+                    <i class="ti ti-heart"></i> Favorite
+                </button>
+                <button class="btn" style="flex: 1; background: #fff; border: 1px solid #e2e8f0; color: var(--text);">
+                    <i class="ti ti-share"></i> Share
+                </button>
+            </div>
+        </div>
+
+        <div class="eco-benefit">
+            <strong>Eco Impact:</strong> By swapping this item, you save approx. <b>2,500 liters</b> of water compared to buying new!
+        </div>
+    </aside>
+</div>
+
+  <!-- ── Sidebar Overlay ── -->
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- ── Sidebar ── -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo2"><b>Eco System</b></div>
+
+        <div class="module">
+            <button onclick="togglePages('admin', this)"><b>Admin</b></button>
+            <div class="pages" id="admin">
+                <a href="../admin/admin-dashboard.html">Admin Dashboard</a>
+                <a href="../admin/user-management.html">User Management</a>
+                <a href="../admin/dispute-management.html">Dispute Management</a>
+                <a href="../admin/reports.html">Reports</a>
+                <a href="../admin/seller-analytics.html">Seller Analytics</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('auth', this)"><b>Auth</b></button>
+            <div class="pages" id="auth">
+                <a href="../auth/login.html">Login</a>
+                <a href="../auth/register.html">Register</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('community', this)"><b>Community</b></button>
+            <div class="pages" id="community">
+                <a href="../community/community.html">Community</a>
+                <a href="../community/reviews.html">Reviews Section</a>
+                <a href="../community/comments.html">Comments Section</a>
+                <a href="../community/report-content.html">Report Content Form</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('listings', this)"><b>Listings</b></button>
+            <div class="pages" id="listings">
+                <a href="../listings/marketplace.html">Marketplace</a>
+                <a href="../listings/listing-details.html">Listing Details</a>
+                <a href="../listings/create-listing.html">Create Listing</a>
+                <a href="../listings/edit-listing.html">Edit Listing</a>
+                <a href="../listings/inventory.html">Inventory</a>
+                <a href="../listings/upcycle-log.html">Upcycle Log</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('orders', this)"><b>Orders</b></button>
+            <div class="pages" id="orders">
+                <a href="../orders/cart.html">Cart</a>
+                <a href="../orders/checkout.html">Checkout</a>
+                <a href="../orders/order-details.html">Order Details</a>
+                <a href="../orders/payment-simulation.html">Payment Simulation</a>
+                <a href="../orders/shipping-label.html">Shipping Label</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('swap', this)"><b>Swap</b></button>
+            <div class="pages" id="swap">
+                <a href="../swap/swap-request.html">Swap Request</a>
+                <a href="../swap/swap-offers.html">Swap Offers</a>
+                <a href="../swap/swap-negotiation.html">Swap Negotiation</a>
+                <a href="../swap/swap-lock-confirmation.html">Swap Lock Confirmation</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('user', this)"><b>User</b></button>
+            <div class="pages" id="user">
+                <a href="../user/profile.html">User Profile</a>
+                <a href="../user/eco-impact.html">EcoImpact Dashboard</a>
+                <a href="../user/trust-score.html">Trust Score</a>
+            </div>
+        </div>
+    </div>
+
+<section style="max-width: 1100px; margin: 60px auto; padding: 0 20px;">
+    <h3 style="margin-bottom: 20px;">Similar Items You Might Like</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
+        <!-- Card 1 -->
+        <div style="background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
+            <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400" style="width: 100%; height: 200px; object-fit: cover;">
+            <div style="padding: 12px;">
+                <div style="font-weight: 800;">$40.00</div>
+                <div style="font-size: 13px; color: var(--muted);">Vintage Leather Jacket</div>
+            </div>
+        </div>
+        <!-- كرر الكروت هنا -->
+    </div>
+</section>
+
+<!-- Swap Proposal Modal -->
+<div id="swapModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Select an Item to Swap</h3>
+            <button class="close-btn" onclick="closeSwapModal()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+            <p style="font-size: 14px; color: var(--muted); margin-bottom: 20px;">
+                Choose one of your listed items to offer in exchange for the <b>Vintage Denim Jacket</b>.
+            </p>
+            
+            <div class="my-items-list" id="myItemsList">
+                <!-- المنتجات هتتحمل هنا من الـ JS -->
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeSwapModal()">Cancel</button>
+            <button class="btn btn-swap" id="confirmSwapBtn" disabled>Send Swap Proposal</button>
+        </div>
+    </div>
+</div>
+
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/listings.js"></script>
+
+</body>
+</html>
