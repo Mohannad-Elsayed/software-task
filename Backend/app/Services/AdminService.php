@@ -18,7 +18,7 @@ class AdminService
     // =========================
     public function getUsers()
     {
-        $sql = "SELECT * FROM user";
+        $sql = "SELECT * FROM User";
         $result = $this->conn->query($sql);
 
         $users = [];
@@ -37,7 +37,7 @@ class AdminService
     // =========================
     public function getUserById($userId)
     {
-        $sql = "SELECT * FROM user WHERE user_id = ?";
+        $sql = "SELECT * FROM User WHERE user_id = ?";
         $stmt = $this->conn->prepare($sql);
 
         $stmt->bind_param("i", $userId);
@@ -56,7 +56,7 @@ class AdminService
     // =========================
     public function deleteUser($userId)
     {
-        $stmt = $this->conn->prepare("DELETE FROM user WHERE user_id = ?");
+        $stmt = $this->conn->prepare("DELETE FROM User WHERE user_id = ?");
         $stmt->bind_param("i", $userId);
 
         if ($stmt->execute()) {
@@ -79,7 +79,7 @@ class AdminService
     // =========================
     public function getReports()
     {
-        $sql = "SELECT * FROM report";
+        $sql = "SELECT * FROM Report";
         $result = $this->conn->query($sql);
 
         $reports = [];
@@ -105,7 +105,7 @@ class AdminService
         }
 
         $stmt = $this->conn->prepare(
-            "UPDATE report SET status = ? WHERE report_id = ?"
+            "UPDATE Report SET status = ? WHERE report_id = ?"
         );
 
         $stmt->bind_param("si", $status, $reportId);

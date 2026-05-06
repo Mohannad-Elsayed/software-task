@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    const API_BASE_URL = 'http://localhost:8000/software-task/api/'; 
+    const API_BASE_URL = 'http://localhost:8000/api/'; 
 
     async function fetchFromAPI(endpoint, method = 'GET', data = null) {
         const options = {
@@ -112,9 +112,8 @@ document.addEventListener("DOMContentLoaded", function() {
             users.forEach(user => {
                 usersTableBody.innerHTML += `
                     <tr>
-                        <td>${user.name || 'User ' + user.user_id}</td>
-                        <td>${user.role || 'N/A'}</td>
-                        <td>${user.status || 'Active'}</td>
+                        <td>${user.username || 'User ' + user.user_id}</td>
+                        <td>${user.user_id}</td>
                         <td>
                             <button class="btn btn-danger" onclick="deleteUser(${user.user_id})">Delete</button>
                         </td>

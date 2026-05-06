@@ -84,6 +84,9 @@ class ListingService {
     }
 
     public function createListing($data) {
+        if (!isset($data['price']) || $data['price'] <= 0) {
+            throw new \Exception("Price must be greater than zero.");
+        }
         $this->db->begin_transaction();
         try {
             $stmt = $this->db->prepare("
@@ -135,19 +138,30 @@ class ListingService {
     }
 
     public function editListing($id, $data) {
+        $stmt = $this->db->prepare("SELECT * FROM Listing WHERE listing_id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            return false;
+        }
+        
+        $existing = $result->fetch_assoc();
+
         $stmt = $this->db->prepare("
             UPDATE Listing 
             SET title = ?, description = ?, price = ?, category = ?, condition_status = ?, listing_type = ?, status = ?
             WHERE listing_id = ?
         ");
 
-        $title = $data['title'] ?? null;
-        $description = $data['description'] ?? null;
-        $price = $data['price'] ?? null;
-        $category = $data['category'] ?? null;
-        $condition_status = $data['condition_status'] ?? null;
-        $listing_type = $data['listing_type'] ?? null;
-        $status = $data['status'] ?? null;
+        $title = $data['title'] ?? $existing['title'];
+        $description = $data['description'] ?? $existing['description'];
+        $price = $data['price'] ?? $existing['price'];
+        $category = $data['category'] ?? $existing['category'];
+        $condition_status = $data['condition_status'] ?? $existing['condition_status'];
+        $listing_type = $data['listing_type'] ?? $existing['listing_type'];
+        $status = $data['status'] ?? $existing['status'];
 
         $stmt->bind_param("ssdssssi", 
             $title,

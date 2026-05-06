@@ -140,10 +140,10 @@ class SwapService {
             ");
             $stmt->bind_param("iis", $requestId, $initiatorId, $offerValue);
             $stmt->execute();
+            $offerId = $this->db->insert_id;
 
             $this->transitionSwapStatus($requestId, 'negotiating');
 
-            $offerId = $this->db->insert_id;
             $this->db->commit();
 
             return $offerId;
@@ -176,10 +176,10 @@ class SwapService {
             ");
             $stmt->bind_param("iis", $requestId, $initiatorId, $offerValue);
             $stmt->execute();
+            $offerId = $this->db->insert_id;
 
             $this->transitionSwapStatus($requestId, 'negotiating');
 
-            $offerId = $this->db->insert_id;
             $this->db->commit();
 
             return $offerId;
@@ -191,7 +191,7 @@ class SwapService {
 
     public function balanceSwapValue($requestId) {
         $stmt = $this->db->prepare("
-            SELECT offer_value
+            SELECT offer_value, initiator_id
             FROM Offer
             WHERE request_id = ?
             ORDER BY offer_id DESC
@@ -201,25 +201,44 @@ class SwapService {
         $stmt->execute();
         $result = $stmt->get_result();
 
-        $values = [];
+        $offers = [];
         while ($result && ($row = $result->fetch_assoc())) {
-            $values[] = (float) $row['offer_value'];
+            $offers[] = [
+                'value' => (float) $row['offer_value'],
+                'initiator_id' => $row['initiator_id']
+            ];
         }
 
-        if (count($values) < 2) {
+        if (count($offers) < 2) {
             return [
                 'request_id' => $requestId,
-                'latest_offer_value' => $values[0] ?? null,
+                'latest_offer_value' => $offers[0]['value'] ?? null,
                 'previous_offer_value' => null,
-                'balance_value' => $values[0] ?? null,
+                'balance_value' => $offers[0]['value'] ?? null,
+                'owed_to' => $offers[0]['initiator_id'] ?? null
             ];
+        }
+
+        // Note: This logic is simplified for demo purposes.
+        // It compares the last two offers directly. For a completely accurate calculation,
+        // it should compare offer values against the base listing price.
+        $latest = $offers[0];
+        $previous = $offers[1];
+        $balance = round($latest['value'] - $previous['value'], 2);
+        
+        $owedTo = null;
+        if ($balance > 0) {
+            $owedTo = $latest['initiator_id'];
+        } elseif ($balance < 0) {
+            $owedTo = $previous['initiator_id'];
         }
 
         return [
             'request_id' => $requestId,
-            'latest_offer_value' => $values[0],
-            'previous_offer_value' => $values[1],
-            'balance_value' => round($values[0] - $values[1], 2),
+            'latest_offer_value' => $latest['value'],
+            'previous_offer_value' => $previous['value'],
+            'balance_value' => abs($balance),
+            'owed_to' => $owedTo
         ];
     }
 
@@ -290,7 +309,16 @@ class SwapService {
             $stmt->bind_param("i", $requestId);
             $stmt->execute();
 
-            $this->updateListingStatus((int) $swapRequest['requested_listing_id'], 'active');
+            if ($swapRequest['status'] === 'accepted') {
+                $listingId = (int) $swapRequest['requested_listing_id'];
+                $chkStmt = $this->db->prepare("SELECT status FROM Listing WHERE listing_id = ? FOR UPDATE");
+                $chkStmt->bind_param("i", $listingId);
+                $chkStmt->execute();
+                $lRow = $chkStmt->get_result()->fetch_assoc();
+                if ($lRow && $lRow['status'] === 'swap_locked') {
+                    $this->updateListingStatus($listingId, 'active');
+                }
+            }
 
             $this->db->commit();
             return true;

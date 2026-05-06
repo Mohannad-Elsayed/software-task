@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/routes/api.php';
 // Autoloader to avoid manual require_once everywhere
+// (routes are included later after setup)
 spl_autoload_register(function ($class) {
     $prefix = 'app\\';
     $base_dir = __DIR__ . '/app/';
@@ -25,6 +25,7 @@ require_once __DIR__ . '/database/connection.php';
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);

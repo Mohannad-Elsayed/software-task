@@ -19,7 +19,7 @@ class ReportService
     // =========================
     public function getReports()
     {
-        $sql = "SELECT * FROM report";
+        $sql = "SELECT * FROM Report";
         $result = $this->conn->query($sql);
 
         $reports = [];
@@ -38,7 +38,7 @@ class ReportService
     // =========================
     public function getReportById($reportId)
     {
-        $sql = "SELECT * FROM report  WHERE report_id = ?";
+        $sql = "SELECT * FROM Report WHERE report_id = ?";
         $stmt = $this->conn->prepare($sql);
 
         $stmt->bind_param("i", $reportId);
@@ -68,13 +68,13 @@ class ReportService
         }
     
         $stmt = $this->conn->prepare(
-            "INSERT INTO report (status, initiator_id, comment_id, reason, listing_id)
+            "INSERT INTO Report (status, initiator_id, comment_id, reason, listing_id)
              VALUES (?, ?, ?, ?, ?)"
         );
 
         // FIXED: correct bind types (important)
         $stmt->bind_param(
-            "sisss",
+            "siisi",
             $status,
             $initiator_id,
             $comment_id,
@@ -111,7 +111,7 @@ class ReportService
         }
 
         $stmt = $this->conn->prepare(
-            "UPDATE report 
+            "UPDATE Report 
              SET status = ?, reason = ? 
              WHERE report_id = ?"
         );

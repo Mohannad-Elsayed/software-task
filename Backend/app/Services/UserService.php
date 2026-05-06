@@ -13,7 +13,7 @@ class UserService
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
         $stmt = $conn->prepare("
-            INSERT INTO users (name, email, password, trust_score)
+            INSERT INTO User (username, email, password, trust_score)
             VALUES (?, ?, ?, 0)
         ");
         $stmt->bind_param("sss", $name, $email, $hashedPassword);
@@ -24,23 +24,11 @@ class UserService
 
         $userId = $conn->insert_id;
 
-        $roleStmt = $conn->prepare("SELECT role_id FROM roles WHERE role_name = ?");
-        $roleStmt->bind_param("s", $roleName);
-        $roleStmt->execute();
-
-        $role = $roleStmt->get_result()->fetch_assoc();
-
-        if (!$role) {
-            return false;
-        }
-
-        $roleId = $role['role_id'];
-
         $assignStmt = $conn->prepare("
-            INSERT INTO user_roles (user_id, role_id)
+            INSERT INTO UserRole (user_id, role_name)
             VALUES (?, ?)
         ");
-        $assignStmt->bind_param("ii", $userId, $roleId);
+        $assignStmt->bind_param("is", $userId, $roleName);
         $assignStmt->execute();
 
         return $this->findById($userId);
@@ -50,7 +38,7 @@ class UserService
     {
         $conn = db();
 
-        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt = $conn->prepare("SELECT * FROM User WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
 
@@ -70,13 +58,12 @@ class UserService
         $stmt = $conn->prepare("
             SELECT 
                 u.user_id,
-                u.name,
+                u.username,
                 u.email,
                 u.trust_score,
-                GROUP_CONCAT(r.role_name) AS roles
-            FROM users u
-            LEFT JOIN user_roles ur ON u.user_id = ur.user_id
-            LEFT JOIN roles r ON ur.role_id = r.role_id
+                GROUP_CONCAT(ur.role_name) AS roles
+            FROM User u
+            LEFT JOIN UserRole ur ON u.user_id = ur.user_id
             WHERE u.user_id = ?
             GROUP BY u.user_id
         ");

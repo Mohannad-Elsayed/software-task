@@ -4,17 +4,23 @@ use app\Http\Controllers\ListingController;
 use app\Http\Controllers\OrderController;
 use app\Http\Controllers\AdminController;
 use app\Http\Controllers\ReportController;
+use app\Http\Controllers\SwapController;
 
 require_once __DIR__ . '/../app/Http/Controllers/ListingController.php';
 require_once __DIR__ . '/../app/Http/Controllers/OrderController.php';
 require_once __DIR__ . '/../app/Http/Controllers/AdminController.php';
 require_once __DIR__ . '/../app/Http/Controllers/ReportController.php';
+require_once __DIR__ . '/../app/Http/Controllers/SwapController.php';
 
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 $basePath = dirname($_SERVER['SCRIPT_NAME']);
-$requestUri = substr($requestUri, strlen($basePath));
+// Remove basePath from request URI only when necessary (supports web root deploy)
+if ($basePath && $basePath !== '/' && strpos($requestUri, $basePath) === 0) {
+    $requestUri = substr($requestUri, strlen($basePath));
+}
 
+// Remove /index.php if present
 $requestUri = str_replace('/index.php', '', $requestUri);
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -133,8 +139,14 @@ if (preg_match('#^/api/orders/ship/?$#', $requestUri)) {
 
     if ($method === 'POST') {
         $data = json_decode(file_get_contents("php://input"), true);
+        $orderId = $data['order_id'] ?? null;
+        if (!$orderId) {
+            http_response_code(400);
+            echo json_encode(["error" => "order_id is required"]);
+            exit;
+        }
         echo json_encode(
-            $controller->generateShipping($data['order_id'])
+            $controller->generateShipping($orderId)
         );
     } else {
         http_response_code(405);
@@ -149,8 +161,14 @@ if (preg_match('#^/api/orders/release/?$#', $requestUri)) {
 
     if ($method === 'POST') {
         $data = json_decode(file_get_contents("php://input"), true);
+        $orderId = $data['order_id'] ?? null;
+        if (!$orderId) {
+            http_response_code(400);
+            echo json_encode(["error" => "order_id is required"]);
+            exit;
+        }
         echo json_encode(
-            $controller->releasePayment($data['order_id'])
+            $controller->releasePayment($orderId)
         );
     } else {
         http_response_code(405);
@@ -182,8 +200,6 @@ if (preg_match('#^/api/order-items/?$#', $requestUri)) {
 
     if ($method === 'GET') {
         $controller->getItems();
-    } elseif ($method === 'POST') {
-        $controller->store();
     } else {
         http_response_code(405);
         echo json_encode(["error" => "Method Not Allowed"]);
