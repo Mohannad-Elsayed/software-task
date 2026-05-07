@@ -8,7 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadMarketplace() {
         try {
             const res = await fetch(`${API_BASE}/listings`);
-            const products = await res.json();
+            let products = await res.json();
+            if (products && products.data) products = products.data;
             if (!Array.isArray(products)) { grid.innerHTML = '<p style="text-align:center;padding:40px;color:#94a3b8;">No listings available.</p>'; return; }
             renderProducts(products);
         } catch (err) {
@@ -74,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadMarketplace().then(() => {
         // cache for search
-        fetch(`${API_BASE}/listings`).then(r=>r.json()).then(d => { if(Array.isArray(d)) allProducts=d; }).catch(()=>{});
+        fetch(`${API_BASE}/listings`).then(r=>r.json()).then(d => { const data = d.data || d; if(Array.isArray(data)) allProducts=data; }).catch(()=>{});
     });
 });
 
@@ -88,7 +89,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Upcycle logs are listing-level; fetch all listings and filter upcycled ones
         try {
             const res = await fetch(`${API_BASE}/listings`);
-            const listings = await res.json();
+            let listings = await res.json();
+            if (listings && listings.data) listings = listings.data;
             if (!Array.isArray(listings)) return;
             const upcycled = listings.filter(l => l.is_upcycled || l.eco_contribution === 'Upcycled Piece');
             if (!upcycled.length) {
@@ -150,7 +152,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!listingId) return; // no ID, leave page as-is for demo
         try {
             const res = await fetch(`${API_BASE}/listings/${listingId}`);
-            const item = await res.json();
+            let item = await res.json();
+            if (item && item.data) item = item.data;
             if (!item || item.error) return;
 
             // Populate the page
@@ -210,7 +213,8 @@ function openSwapModal() {
     listContainer.innerHTML = '<p style="text-align:center;padding:20px;color:#94a3b8;">Loading your items...</p>';
     modal.style.display = 'flex';
 
-    fetch(`${API_BASE}/listings`).then(r => r.json()).then(items => {
+    fetch(`${API_BASE}/listings`).then(r => r.json()).then(res => {
+        const items = res.data || res;
         if (!Array.isArray(items) || !items.length) {
             listContainer.innerHTML = '<p style="text-align:center;padding:20px;color:#94a3b8;">No items in your inventory.</p>';
             return;
@@ -275,7 +279,8 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadInventory() {
         try {
             const res = await fetch(`${API_BASE}/listings`);
-            const items = await res.json();
+            let items = await res.json();
+            if (items && items.data) items = items.data;
             if (!Array.isArray(items)) { container.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;">No items found.</p>'; return; }
             allItems = items;
             renderInventory(items);
@@ -363,7 +368,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!listingId) return;
         try {
             const res = await fetch(`${API_BASE}/listings/${listingId}`);
-            const item = await res.json();
+            let item = await res.json();
+            if (item && item.data) item = item.data;
             if (!item || item.error) return;
 
             const el = (id) => document.getElementById(id);
