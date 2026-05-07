@@ -1,26 +1,39 @@
 <?php
 
-namespace app\Http\Controllers;
+require_once __DIR__ . "/../../Services/UserService.php";
 
-class UserController
-{
-    public function getUserProfile()
-    {
-        // TODO: return user profile
+class UserController {
+
+    private $userService;
+
+    public function __construct() {
+        $this->userService = new UserService();
     }
 
-    public function updateUserProfile()
-    {
-        // TODO: update user data
-    }
+    public function getUserProfile() {
+        $userId = $_GET["user_id"] ?? null;
 
-    public function assignRole()
-    {
-        // TODO: assign role to user
-    }
+        if (!$userId) {
+            echo json_encode([
+                "success" => false,
+                "message" => "User ID is required"
+            ]);
+            return;
+        }
 
-    public function switchRole()
-    {
-        // TODO: switch active role
+        $user = $this->userService->findById($userId);
+
+        if (!$user) {
+            echo json_encode([
+                "success" => false,
+                "message" => "User not found"
+            ]);
+            return;
+        }
+
+        echo json_encode([
+            "success" => true,
+            "user" => $user
+        ]);
     }
 }

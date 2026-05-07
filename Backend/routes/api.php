@@ -25,11 +25,16 @@ $requestUri = str_replace('/index.php', '', $requestUri);
 
 $method = $_SERVER['REQUEST_METHOD'];
 
+<<<<<<< HEAD
+// Listings endpoints
+if (preg_match('# ^/api/listings/?$#', $requestUri)) {
+=======
 
 // =========================
 // LISTINGS endpoints
 // =========================
 if (preg_match('#^/api/listings/?$#', $requestUri)) {
+>>>>>>> main
     $controller = new ListingController();
 
     if ($method === 'GET') {
