@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+
+  <style>
+    :root{
+  --primary-green: rgb(34, 197, 94);
+  --dark-green: rgb(21, 128, 61);
+  --background: rgb(240, 253, 244);
+  --text-dark: rgb(17, 24, 39);
+  --white: rgb(255, 255, 255);
+  --light-green: rgb(134, 239, 172);
+  --border-gray: rgb(229, 231, 235);
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,var(--primary-green),var(--dark-green));
+  padding:20px;
+}
+
+.register-container{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.register-box{
+  width:420px;
+  background:var(--white);
+  padding:35px;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+  text-align:center;
+}
+
+.register-box h1{
+  color:var(--text-dark);
+  margin-bottom:10px;
+}
+
+.register-box p{
+  color:gray;
+  margin-bottom:20px;
+}
+
+.register-box input,
+.register-box select{
+  width:100%;
+  padding:14px;
+  margin-bottom:15px;
+  border:1px solid var(--border-gray);
+  border-radius:8px;
+  font-size:15px;
+  outline:none;
+  transition:0.3s;
+}
+
+.register-box input:focus,
+.register-box select:focus{
+  border-color:var(--primary-green);
+}
+
+.register-box button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:8px;
+  background:var(--primary-green);
+  color:var(--white);
+  font-size:16px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.register-box button:hover{
+  background:var(--dark-green);
+}
+
+.login-link{
+  margin-top:18px;
+  font-size:14px;
+}
+
+.login-link a{
+  text-decoration:none;
+  color:var(--primary-green);
+  font-weight:bold;
+}
+  </style>
+</head>
+<body>
+
+<div class="register-container">
+
+  <div class="register-box">
+    <h1>Create Account</h1>
+    <p>Join our eco marketplace</p>
+
+    <form id="registerForm">
+
+      <input type="text" id="name" placeholder="Full Name">
+
+      <input type="email" id="email" placeholder="Email Address">
+
+      <input type="password" id="password" placeholder="Password">
+
+      <input type="password" id="confirmPassword" placeholder="Confirm Password">
+
+      <button type="submit">Register</button>
+
+    </form>
+
+    <p class="login-link">
+      Already have an account?
+      <a href="../../pages/auth/login.html">Login</a>
+    </p>
+
+  </div>
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+
+  const form = document.getElementById("registerForm");
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+    if(name === "" || email === "" || password === "" || confirmPassword === "" || role === ""){
+      alert("Please fill all fields.");
+      return;
+    }
+
+    if(password.length < 6){
+      alert("Password must be at least 6 characters.");
+      return;
+    }
+
+    if(password !== confirmPassword){
+      alert("Passwords do not match.");
+      return;
+    }
+
+    alert("Registration Successful!");
+
+    window.location.href = "LoginPage.html";
+  });
+
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust Score</title>
+
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/Layout.css">
+    <style>
+        /* Trust Card */
+.trust-card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Circle Score */
+.score-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 10px solid #2ecc71;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+/* Label */
+.score-label {
+    font-size: 18px;
+    color: #555;
+}
+
+/* Breakdown */
+.breakdown {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.item {
+    margin-bottom: 20px;
+}
+
+.item span {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Progress Bars */
+.bar {
+    width: 100%;
+    height: 10px;
+    background: #eee;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.bar div {
+    height: 100%;
+    background: #2ecc71;
+    width: 0%;
+    transition: 0.5s;
+}
+    </style>
+</head>
+
+<body>
+
+    <!-- ── Sidebar Overlay ── -->
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- ── Sidebar ── -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo2"><b>Eco System</b></div>
+
+        <div class="module">
+            <button onclick="togglePages('admin', this)"><b>Admin</b></button>
+            <div class="pages" id="admin">
+                <a href="../admin/admin-dashboard.html">Admin Dashboard</a>
+                <a href="../admin/user-management.html">User Management</a>
+                <a href="../admin/dispute-management.html">Dispute Management</a>
+                <a href="../admin/reports.html">Reports</a>
+                <a href="../admin/seller-analytics.html">Seller Analytics</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('auth', this)"><b>Auth</b></button>
+            <div class="pages" id="auth">
+                <a href="../auth/login.html">Login</a>
+                <a href="../auth/register.html">Register</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('community', this)"><b>Community</b></button>
+            <div class="pages" id="community">
+                <a href="../community/community.html">Community</a>
+                <a href="../community/reviews.html">Reviews Section</a>
+                <a href="../community/comments.html">Comments Section</a>
+                <a href="../community/report-content.html">Report Content Form</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('listings', this)"><b>Listings</b></button>
+            <div class="pages" id="listings">
+                <a href="../listings/marketplace.html">Marketplace</a>
+                <a href="../listings/listing-details.html">Listing Details</a>
+                <a href="../listings/create-listing.html">Create Listing</a>
+                <a href="../listings/edit-listing.html">Edit Listing</a>
+                <a href="../listings/inventory.html">Inventory</a>
+                <a href="../listings/upcycle-log.html">Upcycle Log</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('orders', this)"><b>Orders</b></button>
+            <div class="pages" id="orders">
+                <a href="../orders/cart.html">Cart</a>
+                <a href="../orders/checkout.html">Checkout</a>
+                <a href="../orders/order-details.html">Order Details</a>
+                <a href="../orders/payment-simulation.html">Payment Simulation</a>
+                <a href="../orders/shipping-label.html">Shipping Label</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('swap', this)"><b>Swap</b></button>
+            <div class="pages" id="swap">
+                <a href="../swap/swap-request.html">Swap Request</a>
+                <a href="../swap/swap-offers.html">Swap Offers</a>
+                <a href="../swap/swap-negotiation.html">Swap Negotiation</a>
+                <a href="../swap/swap-lock-confirmation.html">Swap Lock Confirmation</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('user', this)"><b>User</b></button>
+            <div class="pages" id="user">
+                <a href="../user/profile.html">User Profile</a>
+                <a href="../user/eco-impact.html">EcoImpact Dashboard</a>
+                <a href="trust-score.html" class="active">Trust Score</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Header ── -->
+    <header class="header">
+
+        <!-- Left: hamburger + logo -->
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h2>EcoSwap</h2>
+        </div>
+
+        <!-- Center: main nav links -->
+        <nav class="header-nav">
+            <a href="../listings/marketplace.html">Marketplace</a>
+            <a href="../community/community.html">Community</a>
+            <a href="../swap/swap-request.html">Swap</a>
+            <a href="../orders/cart.html">Cart</a>
+        </nav>
+
+        <!-- Right: profile + logout -->
+        <div class="header-right">
+            <a href="../user/profile.html">Profile</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+    </header>
+
+    <!-- ── Main Container ── -->
+    <div class="container">
+        <main class="content">
+
+            <!-- Score Card -->
+            <section class="trust-card">
+                <h2>Your Trust Score</h2>
+
+                <div class="score-circle">
+                    <span id="scoreValue">0%</span>
+                </div>
+
+                <p class="score-label" id="scoreLabel">Loading...</p>
+            </section>
+
+            <!-- Breakdown -->
+            <section class="breakdown">
+                <h3>Score Breakdown</h3>
+
+                <div class="item">
+                    <span>Successful Swaps</span>
+                    <div class="bar"><div id="swapBar"></div></div>
+                </div>
+
+                <div class="item">
+                    <span>User Reviews</span>
+                    <div class="bar"><div id="reviewBar"></div></div>
+                </div>
+
+                <div class="item">
+                    <span>Account Activity</span>
+                    <div class="bar"><div id="activityBar"></div></div>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        function loadTrustScore() {
+    
+    async function loadTrust() {
+    const data = await request("/trust");
+
+    document.getElementById("scoreValue").textContent = data.score + "%";
+}
+
+loadTrust();
+
+    // Set score
+    document.getElementById("scoreValue").textContent = data.score + "%";
+
+    // Label logic
+    let label = "Low";
+    if (data.score > 80) label = "Excellent";
+    else if (data.score > 60) label = "Good";
+    else if (data.score > 40) label = " متوسط";
+
+    document.getElementById("scoreLabel").textContent = label;
+
+    // Bars
+    document.getElementById("swapBar").style.width = data.swaps + "%";
+    document.getElementById("reviewBar").style.width = data.reviews + "%";
+    document.getElementById("activityBar").style.width = data.activity + "%";
+}
+
+loadTrustScore();
+
+    </script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('visible');
+        }
+
+        function togglePages(id, btn) {
+            const pages = document.getElementById(id);
+            pages.classList.toggle('open');
+            btn.classList.toggle('open');
+        }
+
+        function logout() {
+            window.location.href = '../auth/login.html';
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco Impact</title>
+
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/Layout.css">
+   <style>
+    /* Summary Cards */
+.eco-summary {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.card {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.card p {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2ecc71;
+    margin-top: 10px;
+}
+
+/* Progress */
+.eco-progress {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.progress-item {
+    margin-bottom: 20px;
+}
+
+.bar {
+    width: 100%;
+    height: 10px;
+    background: #eee;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.bar div {
+    height: 100%;
+    background: #2ecc71;
+    width: 0%;
+    transition: 0.5s;
+}
+
+/* Achievements */
+.eco-achievements {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.badges {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    background: #eafaf1;
+    color: #27ae60;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+   </style>
+</head>
+
+<body>
+
+    <!-- ── Sidebar Overlay ── -->
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- ── Sidebar ── -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo2"><b>Eco System</b></div>
+
+        <div class="module">
+            <button onclick="togglePages('admin', this)"><b>Admin</b></button>
+            <div class="pages" id="admin">
+                <a href="../admin/admin-dashboard.html">Admin Dashboard</a>
+                <a href="../admin/user-management.html">User Management</a>
+                <a href="../admin/dispute-management.html">Dispute Management</a>
+                <a href="../admin/reports.html">Reports</a>
+                <a href="../admin/seller-analytics.html">Seller Analytics</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('auth', this)"><b>Auth</b></button>
+            <div class="pages" id="auth">
+                <a href="../auth/login.html">Login</a>
+                <a href="../auth/register.html">Register</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('community', this)"><b>Community</b></button>
+            <div class="pages" id="community">
+                <a href="../community/community.html">Community</a>
+                <a href="../community/reviews.html">Reviews Section</a>
+                <a href="../community/comments.html">Comments Section</a>
+                <a href="../community/report-content.html">Report Content Form</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('listings', this)"><b>Listings</b></button>
+            <div class="pages" id="listings">
+                <a href="../listings/marketplace.html">Marketplace</a>
+                <a href="../listings/listing-details.html">Listing Details</a>
+                <a href="../listings/create-listing.html">Create Listing</a>
+                <a href="../listings/edit-listing.html">Edit Listing</a>
+                <a href="../listings/inventory.html">Inventory</a>
+                <a href="../listings/upcycle-log.html">Upcycle Log</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('orders', this)"><b>Orders</b></button>
+            <div class="pages" id="orders">
+                <a href="../orders/cart.html">Cart</a>
+                <a href="../orders/checkout.html">Checkout</a>
+                <a href="../orders/order-details.html">Order Details</a>
+                <a href="../orders/payment-simulation.html">Payment Simulation</a>
+                <a href="../orders/shipping-label.html">Shipping Label</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('swap', this)"><b>Swap</b></button>
+            <div class="pages" id="swap">
+                <a href="../swap/swap-request.html">Swap Request</a>
+                <a href="../swap/swap-offers.html">Swap Offers</a>
+                <a href="../swap/swap-negotiation.html">Swap Negotiation</a>
+                <a href="../swap/swap-lock-confirmation.html">Swap Lock Confirmation</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('user', this)"><b>User</b></button>
+            <div class="pages" id="user">
+                <a href="../user/profile.html">User Profile</a>
+                <a href="eco-impact.html" class="active">EcoImpact Dashboard</a>
+                <a href="../user/trust-score.html">Trust Score</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Header ── -->
+    <header class="header">
+
+        <!-- Left: hamburger + logo -->
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h2>EcoSwap</h2>
+        </div>
+
+        <!-- Center: main nav links -->
+        <nav class="header-nav">
+            <a href="../listings/marketplace.html">Marketplace</a>
+            <a href="../community/community.html">Community</a>
+            <a href="../swap/swap-request.html">Swap</a>
+            <a href="../orders/cart.html">Cart</a>
+        </nav>
+
+        <!-- Right: profile + logout -->
+        <div class="header-right">
+            <a href="../user/profile.html">Profile</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+    </header>
+
+    <!-- ── Main Container ── -->
+    <div class="container">
+        <main class="content">
+
+            <!-- Summary Cards -->
+            <section class="eco-summary">
+
+                <div class="card">
+                    <h3>Eco Points</h3>
+                    <p id="ecoPoints">0</p>
+                </div>
+
+                <div class="card">
+                    <h3>CO₂ Saved</h3>
+                    <p id="co2">0 kg</p>
+                </div>
+
+                <div class="card">
+                    <h3>Items Reused</h3>
+                    <p id="items">0</p>
+                </div>
+
+            </section>
+
+            <!-- Progress Section -->
+            <section class="eco-progress">
+                <h3>Your Impact Progress</h3>
+
+                <div class="progress-item">
+                    <span>Monthly Goal</span>
+                    <div class="bar"><div id="goalBar"></div></div>
+                </div>
+
+                <div class="progress-item">
+                    <span>Waste Reduction</span>
+                    <div class="bar"><div id="wasteBar"></div></div>
+                </div>
+            </section>
+
+            <!-- Achievements -->
+            <section class="eco-achievements">
+                <h3>Achievements</h3>
+                <div id="badges" class="badges"></div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        function loadEcoImpact() {
+
+    async function loadEco() {
+    const data = await request("/eco");
+
+    document.getElementById("ecoPoints").textContent = data.ecoPoints;
+    document.getElementById("co2").textContent = data.co2 + " kg";
+}
+
+loadEco();
+
+    // Numbers
+    document.getElementById("ecoPoints").textContent = data.ecoPoints;
+    document.getElementById("co2").textContent = data.co2 + " kg";
+    document.getElementById("items").textContent = data.items;
+
+    // Progress bars
+    document.getElementById("goalBar").style.width = data.goal + "%";
+    document.getElementById("wasteBar").style.width = data.waste + "%";
+
+    // Badges
+    const badgeContainer = document.getElementById("badges");
+    badgeContainer.innerHTML = "";
+
+    data.badges.forEach(b => {
+        const el = document.createElement("div");
+        el.className = "badge";
+        el.textContent = b;
+        badgeContainer.appendChild(el);
+    });
+}
+
+loadEcoImpact();
+    </script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('visible');
+        }
+
+        function togglePages(id, btn) {
+            const pages = document.getElementById(id);
+            pages.classList.toggle('open');
+            btn.classList.toggle('open');
+        }
+
+        function logout() {
+            window.location.href = '../auth/login.html';
+        }
+    </script>
+
+</body>
+</html>
