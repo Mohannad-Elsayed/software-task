@@ -1,67 +1,53 @@
 <?php
 
-namespace App\Models;
+namespace app\Models;
 
 class Payment
 {
-    public $id;
-    public $order_id;
-    public $amount;
-    public $status;
-    public $createdAt;
-    public $paymentMethod;
-    public function getOrder($db)
-        {
-            $stmt = $db->prepare("SELECT * FROM orders WHERE id = ?");
-            $stmt->execute([$this->order_id]);
-            return $stmt->fetch();
-        }
-        public function __construct($id = null, $amount = null, $status = null, $createdAt = null)
-        {
-        $this->id = $id;
+    private $payment_id;
+    private $order_id;
+    private $amount;
+    private $payment_method;
+    private $status;
+    private $transaction_id;
+    private $created_at;
+
+    public function __construct(
+        $payment_id = null,
+        $order_id = null,
+        $amount = null,
+        $payment_method = null,
+        $status = null,
+        $transaction_id = null,
+        $created_at = null
+    ) {
+        $this->payment_id = $payment_id;
+        $this->order_id = $order_id;
         $this->amount = $amount;
+        $this->payment_method = $payment_method;
         $this->status = $status;
-        $this->createdAt = $createdAt;
+        $this->transaction_id = $transaction_id;
+        $this->created_at = $created_at;
     }
 
-    public function getId()
-    {
-        return $this->id;
-    }
+    public function getPaymentId() { return $this->payment_id; }
+    public function setPaymentId($payment_id) { $this->payment_id = $payment_id; return $this; }
 
-    public function setId($id)
-    {
-       return $this->id = $id;
-    }
+    public function getOrderId() { return $this->order_id; }
+    public function setOrderId($order_id) { $this->order_id = $order_id; return $this; }
 
-    public function getAmount()
-    {
-        return $this->amount;
-    }
+    public function getAmount() { return $this->amount; }
+    public function setAmount($amount) { $this->amount = $amount; return $this; }
 
-    public function setAmount($amount)
-    {
-       return $this->amount = $amount;
-        
-    }
+    public function getPaymentMethod() { return $this->payment_method; }
+    public function setPaymentMethod($payment_method) { $this->payment_method = $payment_method; return $this; }
 
-    public function getStatus()
-    {
-        return $this->status;
-    }
+    public function getStatus() { return $this->status; }
+    public function setStatus($status) { $this->status = $status; return $this; }
 
-    public function setStatus($status)
-    {
-        return $this->status = $status;
-    }
+    public function getTransactionId() { return $this->transaction_id; }
+    public function setTransactionId($transaction_id) { $this->transaction_id = $transaction_id; return $this; }
 
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt($createdAt)
-    {
-        return $this->createdAt = $createdAt;    
-    }
+    public function getCreatedAt() { return $this->created_at; }
+    public function setCreatedAt($created_at) { $this->created_at = $created_at; return $this; }
 }

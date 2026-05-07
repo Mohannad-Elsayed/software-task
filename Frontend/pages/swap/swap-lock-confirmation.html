@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deal Locked | EcoSwap</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .confirmation-wrapper {
+            max-width: 600px;
+            margin: 100px auto;
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: #dcfce7;
+            color: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            margin: 0 auto 25px;
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .deal-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 20px;
+        }
+
+        .next-steps {
+            text-align: left;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="confirmation-wrapper">
+        <div class="success-icon">
+            <i class="ti ti-lock-check"></i>
+        </div>
+        
+        <div class="deal-badge">Order ID: #SWP-77201</div>
+        
+        <h1 style="color: #1e293b; margin-bottom: 10px;">It's a Match!</h1>
+        <p style="color: #64748b; line-height: 1.6;">
+            The swap has been officially locked. We've notified <strong>Mohanad</strong>. 
+            The items are now reserved for this exchange.
+        </p>
+
+        <div class="next-steps">
+            <h4 style="margin-top: 0; margin-bottom: 15px; color: #1e293b;">Next Steps:</h4>
+            <div class="step-item">
+                <div class="step-number">1</div>
+                <div><strong>Print Label:</strong> Download your shipping label from the dashboard.</div>
+            </div>
+            <div class="step-item">
+                <div class="step-number">2</div>
+                <div><strong>Pack Item:</strong> Use eco-friendly packaging if possible! 🌿</div>
+            </div>
+            <div class="step-item">
+                <div class="step-number">3</div>
+                <div><strong>Ship:</strong> Drop it off at the nearest Aramex point within 3 days.</div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <a href="../orders/shipping-label.html" class="btn btn-primary" style="padding: 15px;">
+                <i class="ti ti-printer"></i> Get Label
+            </a>
+            <a href="../listings/marketplace.html" class="btn" style="background: #f1f5f9; color: #1e293b; padding: 15px;">
+                Back to Explore
+            </a>
+        </div>
+    </div>
+
+    <!-- كود الـ Confetti عشان الاحتفال -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script src="../../assets/js/navbar.js"></script>
+<script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/swap.js"></script>
+</body>
+</html>

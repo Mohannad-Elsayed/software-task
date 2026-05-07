@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace app\Http\Controllers;
 
-use App\Services\AdminService;
-use App\Middleware\RoleMiddleware;
+use app\Services\AdminService;
 require_once __DIR__ . '/../../Services/AdminService.php';
 class AdminController
 {

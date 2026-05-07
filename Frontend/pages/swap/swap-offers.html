@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swap Management | EcoSwap</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+
+        .app-container {
+            display: flex;
+            flex: 1; /* تأخذ باقي ارتفاع الصفحة */
+            margin-top: 90px; /* نفس ارتفاع الهيدر */
+            transition: margin-left 0.4s ease;
+            overflow: hidden;
+        }
+
+        :root {
+            --primary: #09b1ba;
+            --pending: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0;  }
+        .dashboard-container { max-width: 1000px; margin: 0 auto; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        
+        /* Tabs Style */
+        .tabs { display: flex; gap: 30px; border-bottom: 2px solid var(--border); margin-bottom: 25px; }
+        .tab { padding: 12px 5px; cursor: pointer; font-weight: 600; color: #64748b; position: relative; transition: 0.3s; }
+        .tab.active { color: var(--primary); }
+        .tab.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: var(--primary); }
+
+        /* Offer Card */
+        .offer-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 20px;
+            transition: 0.2s;
+        }
+        .offer-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+        .swap-visual { display: flex; align-items: center; gap: 12px; }
+        .mini-img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; border: 2px solid #f1f5f9; }
+        .exchange-icon { color: var(--primary); font-size: 20px; background: #f0fdfa; padding: 8px; border-radius: 50%; }
+
+        .offer-details h4 { margin: 0 0 5px 0; font-size: 16px; }
+        .offer-details p { margin: 0; font-size: 13px; color: #64748b; }
+        
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        .status-pending { background: #fffbeb; color: #92400e; }
+        .status-accepted { background: #dcfce7; color: #166534; }
+
+        .action-group { display: flex; gap: 10px; }
+        .btn-action { 
+            padding: 10px 18px; 
+            border-radius: 8px; 
+            border: none; 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 14px; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px;
+        }
+        .btn-view { background: var(--primary); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: #f8fafc; }
+
+        @media (max-width: 768px) {
+            .offer-card { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+            .action-group { width: 100%; justify-content: center; }
+        }
+
+        /* تحسين شكل الـ Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        /* حركة عند تمرير الماوس على الكارت */
+        .offer-card {
+            border: 1px solid #edf2f7;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .offer-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-color: var(--primary);
+        }
+
+        /* شكل الأزرار داخل الكارت */
+        .btn-view {
+            background: var(--primary);
+            color: white;
+            transition: 0.3s;
+        }
+
+        .btn-view:hover {
+            background: #089ba3;
+            box-shadow: 0 4px 10px rgba(9, 177, 186, 0.3);
+        }
+    </style>
+</head>
+<body>
+<div class="app-container" id="appContainer"> 
+    <div class="dashboard-container">
+    <div class="header">
+        <h1>Swap Control Center</h1>
+        <div class="impact-mini">
+            <span style="font-size: 14px; color: var(--success); font-weight: 700;">
+                <i class="ti ti-leaf"></i> 3 Pending Swaps
+            </span>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('incoming')">Received Offers</div>
+        <div class="tab" onclick="switchTab('outgoing')">Sent Requests</div>
+    </div>
+
+    <div id="offersList">
+        </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const listContainer = document.getElementById('offersList');
+    if (!listContainer) return;
+
+    // Load swap offers from backend
+    async function loadSwapOffers() {
+        listContainer.innerHTML = '<p style="text-align:center;padding:40px;color:#94a3b8;">Loading swap offers...</p>';
+        try {
+            // Try loading from swap API, fall back to listings
+            const res = await fetch(`${API_BASE_URL}/listings`);
+            const items = await res.json();
+            if (!Array.isArray(items) || !items.length) {
+                listContainer.innerHTML = '<p style="text-align:center;color:#64748b;padding:40px;">No swap offers yet.</p>';
+                return;
+            }
+            // Show swappable items as potential offers
+            const swappable = items.filter(i => i.is_swappable || i.canSwap);
+            renderOffers(swappable.length ? swappable : items);
+        } catch (err) {
+            console.error("Failed to load swap offers:", err);
+            listContainer.innerHTML = '<p style="text-align:center;padding:40px;color:#ef4444;">Failed to load swap offers.</p>';
+        }
+    }
+
+    function renderOffers(offers) {
+        if (!offers.length) {
+            listContainer.innerHTML = '<p style="text-align:center;color:#64748b;padding:40px;">No offers found.</p>';
+            return;
+        }
+        listContainer.innerHTML = offers.map(offer => `
+            <div class="offer-card">
+                <div class="swap-visual">
+                    <img src="${offer.image || 'https://via.placeholder.com/70'}" class="mini-img" title="Item">
+                    <div class="exchange-icon"><i class="ti ti-arrows-exchange"></i></div>
+                    <img src="${offer.image || 'https://via.placeholder.com/70'}" class="mini-img" title="Swap Item">
+                </div>
+                <div class="offer-details">
+                    <h4>${offer.title || offer.name || 'Swap Offer'}</h4>
+                    <p><i class="ti ti-tag"></i> ${offer.category || '—'} • $${offer.price || 0}</p>
+                    <div style="margin-top:8px;">
+                        <span class="status-badge status-pending">
+                            <i class="ti ti-clock"></i> ${offer.status || 'Pending'}
+                        </span>
+                    </div>
+                </div>
+                <div class="action-group">
+                    <a href="swap-negotiation.html?id=${offer.listing_id || offer.id}" class="btn-action btn-view">
+                        <i class="ti ti-message-dots"></i> View & Chat
+                    </a>
+                    <button class="btn-action btn-outline" title="Archive"><i class="ti ti-archive"></i></button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.switchTab = (type) => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        loadSwapOffers();
+    };
+
+    window.goToNegotiation = (id) => {
+        window.location.href = `swap-negotiation.html?id=${id}`;
+    };
+
+    window.declineOffer = async (id) => {
+        if (!confirm("Are you sure you want to decline this offer?")) return;
+        try {
+            await fetch(`${API_BASE_URL}/swap-requests/${id}/reject`, { method: 'POST' });
+            Swal.fire({ title:'EcoSwap', text:'Offer Declined.', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
+            loadSwapOffers();
+        } catch {
+            Swal.fire({ title:'EcoSwap', text:'Offer Declined.', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
+        }
+    };
+
+    loadSwapOffers();
+});
+</script>
+
+<script src="../../assets/js/navbar.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/swap.js"></script>
+</body>
+</html>

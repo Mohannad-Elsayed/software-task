@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace app\Http\Controllers;
 
-use App\Services\ReportService;
+use app\Services\ReportService;
 
 require_once __DIR__ . '/../../Services/ReportService.php';
 

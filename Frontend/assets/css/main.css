@@ -1,20 +1,22 @@
+
 /* Global Styles */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
+
+ *{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
 }
 
-body {
-    background-color: #f4f9f4;
-    color: #333;
-    line-height: 1.6;
+body{
+    background:#f1f5f9;
+    color:#333;
+    /* line-height: 1.6; */
 }
 
 a {
     text-decoration: none;
-    color: #2e8b57; /* Sea green */
+    color: #2c9459; /* Sea green */
 }
 
 a:hover {
@@ -25,3 +27,74 @@ h1, h2, h3 {
     margin-bottom: 1rem;
     color: #2c3e50;
 }
+
+
+    .logo2 {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 30px;
+    color: #38bdf8;
+    margin-left: 0; /* اجعلها 0 لأنه داخل السايد بار أصلاً */
+}
+
+    .module{
+      margin-bottom:15px;
+    }
+
+    .module button{
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:10px;
+      background:#1e293b;
+      color:white;
+      font-size:16px;
+      text-align:left;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    .module button:hover{
+      background:#334155;
+    }
+
+    .pages{
+      display:none;
+      margin-top:8px;
+      margin-left:10px;
+    }
+
+    .pages a{
+      display:block;
+      text-decoration:none;
+      color:#cbd5e1;
+      padding:10px;
+      border-radius:8px;
+      margin-bottom:5px;
+      transition:0.3s;
+    }
+
+    .pages a:hover{
+      background:#475569;
+      color:white;
+      padding-left:18px;
+    }
+
+    /* CONTENT */
+
+    .content{
+      flex:1;
+      background:#f1f5f9;
+      padding:40px;
+    }
+
+    .content h1{
+      margin-bottom:20px;
+      color:#0f172a;
+    }
+
+ 
+
+ 
+

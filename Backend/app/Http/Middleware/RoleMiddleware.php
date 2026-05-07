@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace app\Http\Middleware;
 
 require_once __DIR__ . '/../../../database/connection.php';
 class RoleMiddleware

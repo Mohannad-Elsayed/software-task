@@ -1,10 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace app\Http\Controllers;
 
-use App\Services\OrderService;
-use App\Http\Middleware\RoleMiddleware;
-
+use app\Services\OrderService;
 
 require_once __DIR__ . '/../../Services/OrderService.php';
 require_once __DIR__ . '/../Middleware/RoleMiddleware.php';
