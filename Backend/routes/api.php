@@ -11,7 +11,7 @@ $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
 // Listings endpoints
-if (preg_match('#^/api/listings/?$#', $requestUri)) {
+if (preg_match('# ^/api/listings/?$#', $requestUri)) {
     $controller = new ListingController();
     if ($method === 'GET') {
         $controller->index();

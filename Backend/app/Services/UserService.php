@@ -1,89 +1,106 @@
 <?php
 
-namespace app\Services;
+require_once __DIR__ . "/../../database/connection.php";
 
-require_once __DIR__ . '/../../database/connection.php';
+class UserService {
 
-class UserService
-{
-    public function register($name, $email, $password, $roleName)
-    {
+    public function emailExists($email) {
+        $conn = db();
+
+        $stmt = $conn->prepare("SELECT user_id FROM User WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        return $result->num_rows > 0;
+    }
+
+    public function createUser($username, $email, $password) {
         $conn = db();
 
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
         $stmt = $conn->prepare("
-            INSERT INTO users (name, email, password, trust_score)
-            VALUES (?, ?, ?, 0)
+            INSERT INTO User (username, email, password)
+            VALUES (?, ?, ?)
         ");
-        $stmt->bind_param("sss", $name, $email, $hashedPassword);
+
+        $stmt->bind_param("sss", $username, $email, $hashedPassword);
 
         if (!$stmt->execute()) {
             return false;
         }
 
-        $userId = $conn->insert_id;
+        $userId = $stmt->insert_id;
 
-        $roleStmt = $conn->prepare("SELECT role_id FROM roles WHERE role_name = ?");
-        $roleStmt->bind_param("s", $roleName);
-        $roleStmt->execute();
-
-        $role = $roleStmt->get_result()->fetch_assoc();
-
-        if (!$role) {
-            return false;
-        }
-
-        $roleId = $role['role_id'];
-
-        $assignStmt = $conn->prepare("
-            INSERT INTO user_roles (user_id, role_id)
-            VALUES (?, ?)
+        $impact = $conn->prepare("
+            INSERT INTO EcoImpact (user_id)
+            VALUES (?)
         ");
-        $assignStmt->bind_param("ii", $userId, $roleId);
-        $assignStmt->execute();
 
-        return $this->findById($userId);
+        $impact->bind_param("i", $userId);
+        $impact->execute();
+
+        return $userId;
     }
 
-    public function login($email, $password)
-    {
-        $conn = db();
-
-        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-
-        $user = $stmt->get_result()->fetch_assoc();
-
-        if (!$user || !password_verify($password, $user['password'])) {
-            return false;
-        }
-
-        return $user;
-    }
-
-    public function findById($userId)
-    {
+    public function findByEmail($email) {
         $conn = db();
 
         $stmt = $conn->prepare("
             SELECT 
-                u.user_id,
-                u.name,
-                u.email,
-                u.trust_score,
-                GROUP_CONCAT(r.role_name) AS roles
-            FROM users u
-            LEFT JOIN user_roles ur ON u.user_id = ur.user_id
-            LEFT JOIN roles r ON ur.role_id = r.role_id
-            WHERE u.user_id = ?
-            GROUP BY u.user_id
+                User.user_id,
+                User.username,
+                User.email,
+                User.password,
+                User.trust_score,
+                EcoImpact.eco_points
+            FROM User
+            LEFT JOIN EcoImpact ON User.user_id = EcoImpact.user_id
+            WHERE User.email = ?
+        ");
+
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 0) {
+            return null;
+        }
+
+        return $result->fetch_assoc();
+    }
+
+    public function findById($userId) {
+        $conn = db();
+
+        $stmt = $conn->prepare("
+            SELECT 
+                User.user_id,
+                User.username,
+                User.email,
+                User.trust_score,
+                User.created_at,
+                EcoImpact.co2_saved,
+                EcoImpact.waste_reduced,
+                EcoImpact.water_saved,
+                EcoImpact.eco_points
+            FROM User
+            LEFT JOIN EcoImpact ON User.user_id = EcoImpact.user_id
+            WHERE User.user_id = ?
         ");
 
         $stmt->bind_param("i", $userId);
         $stmt->execute();
 
-        return $stmt->get_result()->fetch_assoc();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 0) {
+            return null;
+        }
+
+        return $result->fetch_assoc();
     }
 }
