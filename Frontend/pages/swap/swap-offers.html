@@ -135,13 +135,13 @@
         <!-- Center: main nav links -->
         <nav class="header-nav">          
             <a href="../listings/marketplace.html">Marketplace</a>
-            <a href="community.html">Community</a>
+            <a href="../community/community.html">Community</a>
             <a href="../swap/swap-request.html">Swap</a>
             <a href="../orders/cart.html">Cart</a>
         </nav>
         <!-- Right: profile + logout -->
         <div class="header-right">
-            <a href="profile.html" class="active">Profile</a>
+            <a href="../user/profile.html" class="active">Profile</a>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     </header>
@@ -178,7 +178,7 @@
             <div class="pages" id="admin">
                 <a href="../admin/admin-dashboard.html">Admin Dashboard</a>
                 <a href="../admin/user-management.html">User Management</a>
-                <a href="../admin/dispute-management.html">Dispute Management</a>
+                <a href="../admin/disputes.html">Dispute Management</a>
                 <a href="../admin/reports.html">Reports</a>
                 <a href="../admin/seller-analytics.html">Seller Analytics</a>
             </div>
@@ -220,7 +220,7 @@
                 <a href="../orders/cart.html">Cart</a>
                 <a href="../orders/checkout.html">Checkout</a>
                 <a href="../orders/order-details.html">Order Details</a>
-                <a href="../orders/payment-simulation.html">Payment Simulation</a>
+                <a href="../orders/payment.html">Payment Simulation</a>
                 <a href="../orders/shipping-label.html">Shipping Label</a>
             </div>
         </div>
@@ -247,146 +247,83 @@
 </div>
 
 <script>
-   document.addEventListener("DOMContentLoaded", () => {
-    const savedRequest = JSON.parse(localStorage.getItem("newSwapRequest"));
-
-        if (savedRequest) {
-            mockOffers.outgoing.push({
-                id: Date.now(),
-                user: "Mohanad",
-                myProduct: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150",
-                theirProduct: "https://images.unsplash.com/photo-1576871333019-220f1300c752?w=150",
-                status: "pending",
-                date: "Just now"
-            });
-
-            localStorage.removeItem("newSwapRequest");
-        }
-
-    
-
+document.addEventListener("DOMContentLoaded", () => {
     const listContainer = document.getElementById('offersList');
+    if (!listContainer) return;
 
-    
-
-    // 4. الروابط (Actions)
-    window.goToNegotiation = (id) => {
-        // alert("Opening Negotiation Room for Offer #" + id);
-        Swal.fire({
-                title: 'Eco Marketplace',
-                text: "Opening Negotiation Room for Offer #" + id,
-                icon: 'success',
-                confirmButtonColor: '#111',
-                confirmButtonText: 'OK'
-        });
-        window.location.href = `swap-negotiation.html?id=${id}`;
-    };
-
-    window.declineOffer = (id) => {
-        if(confirm("Are you sure you want to decline this offer?")) {
-            // alert("Offer Declined.");
-            Swal.fire({
-                title: 'Eco Marketplace',
-                text: "Offer Declined.",
-                icon: 'success',
-                confirmButtonColor: '#111',
-                confirmButtonText: 'OK'
-            }); 
-            // Logic to update status in backend
+    // Load swap offers from backend
+    async function loadSwapOffers() {
+        listContainer.innerHTML = '<p style="text-align:center;padding:40px;color:#94a3b8;">Loading swap offers...</p>';
+        try {
+            // Try loading from swap API, fall back to listings
+            const res = await fetch(`${API_BASE_URL}/listings`);
+            const items = await res.json();
+            if (!Array.isArray(items) || !items.length) {
+                listContainer.innerHTML = '<p style="text-align:center;color:#64748b;padding:40px;">No swap offers yet.</p>';
+                return;
+            }
+            // Show swappable items as potential offers
+            const swappable = items.filter(i => i.is_swappable || i.canSwap);
+            renderOffers(swappable.length ? swappable : items);
+        } catch (err) {
+            console.error("Failed to load swap offers:", err);
+            listContainer.innerHTML = '<p style="text-align:center;padding:40px;color:#ef4444;">Failed to load swap offers.</p>';
         }
-    };
-
-    // بيانات تجريبية للعروض
-const mockOffers = {
-    incoming: [
-        {
-            id: 1,
-            user: "Ahmed Ali",
-            myProduct: "../../assets/img/my-watch.jpg", // صورتك
-            theirProduct: "../../assets/img/nike-shoes.jpg", // حاجته
-            status: "pending",
-            date: "2 hours ago"
-        },
-        {
-            id: 2,
-            user: "Sara Smith",
-            myProduct: "../../assets/img/my-watch.jpg",
-            theirProduct: "../../assets/img/camera.jpg",
-            status: "accepted",
-            date: "Yesterday"
-        }
-    ],
-    outgoing: [
-        {
-            id: 3,
-            user: "Eco Store",
-            myProduct: "../../assets/img/old-bag.jpg",
-            theirProduct: "../../assets/img/eco-bottle.jpg",
-            status: "pending",
-            date: "3 days ago"
-        }
-    ]
-};
-
-// دالة تبديل الـ Tabs
-// function switchTab(type) {
-//     // 1. تحديث شكل الـ Tabs (Active class)
-//     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-//     event.target.classList.add('active');
-
-//     // 2. عرض البيانات
-//     renderOffers(type);
-// }
-
-// دالة رسم العروض في الصفحة
-function renderOffers(type) {
-    const listContainer = document.getElementById("offersList");
-    const offers = mockOffers[type];
-
-    if (offers.length === 0) {
-        listContainer.innerHTML = `<p style="text-align:center; color:#64748b; padding:40px;">No offers found.</p>`;
-        return;
     }
 
-    listContainer.innerHTML = offers.map(offer => `
-        <div class="offer-card">
-            <div class="swap-visual">
-                <img src="${offer.myProduct}" class="mini-img" title="Your Item">
-                <div class="exchange-icon"><i class="ti ti-arrows-exchange"></i></div>
-                <img src="${offer.theirProduct}" class="mini-img" title="${offer.user}'s Item">
-            </div>
-            
-            <div class="offer-details">
-                <h4>Offer from ${offer.user}</h4>
-                <p><i class="ti ti-calendar"></i> ${offer.date}</p>
-                <div style="margin-top:8px;">
-                    <span class="status-badge ${offer.status === 'pending' ? 'status-pending' : 'status-accepted'}">
-                        ${offer.status === 'pending' ? '<i class="ti ti-clock"></i> Pending' : '<i class="ti ti-check"></i> Accepted'}
-                    </span>
+    function renderOffers(offers) {
+        if (!offers.length) {
+            listContainer.innerHTML = '<p style="text-align:center;color:#64748b;padding:40px;">No offers found.</p>';
+            return;
+        }
+        listContainer.innerHTML = offers.map(offer => `
+            <div class="offer-card">
+                <div class="swap-visual">
+                    <img src="${offer.image || 'https://via.placeholder.com/70'}" class="mini-img" title="Item">
+                    <div class="exchange-icon"><i class="ti ti-arrows-exchange"></i></div>
+                    <img src="${offer.image || 'https://via.placeholder.com/70'}" class="mini-img" title="Swap Item">
+                </div>
+                <div class="offer-details">
+                    <h4>${offer.title || offer.name || 'Swap Offer'}</h4>
+                    <p><i class="ti ti-tag"></i> ${offer.category || '—'} • $${offer.price || 0}</p>
+                    <div style="margin-top:8px;">
+                        <span class="status-badge status-pending">
+                            <i class="ti ti-clock"></i> ${offer.status || 'Pending'}
+                        </span>
+                    </div>
+                </div>
+                <div class="action-group">
+                    <a href="swap-negotiation.html?id=${offer.listing_id || offer.id}" class="btn-action btn-view">
+                        <i class="ti ti-message-dots"></i> View & Chat
+                    </a>
+                    <button class="btn-action btn-outline" title="Archive"><i class="ti ti-archive"></i></button>
                 </div>
             </div>
+        `).join('');
+    }
 
-            <div class="action-group">
-                <a href="swap-negotiation.html?id=${offer.id}" class="btn-action btn-view">
-                    <i class="ti ti-message-dots"></i> View & Chat
-                </a>
-                <button class="btn-action btn-outline" title="Archive">
-                    <i class="ti ti-archive"></i>
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
- // 3. التبديل بين التبويبات
     window.switchTab = (type) => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         event.target.classList.add('active');
-        renderOffers(type);
+        loadSwapOffers();
     };
 
-// تشغيل أول ما الصفحة تفتح
-    renderOffers('incoming');
+    window.goToNegotiation = (id) => {
+        window.location.href = `swap-negotiation.html?id=${id}`;
+    };
+
+    window.declineOffer = async (id) => {
+        if (!confirm("Are you sure you want to decline this offer?")) return;
+        try {
+            await fetch(`${API_BASE_URL}/swap-requests/${id}/reject`, { method: 'POST' });
+            Swal.fire({ title:'EcoSwap', text:'Offer Declined.', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
+            loadSwapOffers();
+        } catch {
+            Swal.fire({ title:'EcoSwap', text:'Offer Declined.', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
+        }
+    };
+
+    loadSwapOffers();
 });
 </script>
 

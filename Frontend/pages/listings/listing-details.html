@@ -131,13 +131,13 @@
         <!-- Center: main nav links -->
         <nav class="header-nav">                   
             <a href="../listings/marketplace.html">Marketplace</a>
-            <a href="community.html">Community</a>
+            <a href="../community/community.html">Community</a>
             <a href="../swap/swap-request.html">Swap</a>
             <a href="../orders/cart.html">Cart</a>
         </nav>
         <!-- Right: profile + logout -->
         <div class="header-right">
-            <a href="profile.html" class="active">Profile</a>
+            <a href="../user/profile.html" class="active">Profile</a>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     </header>
@@ -234,7 +234,7 @@
             <div class="pages" id="admin">
                 <a href="../admin/admin-dashboard.html">Admin Dashboard</a>
                 <a href="../admin/user-management.html">User Management</a>
-                <a href="../admin/dispute-management.html">Dispute Management</a>
+                <a href="../admin/disputes.html">Dispute Management</a>
                 <a href="../admin/reports.html">Reports</a>
                 <a href="../admin/seller-analytics.html">Seller Analytics</a>
             </div>
@@ -276,7 +276,7 @@
                 <a href="../orders/cart.html">Cart</a>
                 <a href="../orders/checkout.html">Checkout</a>
                 <a href="../orders/order-details.html">Order Details</a>
-                <a href="../orders/payment-simulation.html">Payment Simulation</a>
+                <a href="../orders/payment.html">Payment Simulation</a>
                 <a href="../orders/shipping-label.html">Shipping Label</a>
             </div>
         </div>
@@ -303,18 +303,33 @@
 
 <section style="max-width: 1100px; margin: 60px auto; padding: 0 20px;">
     <h3 style="margin-bottom: 20px;">Similar Items You Might Like</h3>
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
-        <!-- Card 1 -->
-        <div style="background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
-            <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400" style="width: 100%; height: 200px; object-fit: cover;">
-            <div style="padding: 12px;">
-                <div style="font-weight: 800;">$40.00</div>
-                <div style="font-size: 13px; color: var(--muted);">Vintage Leather Jacket</div>
-            </div>
-        </div>
-        <!-- كرر الكروت هنا -->
+    <div id="similarItemsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
+        <p style="color:#94a3b8;">Loading similar items...</p>
     </div>
 </section>
+<script>
+// Load similar items from API
+(async function() {
+    const grid = document.getElementById('similarItemsGrid');
+    if (!grid) return;
+    try {
+        const res = await fetch(API_BASE_URL + '/listings');
+        const items = await res.json();
+        if (!Array.isArray(items) || !items.length) { grid.innerHTML = '<p style="color:#94a3b8;">No similar items found.</p>'; return; }
+        grid.innerHTML = items.slice(0, 4).map(item => `
+            <a href="listing-details.html?id=${item.listing_id || item.id}" style="text-decoration:none;color:inherit;">
+                <div style="background:white;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+                    <img src="${item.image || 'https://via.placeholder.com/400x200'}" style="width:100%;height:200px;object-fit:cover;">
+                    <div style="padding:12px;">
+                        <div style="font-weight:800;">$${item.price || 0}</div>
+                        <div style="font-size:13px;color:var(--muted);">${item.title || item.name || ''}</div>
+                    </div>
+                </div>
+            </a>
+        `).join('');
+    } catch { grid.innerHTML = '<p style="color:#94a3b8;">Could not load similar items.</p>'; }
+})();
+</script>
 
 <!-- Swap Proposal Modal -->
 <div id="swapModal" class="modal-overlay">

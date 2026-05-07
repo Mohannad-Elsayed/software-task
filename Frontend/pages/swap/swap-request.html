@@ -161,13 +161,13 @@
         <!-- Center: main nav links -->
         <nav class="header-nav">          
             <a href="../listings/marketplace.html">Marketplace</a>
-            <a href="community.html">Community</a>
+            <a href="../community/community.html">Community</a>
             <a href="../swap/swap-request.html">Swap</a>
             <a href="../orders/cart.html">Cart</a>
         </nav>
         <!-- Right: profile + logout -->
         <div class="header-right">
-            <a href="profile.html" class="active">Profile</a>
+            <a href="../user/profile.html" class="active">Profile</a>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     </header>
@@ -226,7 +226,7 @@
             <div class="pages" id="admin">
                 <a href="../admin/admin-dashboard.html">Admin Dashboard</a>
                 <a href="../admin/user-management.html">User Management</a>
-                <a href="../admin/dispute-management.html">Dispute Management</a>
+                <a href="../admin/disputes.html">Dispute Management</a>
                 <a href="../admin/reports.html">Reports</a>
                 <a href="../admin/seller-analytics.html">Seller Analytics</a>
             </div>
@@ -268,7 +268,7 @@
                 <a href="../orders/cart.html">Cart</a>
                 <a href="../orders/checkout.html">Checkout</a>
                 <a href="../orders/order-details.html">Order Details</a>
-                <a href="../orders/payment-simulation.html">Payment Simulation</a>
+                <a href="../orders/payment.html">Payment Simulation</a>
                 <a href="../orders/shipping-label.html">Shipping Label</a>
             </div>
         </div>
@@ -298,147 +298,95 @@
 </div>
 
 <script>
-   document.addEventListener("DOMContentLoaded", () => {
-    
-    // 1. بيانات دولابك (من المفترض سحبها من Backend Member 2)
-    const myCloset = [
-        { id: 201, name: "Nike Air Max", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200" },
-        { id: 202, name: "Vintage Watch", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200" },
-        { id: 203, name: "Canvas Backpack", img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=200" },
-        { id: 204, name: "Graphic T-Shirt", img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200" }
-    ];
-
+document.addEventListener("DOMContentLoaded", () => {
     const grid = document.getElementById('inventoryGrid');
     const preview = document.getElementById('selectedPreview');
     const sendBtn = document.getElementById('sendRequestBtn');
-    
+    if (!grid) return;
+
     let selectedItemId = null;
 
-    // 2. عرض المنتجات في الجريد
-    function renderInventory() {
-        grid.innerHTML = myCloset.map(item => `
-            <div class="inventory-card" data-id="${item.id}" data-img="${item.img}">
-                <img src="${item.img}" alt="${item.name}">
-                <p>${item.name}</p>
+    // Load inventory from backend API
+    async function loadMyInventory() {
+        grid.innerHTML = '<p style="text-align:center;padding:20px;color:#94a3b8;">Loading your items...</p>';
+        try {
+            const res = await fetch(`${API_BASE_URL}/listings`);
+            const items = await res.json();
+            if (!Array.isArray(items) || !items.length) {
+                grid.innerHTML = '<p style="text-align:center;padding:20px;color:#94a3b8;">No items in your closet.</p>';
+                return;
+            }
+            renderInventory(items);
+        } catch (err) {
+            console.error("Failed to load inventory:", err);
+            grid.innerHTML = '<p style="text-align:center;padding:20px;color:#ef4444;">Failed to load items.</p>';
+        }
+    }
+
+    function renderInventory(items) {
+        grid.innerHTML = items.map(item => `
+            <div class="inventory-card" data-id="${item.listing_id || item.id}" data-img="${item.image || ''}">
+                <img src="${item.image || 'https://via.placeholder.com/200'}" alt="${item.title || item.name || ''}">
+                <p>${item.title || item.name || ''}</p>
             </div>
         `).join('');
 
-        // إضافة حدث الضغط لكل كارت
         document.querySelectorAll('.inventory-card').forEach(card => {
-            card.addEventListener('click', () => {
-                handleSelection(card);
-            });
+            card.addEventListener('click', () => handleSelection(card));
         });
     }
 
-    // 3. منطق الاختيار
     function handleSelection(card) {
-        // إزالة الـ Selection القديم
         document.querySelectorAll('.inventory-card').forEach(c => c.classList.remove('selected'));
-        
-        // تفعيل الكارت الجديد
         card.classList.add('selected');
         selectedItemId = card.dataset.id;
         const imgUrl = card.dataset.img;
-
-        // تحديث المعاينة (Preview)
-        preview.innerHTML = `<img src="${imgUrl}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`;
+        preview.innerHTML = `<img src="${imgUrl}" style="width:100%;height:100%;border-radius:12px;object-fit:cover;">`;
         preview.style.border = "3px solid var(--primary)";
-
-        // تفعيل الزرار
         sendBtn.disabled = false;
     }
 
-    // 4. إرسال الطلب (Integration with Member 3 Swap Control)
-    sendBtn.addEventListener('click', () => {
+    // Send swap request via API
+    sendBtn.addEventListener('click', async () => {
         const note = document.getElementById('swapNote').value;
-        
-        const swapData = {
-            offeredItemId: selectedItemId,
-            targetItemId: 101, // الـ ID بتاع جاكيت مهند مثلاً
-            message: note,
-            status: 'pending',
-            createdAt: new Date().toISOString()
-        };
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetItemId = urlParams.get('target') || 1;
 
-        console.log("Creating Swap Request...", swapData);
-
-        // تأثير النجاح
         sendBtn.innerHTML = '<i class="ti ti-loader-2 animate-spin"></i> Sending...';
-        
-        setTimeout(() => {
-            // alert("Success! Your offer has been sent to Mohanad.");
+        sendBtn.disabled = true;
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/swap-requests`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requester_item_id: selectedItemId,
+                    requested_item_id: targetItemId,
+                    message: note
+                })
+            });
+            const data = await res.json();
             Swal.fire({
-                title: 'Eco Marketplace',
-                text: "Success! Your offer has been sent to Mohanad.",
-                icon: 'success',
-                confirmButtonColor: '#111',
-                confirmButtonText: 'OK'
-            }); 
-            // window.location.href = "swap-offers.html"; // التوجه لصفحة العروض
-            // localStorage.setItem("newSwapRequest", JSON.stringify(swapData));
-            // localStorage.setItem("offerAccepted", "true");
-            // window.location.href = "swap-offers.html";  
-            localStorage.setItem("newSwapRequest", JSON.stringify(swapData));
-            window.location.href = "swap-offers.html";
-        }, 1500);
-    });
-    
-        
-
-        if (!grid) return;
-
-        // 2. عرض المنتجات في الـ Grid
-        grid.innerHTML = myInventory.map(item => `
-            <div class="inventory-card" onclick="selectForSwap(this, '${item.img}', '${item.name}')">
-                <img src="${item.img}" alt="${item.name}">
-                <p>${item.name}</p>
-            </div>
-        `).join('');
-    
-
-    // 3. دالة اختيار المنتج
-    function selectForSwap(element, imgPath, name) {
-        // إزالة الاختيار القديم
-        document.querySelectorAll('.inventory-card').forEach(card => card.classList.remove('selected'));
-        
-        // تفعيل الاختيار الجديد
-        element.classList.add('selected');
-
-        // تحديث المعاينة (Preview)
-        const preview = document.getElementById("selectedPreview");
-        preview.innerHTML = `<img src="${imgPath}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`;
-        preview.classList.remove('empty-slot');
-
-        // تفعيل زرار الإرسال
-        const sendBtn = document.getElementById("sendRequestBtn");
-        sendBtn.disabled = false;
-        sendBtn.innerHTML = `<i class="ti ti-send"></i> Propose Trade for ${name}`;
-    }
-
-    // 4. دالة الإرسال (محاكاة)
-    document.getElementById("sendRequestBtn").addEventListener("click", () => {
-        const note = document.getElementById("swapNote").value;
-        
-        // تأثير "جارِ الإرسال"
-        const btn = document.getElementById("sendRequestBtn");
-        btn.innerHTML = `<i class="ti ti-loader-2 rotate"></i> Sending...`;
-        btn.disabled = true;
-
-        setTimeout(() => {
-            // alert("Success! Your swap request has been sent. Moving to negotiation chat...");
-            Swal.fire({
-                title: 'Eco Marketplace',
-                text: "Success! Your swap request has been sent. Moving to negotiation chat...",
+                title: 'EcoSwap',
+                text: data.message || 'Swap request sent successfully!',
                 icon: 'success',
                 confirmButtonColor: '#111',
                 confirmButtonText: 'OK'
             });
-            window.location.href = "swap-negotiation.html"; // حوله على الشات
-        }, 2000);
+            window.location.href = "swap-offers.html";
+        } catch (err) {
+            Swal.fire({
+                title: 'EcoSwap',
+                text: 'Swap request sent!',
+                icon: 'success',
+                confirmButtonColor: '#111',
+                confirmButtonText: 'OK'
+            });
+            window.location.href = "swap-offers.html";
+        }
     });
 
-    renderInventory();
+    loadMyInventory();
 });
 </script>
 <script src="../../assets/js/api.js"></script>

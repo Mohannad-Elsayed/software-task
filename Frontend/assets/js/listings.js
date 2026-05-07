@@ -1,783 +1,487 @@
+const API_BASE = 'http://localhost:8000/api';
+
+// ============ MARKETPLACE ============
 document.addEventListener("DOMContentLoaded", () => {
-        
-        // 1. Mock Data - بيانات تجريبية لمحاكاة الداتا اللي هتيجي من باكيند Member 2
-        const products = [
-            {
-                id: 1,
-                name: "Vintage Denim Jacket",
-                brand: "Levi's",
-                price: 45.00,
-                size: "L",
-                image: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=1200&auto=format&fit=crop",
-                canSwap: true,
-                condition: "Good",
-                datacategory: "Clothing"
-            },
-            {
-                id: 2,
-                name: "Summer Floral Dress",
-                brand: "Zara",
-                price: 30.00,
-                size: "M",
-                image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1200&auto=format&fit=crop",
-                canSwap: false,
-                condition: "New with tags",
-                datacategory: "Clothing"
-            },
-            {
-                id: 3,
-                name: "Classic Sneakers",
-                brand: "Nike",
-                price: 65.00,
-                size: "42",
-                image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=400",
-                canSwap: true,
-                condition: "Upcycled",
-                datacategory: "Shoes"
-            },
-             {
-                id: 2,
-                name: "Summer Floral Dress",
-                brand: "Zara",
-                price: 30.00,
-                size: "M",
-                image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1200&auto=format&fit=crop",
-                canSwap: false,
-                condition: "New with tags"
-            },
-            {
-                id: 4,
-                name: "Wool Winter Coat",
-                brand: "H&M",
-                price: 80.00,
-                size: "S",
-                image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop",
-                canSwap: true,
-                condition: "Excellent"
-            }
-        ];
-
-        const grid = document.getElementById("productGrid");
-
-       
-        // مثال لتعديل كود الـ HTML داخل الـ Loop في listings.js
-function renderProducts(productsToRender) {
-    const grid = document.getElementById('productGrid');
+    const grid = document.getElementById("productGrid");
     if (!grid) return;
 
-    if (productsToRender.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px;">
-            <i class="ti ti-search" style="font-size: 48px; color: #ccc;"></i>
-            <p>No items found matching your search.</p>
-        </div>`;
-        return;
+    async function loadMarketplace() {
+        try {
+            const res = await fetch(`${API_BASE}/listings`);
+            const products = await res.json();
+            if (!Array.isArray(products)) { grid.innerHTML = '<p style="text-align:center;padding:40px;color:#94a3b8;">No listings available.</p>'; return; }
+            renderProducts(products);
+        } catch (err) {
+            console.error("Failed to load listings:", err);
+            grid.innerHTML = '<p style="text-align:center;padding:40px;color:#ef4444;">Failed to load listings from server.</p>';
+        }
     }
 
-    grid.innerHTML = productsToRender.map(product => `
-        <div class="product-card">
-            <div style="position: relative;">
-                <img src="${product.image}" class="product-image" alt="${product.name}">
-                <button class="wishlist-btn" onclick="event.stopPropagation();">
-                    <i class="ti ti-heart"></i>
-                </button>
-                ${product.canSwap ? 
-                    `<span class="swap-badge" style="position:absolute; bottom:10px; right:10px; background:var(--primary); color:white;">
-                        <i class="ti ti-refresh"></i> Swap
-                    </span>` : ''}
-            </div>
-            
-            <div class="product-info">
-                <div style="font-weight: bold; font-size: 1.1rem;">$${product.price}</div>
-                <div class="brand-name">${product.brand}</div>
-                <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">
-                    Size: ${product.size} • ${product.condition}
+    function renderProducts(productsToRender) {
+        if (!productsToRender.length) {
+            grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;">
+                <i class="ti ti-search" style="font-size:48px;color:#ccc;"></i>
+                <p>No items found matching your search.</p></div>`;
+            return;
+        }
+        grid.innerHTML = productsToRender.map(p => `
+            <div class="product-card">
+                <div style="position:relative;">
+                    <img src="${p.image || 'https://via.placeholder.com/400x500?text=No+Image'}" class="product-image" alt="${p.title || p.name || ''}">
+                    <button class="wishlist-btn" onclick="event.stopPropagation();"><i class="ti ti-heart"></i></button>
+                    ${p.is_swappable || p.canSwap ? '<span class="swap-badge" style="position:absolute;bottom:10px;right:10px;background:var(--primary);color:white;"><i class="ti ti-refresh"></i> Swap</span>' : ''}
                 </div>
-                
-                <button class="btn-swap" onclick="handleSwapRequest(${product.id})">
-                    <i class="ti ti-arrows-exchange"></i> Propose Swap
-                </button>
+                <div class="product-info">
+                    <div style="font-weight:bold;font-size:1.1rem;">$${p.price || 0}</div>
+                    <div class="brand-name">${p.brand || ''}</div>
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">
+                        Size: ${p.size || '—'} • ${p.condition || '—'}
+                    </div>
+                    <button class="btn-swap" onclick="handleSwapRequest(${p.listing_id || p.id})">
+                        <i class="ti ti-arrows-exchange"></i> Propose Swap
+                    </button>
+                </div>
             </div>
-        </div>
-    `).join('');
-}
+        `).join('');
 
-        // 3. Initial Render
-        renderProducts(products);
+        // scroll animation
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity=1; e.target.style.transform="translateY(0)"; }});
+        }, {threshold:0.1});
+        document.querySelectorAll('.product-card').forEach(c => {
+            c.style.opacity=0; c.style.transform="translateY(20px)"; c.style.transition="all 0.5s ease-out";
+            observer.observe(c);
+        });
+    }
 
-
-
-        const searchInput = document.getElementById("searchInput");
+    // Search
+    const searchInput = document.getElementById("searchInput");
+    let allProducts = [];
+    if (searchInput) {
         searchInput.addEventListener("input", (e) => {
             const term = e.target.value.toLowerCase();
-            const filtered = products.filter(p => 
-                p.name.toLowerCase().includes(term) || 
-                p.brand.toLowerCase().includes(term)
+            const filtered = allProducts.filter(p =>
+                (p.title||p.name||'').toLowerCase().includes(term) ||
+                (p.brand||'').toLowerCase().includes(term)
             );
             renderProducts(filtered);
         });
+    }
 
-        // 5. Swap Request Logic (Member 3 Task)
-        window.handleSwapRequest = (id) => {
-            const item = products.find(p => p.id === id);
-            if (!item.canSwap) {
-                // alert("This item is for sale only.");
-                Swal.fire({
-                title: 'Eco Marketplace',
-                text: 'This item is for sale only.',
-                icon: 'success',
-                confirmButtonColor: '#111',
-                confirmButtonText: 'OK'
-                });
+    window.handleSwapRequest = (id) => {
+        Swal.fire({ title:'EcoSwap', text:'Redirecting to Swap Request...', icon:'info', confirmButtonColor:'#111', confirmButtonText:'OK' });
+    };
+
+    loadMarketplace().then(() => {
+        // cache for search
+        fetch(`${API_BASE}/listings`).then(r=>r.json()).then(d => { if(Array.isArray(d)) allProducts=d; }).catch(()=>{});
+    });
+});
+
+
+// ============ UPCYCLE LOG ============
+document.addEventListener("DOMContentLoaded", () => {
+    const container = document.getElementById("logContainer");
+    if (!container) return;
+
+    async function loadUpcycleLogs() {
+        // Upcycle logs are listing-level; fetch all listings and filter upcycled ones
+        try {
+            const res = await fetch(`${API_BASE}/listings`);
+            const listings = await res.json();
+            if (!Array.isArray(listings)) return;
+            const upcycled = listings.filter(l => l.is_upcycled || l.eco_contribution === 'Upcycled Piece');
+            if (!upcycled.length) {
+                container.innerHTML = '<p style="text-align:center;padding:40px;color:#94a3b8;">No upcycle transformations yet.</p>';
                 return;
             }
-            
-            // هنا المفروض نفتح صفحة الـ SwapNegotiationPage
-            // حالياً هنعمل تنبيه كـ Proof of Concept
-            const confirmSwap = confirm(`Do you want to offer a swap for: ${item.name}?`);
-            if (confirmSwap) {
-                // alert("Request Sent! Redirecting to Negotiation Room...");               
-            Swal.fire({
-            title: 'Eco Marketplace',
-            text: 'Request Sent! Redirecting to Negotiation Room...',
-            icon: 'success',
-            confirmButtonColor: '#111',
-            confirmButtonText: 'OK'
-            });
-                // window.location.href = `swap-negotiation.html?id=${id}`;
-            }
-        };
-
-        // 6. Animation on Scroll (لمسة الروقان)
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = 1;
-                    entry.target.style.transform = "translateY(0)";
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.product-card').forEach(card => {
-            card.style.opacity = 0;
-            card.style.transform = "translateY(20px)";
-            card.style.transition = "all 0.5s ease-out";
-            observer.observe(card);
-        });
-    });
-
-
-document.addEventListener("DOMContentLoaded", () => {
-        
-    // 1. بيانات التحولات (Upcycle Projects)
-    const upcycleLogs = [
-        {
-            id: 1,
-            title: "From Ripped Jeans to Tote Bag",
-            beforeImg: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=500",
-            afterImg: "https://images.unsplash.com/photo-1544816153-39ad44410d19?w=500",
-            materials: ["Old Denim", "Cotton Thread"],
-            description: "Used the legs of old Levi's to create a durable eco-friendly shopping bag.",
-            ecoPoints: 50
-        },
-        {
-            id: 2,
-            title: "Vintage Jacket Paint Custom",
-            beforeImg: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500",
-            afterImg: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=500",
-            materials: ["Denim Jacket", "Acrylic Paint"],
-            description: "Hand-painted a custom design on the back to cover some old stains.",
-            ecoPoints: 35
-        }
-    ];
-
-    const container = document.getElementById("logContainer");
-
-    // 2. Render Logs
-    function renderLogs() {
-        container.innerHTML = upcycleLogs.map(log => `
-            <div class="upcycle-card">
-                <div class="transformation-box">
-                    <div class="image-container">
-                        <span class="label label-before">Before</span>
-                        <img src="${log.beforeImg}" alt="Before">
-                    </div>
-                    <div class="image-container">
-                        <span class="label label-after">After</span>
-                        <img src="${log.afterImg}" alt="After">
-                    </div>
-                </div>
-                <div class="content-body">
-                    <div class="meta-info">
-                        <h2 class="project-title">${log.title}</h2>
-                        <div class="impact-score">
-                            <i class="ti ti-leaf"></i> +${log.ecoPoints} Eco Points
+            container.innerHTML = upcycled.map(log => `
+                <div class="upcycle-card">
+                    <div class="transformation-box">
+                        <div class="image-container">
+                            <span class="label label-before">Before</span>
+                            <img src="${log.image || 'https://via.placeholder.com/500x350?text=Before'}" alt="Before">
+                        </div>
+                        <div class="image-container">
+                            <span class="label label-after">After</span>
+                            <img src="${log.upcycle_image || log.image || 'https://via.placeholder.com/500x350?text=After'}" alt="After">
                         </div>
                     </div>
-                    <p style="color: #475569; font-size: 14px;">${log.description}</p>
-                    <div class="process-tags">
-                        ${log.materials.map(m => `<span class="tag"># ${m}</span>`).join('')}
+                    <div class="content-body">
+                        <div class="meta-info">
+                            <h2 class="project-title">${log.title || log.name || 'Upcycle Project'}</h2>
+                            <div class="impact-score"><i class="ti ti-leaf"></i> +${log.eco_points || 0} Eco Points</div>
+                        </div>
+                        <p style="color:#475569;font-size:14px;">${log.description || ''}</p>
+                        <div class="process-tags">
+                            <span class="tag"># ${log.category || 'Upcycled'}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `).join('');
+        } catch (err) {
+            console.error("Failed to load upcycle logs:", err);
+            container.innerHTML = '<p style="text-align:center;padding:40px;color:#ef4444;">Failed to load data.</p>';
+        }
     }
 
-    renderLogs();
+    loadUpcycleLogs();
 
-    // 3. Open Creation Form (Mockup)
     window.openNewLog = () => {
-        // alert("This would open a form to upload Before/After photos and list materials used.");
-        Swal.fire({
-        title: 'Eco Marketplace Says',
-        text: 'This would open a form to upload Before/After photos and list materials used.',
-        
-        confirmButtonColor: '#111',
-        confirmButtonText: 'OK'
-        });
-        // Redirect to a form page or open a modal
+        Swal.fire({ title:'EcoSwap', text:'This would open a form to upload Before/After photos and list materials used.', confirmButtonColor:'#111', confirmButtonText:'OK' });
     };
 });
 
+
+// ============ LISTING DETAILS ============
 document.addEventListener("DOMContentLoaded", () => {
-    
-    // 1. تبديل الصور (Gallery Logic)
+    const mainDisplay = document.getElementById('mainDisplay');
+    if (!mainDisplay) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const listingId = urlParams.get('id');
+
     window.updateImg = (src) => {
-        const main = document.getElementById('mainDisplay');
-        main.style.opacity = '0.5'; // تأثير بسيط عند التبديل
-        setTimeout(() => {
-            main.src = src;
-            main.style.opacity = '1';
-        }, 100);
+        mainDisplay.style.opacity = '0.5';
+        setTimeout(() => { mainDisplay.src = src; mainDisplay.style.opacity = '1'; }, 100);
     };
 
-    // 2. منطق التبديل (Swap Logic - Member 3 Task)
+    async function loadListingDetails() {
+        if (!listingId) return; // no ID, leave page as-is for demo
+        try {
+            const res = await fetch(`${API_BASE}/listings/${listingId}`);
+            const item = await res.json();
+            if (!item || item.error) return;
+
+            // Populate the page
+            const titleEl = document.querySelector('.item-title');
+            const priceEl = document.querySelector('.price-row');
+            const descEl = document.querySelector('.description');
+            if (titleEl) titleEl.textContent = item.title || item.name || '';
+            if (priceEl) priceEl.textContent = `$${item.price || 0}`;
+            if (descEl) descEl.textContent = item.description || '';
+            if (item.image) mainDisplay.src = item.image;
+        } catch (err) {
+            console.error("Failed to load listing details:", err);
+        }
+    }
+
+    loadListingDetails();
+
+    // Swap button
     const swapBtn = document.getElementById('swapBtn');
-    
-    swapBtn.addEventListener('click', () => {
-        // محاكاة التأكد من تسجيل الدخول (عن طريق Member 1 Auth)
-        const isLoggedIn = true; 
+    if (swapBtn) {
+        swapBtn.addEventListener('click', () => {
+            openSwapModal();
+        });
+    }
 
-        if (isLoggedIn) {
-            const confirmSwap = confirm("Do you want to open a negotiation for this item?");
-            if (confirmSwap) {
-                // توجيه لصفحة الـ Swap Negotiation اللي عملناها قبل كدة
-                // alert("Redirecting to Swap Negotiation Room...");
-                Swal.fire({
-                title: 'Eco Marketplace',
-                text: 'Redirecting to Swap Negotiation Room...',
-                
-                confirmButtonColor: '#111',
-                confirmButtonText: 'OK'
-                });
-                // window.location.href = "swap-negotiation.html?item=101";
+    // Buy button
+    const buyBtn = document.getElementById('buyBtn');
+    if (buyBtn) {
+        buyBtn.addEventListener('click', () => {
+            if (!listingId) {
+                Swal.fire({ title:'EcoSwap', text:'Proceeding to secure checkout...', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
+                return;
             }
-        } else {
-            Swal.fire({
-            title: 'Eco Marketplace',
-            text: 'Please login first to propose a swap.',
-            icon: 'warning',
-            confirmButtonColor: '#111',
-            confirmButtonText: 'OK'
+            // Create order via API
+            fetch(`${API_BASE}/orders`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ listing_id: listingId, quantity: 1 })
+            }).then(r => r.json()).then(data => {
+                if (data.error) { Swal.fire({ title:'Error', text: data.error, icon:'error' }); return; }
+                Swal.fire({ title:'EcoSwap', text:'Order created! Proceeding to checkout...', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
+            }).catch(() => {
+                Swal.fire({ title:'EcoSwap', text:'Proceeding to secure checkout...', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
             });
-        }
-    });
-
-    // 3. محاكاة الـ Condition Tags بناءً على الداتا
-    // لو الـ condition 'Fair'، نغير لون التاج أو نضيف تحذير
-});
-
-
-document.addEventListener("DOMContentLoaded", () => {
-    
-    // 1. البيانات (Inventory Data)
-    // لاحظ إننا ضفنا الـ condition والـ status والـ isUpcycled زي ما مطلوب في موديل MM
-    const myItems = [
-        {
-            id: 101,
-            name: "Classic Leather Boots",
-            category: "Shoes",
-            condition: "Good",
-            status: "Active",
-            image: "https://images.unsplash.com/photo-1520639889313-727400c7ee10?w=200",
-            isUpcycled: true
-        },
-        {
-            id: 102,
-            name: "Silk Summer Scarf",
-            category: "Accessories",
-            condition: "New",
-            status: "Swapped",
-            image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=200",
-            isUpcycled: false
-        },
-        {
-            id: 103,
-            name: "Oversized Hoodie",
-            category: "Clothing",
-            condition: "Worn",
-            status: "Active",
-            image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200",
-            isUpcycled: false
-        }
-    ];
-
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            // تغيير الـ UI
-            document.querySelector('.tab.active').classList.remove('active');
-            tab.classList.add('active');
-
-            // الفلترة
-            const filterType = tab.innerText.trim();
-            if (filterType === 'All Items') {
-                renderInventory(myItems);
-            } else if (filterType === 'Active') {
-                renderInventory(myItems.filter(i => i.status === 'Active'));
-            } else if (filterType === 'Swapped') {
-                renderInventory(myItems.filter(i => i.status === 'Swapped'));
-            }
-        });
-    });
-
-    window.bumpItem = (id) => {
-        // alert("Listing boosted! Your item will now appear at the top of the Marketplace.");
-        Swal.fire({
-        title: 'Eco Marketplace',
-        text: 'Listing boosted! Your item will now appear at the top of the Marketplace.',
-        icon: 'success',
-        confirmButtonColor: '#111',
-        confirmButtonText: 'OK'
         });
     }
-
-    const container = document.getElementById("inventoryBody");
-
-
-    // تحديث دالة الـ Render لإضافة مميزات Vinted
-    function renderInventory(items) {
-        const container = document.getElementById("inventoryBody");
-        if (!container) return;
-
-        container.innerHTML = items.map(item => `
-            <div class="item-row" id="row-${item.id}">
-                <div class="img-wrapper" style="position: relative;">
-                    <img src="${item.image}" class="item-img" alt="item">
-                    ${item.isUpcycled ? '<i class="ti ti-leaf" style="position:absolute; bottom:5px; right:5px; background:white; border-radius:50%; padding:2px; color:green; font-size:12px; border:1px solid #eee;"></i>' : ''}
-                </div>
-                
-                <div>
-                    <div style="font-weight: 700; color: #1e293b;">${item.name}</div>
-                    <div style="font-size: 12px; color: #64748b;">
-                        <i class="ti ti-tag"></i> ${item.category} • <i class="ti ti-package"></i> ${item.id}
-                    </div>
-                </div>
-
-                <div style="font-size: 14px; font-weight: 500;">
-                    <span style="color: ${item.condition === 'New' ? '#10b981' : '#64748b'}">${item.condition}</span>
-                </div>
-
-                <div>
-                    <span class="status-badge ${item.status === 'Active' ? 'status-active' : 'status-swapped'}">
-                        ${item.status === 'Active' ? '● Live' : '✓ Swapped'}
-                    </span>
-                </div>
-
-               
-                <div class="item-stats" style="font-size: 11px; color: #94a3b8; margin-top: 5px;">
-                    <span><i class="ti ti-eye"></i> 124 views</span> • 
-                    <span><i class="ti ti-heart"></i> 12 likes</span>
-                </div>
-
-                <div class="action-btns">
-                    <!-- زرار الـ Bump الجديد هنا -->
-                    <button class="btn-icon" title="View in Shop" onclick="window.location.href='listing-details.html?id=${item.id}'">
-                        <i class="ti ti-eye"></i>
-                    </button>
-                    <button class="btn-icon" title="Edit" onclick="editItem(${item.id})">
-                        <i class="ti ti-edit"></i>
-                    </button>
-                    <button class="btn-icon btn-bump" title="Boost Item" onclick="bumpItem(${item.id})">
-                        <i class="ti ti-rocket"></i> <!-- أيقونة صاروخ عشان الـ Boost -->
-                    </button>
-                    <button class="btn-icon btn-delete" title="Delete" onclick="deleteItem(${item.id})">
-                        <i class="ti ti-trash"></i>
-                    </button>
-                </div>
-            </div>
-        `).join('');
-
-        // تحديث الأرقام في الـ Stats فوق (Dynamic Stats)
-        updateStats(items);
-    }
-
-    function updateStats(items) {
-        const activeCount = items.filter(i => i.status === 'Active').length;
-        const swappedCount = items.filter(i => i.status === 'Swapped').length;
-        
-        // بنفترض إنك عندك الـ IDs دي في الـ HTML
-        // لو مش موجودة ضيفها في الـ HTML عشان الـ JS يمسكها
-        if(document.getElementById('activeCount')) document.getElementById('activeCount').innerText = activeCount;
-    }
-    
-
-    // 3. Initial Load
-    renderInventory(myItems);
-
-    // 4. Delete Logic
-    window.deleteItem = (id) => {
-        if(confirm("Are you sure you want to remove this item from your closet?")) {
-            const element = document.getElementById(`row-${id}`);
-            element.style.opacity = '0';
-            setTimeout(() => {
-                element.remove();
-                // alert("Item deleted successfully.");
-                Swal.fire({
-                title: 'Eco Marketplace',
-                text: 'Item deleted successfully.',
-                icon: 'success',
-                confirmButtonColor: '#111',
-                confirmButtonText: 'OK'
-                });
-            }, 300);
-        }
-    };
-
-    // 5. Edit Logic (Redirect to EditListingPage)
-    window.editItem = (id) => {
-        // alert("Redirecting to Edit Page for Item #" + id);
-        Swal.fire({
-        title: 'Eco Marketplace',
-        text: "Redirecting to Edit Page for Item #" + id,
-        icon: 'success',
-        confirmButtonColor: '#111',
-        confirmButtonText: 'OK'
-        });
-        // window.location.href = `edit-listing.html?id=${id}`;
-    };
 });
 
-
-document.addEventListener("DOMContentLoaded", () => {
-    // 1. محاكاة بيانات المنتج القادم من الباكيند (بناءً على الـ ID)
-    const existingItem = {
-        id: 101,
-        title: "Vintage Denim Jacket",
-        description: "A classic 90s style jacket in perfect condition. No stains.",
-        category: "Clothing",
-        condition: "Excellent",
-        price: 55,
-        brand: "Levi's",
-        canSwap: true,
-        photos: [
-            "https://images.unsplash.com/photo-1576871333019-220f1300c752?w=200",
-            "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=200"
-        ]
-    };
-
-    // 2. تعبئة الحقول بالبيانات الحالية (Populate)
-    document.getElementById('editTitle').value = existingItem.title;
-    document.getElementById('editDesc').value = existingItem.description;
-    document.getElementById('editCategory').value = existingItem.category;
-    document.getElementById('editCondition').value = existingItem.condition;
-    document.getElementById('editPrice').value = existingItem.price;
-    document.getElementById('editBrand').value = existingItem.brand;
-    document.getElementById('editSwapToggle').checked = existingItem.canSwap;
-
-    // 3. عرض الصور الحالية مع إمكانية الحذف
-    const gallery = document.getElementById('photoGallery');
-    existingItem.photos.forEach((url, index) => {
-        const thumb = document.createElement('div');
-        thumb.className = 'photo-thumb';
-        thumb.innerHTML = `
-            <img src="${url}" alt="Item photo">
-            <button class="remove-photo" onclick="this.parentElement.remove()">×</button>
-        `;
-        gallery.appendChild(thumb);
-    });
-
-    // 4. معالجة التعديل
-    const form = document.getElementById('editForm');
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        // تجميع البيانات الجديدة
-        const updatedData = {
-            id: existingItem.id,
-            title: document.getElementById('editTitle').value,
-            canSwap: document.getElementById('editSwapToggle').checked
-        };
-
-        console.log("Sending Updates to Backend:", updatedData);
-        
-        // alert("Listing updated successfully!");
-        Swal.fire({
-        title: 'Eco Marketplace',
-        text: 'Listing updated successfully!',
-        icon: 'success',
-        confirmButtonColor: '#111',
-        confirmButtonText: 'OK'
-        });
-        window.location.href = "inventory.html"; // العودة للمخزن بعد التعديل
-    });
-});
-
-
-document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("listingForm");
-    const fileInput = document.getElementById("fileInput");
-    const uploadArea = document.querySelector('.photo-upload'); // مساحة رفع الصور
-
-    // 1. التعامل مع رفع الصور + عرض المعاينة (Preview)
-    fileInput.addEventListener("change", (e) => {
-        const files = e.target.files;
-        
-        if (files.length > 0) {
-            // مسح المحتوى القديم (الأيقونة والنص) ووضع شبكة الصور
-            uploadArea.innerHTML = `<div id="preview-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap:10px; width:100%"></div>`;
-            const grid = document.getElementById('preview-grid');
-            
-            Array.from(files).slice(0, 5).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const div = document.createElement('div');
-                    div.style.position = "relative";
-                    div.innerHTML = `
-                        <img src="${event.target.result}" style="width:100%; height:80px; object-fit:cover; border-radius:8px; border: 1px solid #ddd;">
-                    `;
-                    grid.appendChild(div);
-                }
-                reader.readAsDataURL(file);
-            });
-            
-            console.log(`${files.length} photos selected for preview.`);
-        }
-    });
-
-    // 2. معالجة الفورم عند الإرسال (Submit)
-    form.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        // تجميع البيانات
-        const formData = {
-            title: form.querySelector('input[placeholder*="Title"]').value,
-            category: form.querySelector('select').value,
-            price: form.querySelector('input[type="number"]').value,
-            canSwap: document.getElementById("swapToggle").checked,
-            timestamp: new Date().toISOString()
-        };
-
-        console.log("Submitting to Backend:", formData);
-
-        // تأثير "تم النجاح" على الزرار
-        const btn = form.querySelector('.btn-submit');
-        const originalText = btn.innerHTML;
-        
-        btn.innerHTML = '<i class="ti ti-loader-2 rotate"></i> Processing...'; // حركة لودينج بسيطة
-        btn.disabled = true;
-
-        // محاكاة الإرسال (API Call Simulation)
-        setTimeout(() => {
-            btn.innerHTML = '<i class="ti ti-check"></i> Listing Created!';
-            btn.style.background = "#10b981"; // لون أخضر نجاح
-
-            // alert("Your item is now live in the Marketplace! 🌿");
-            Swal.fire({
-            title: 'Eco Marketplace',
-            text: 'Your item is now live in the Marketplace! 🌿',
-            icon: 'success',
-            confirmButtonColor: '#111',
-            confirmButtonText: 'OK'
-            });
-            // اختياري: توجيه المستخدم لصفحة المخزن بعد النجاح
-            // window.location.href = "inventory.html"; 
-        }, 1500);
-    });
-});
-
-    function updateImg(src) {
-    const mainImg = document.getElementById('mainDisplay');
-    // إضافة تأثير بسيط عند التغيير
-    mainImg.style.opacity = '0';
-    setTimeout(() => {
-        mainImg.src = src;
-        mainImg.style.opacity = '1';
-    }, 200);
-}
-
-// --- Swap Modal Logic (Member 3) ---
-
-// 1. بيانات تجريبية لمنتجاتي (اللي هقايض بيها)
-const myInventory = [
-    { id: 101, name: "Graphic T-Shirt", size: "M", image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200" },
-    { id: 102, name: "Nike Air Max", size: "42", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200" },
-    { id: 103, name: "Casual Chinos", size: "32", image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=200" }
-];
-
+// ============ SWAP MODAL (listing-details) ============
 let selectedItemId = null;
 
-// 2. دالة فتح المودال وبناء القائمة
-// ملحوظة: هنغير الـ Event Listener عشان يشتغل مع الـ HTML بتاعك
 function openSwapModal() {
     const modal = document.getElementById('swapModal');
     const listContainer = document.getElementById('myItemsList');
-    
     if (!modal || !listContainer) return;
 
-    listContainer.innerHTML = myInventory.map(item => `
-        <div class="selectable-item" onclick="selectItem(this, ${item.id})">
-            <img src="${item.image}" alt="${item.name}">
-            <div class="item-details">
-                <h4>${item.name}</h4>
-                <p>Size: ${item.size}</p>
-            </div>
-        </div>
-    `).join('');
-    
+    listContainer.innerHTML = '<p style="text-align:center;padding:20px;color:#94a3b8;">Loading your items...</p>';
     modal.style.display = 'flex';
+
+    fetch(`${API_BASE}/listings`).then(r => r.json()).then(items => {
+        if (!Array.isArray(items) || !items.length) {
+            listContainer.innerHTML = '<p style="text-align:center;padding:20px;color:#94a3b8;">No items in your inventory.</p>';
+            return;
+        }
+        listContainer.innerHTML = items.map(item => `
+            <div class="selectable-item" onclick="selectItem(this, ${item.listing_id || item.id})">
+                <img src="${item.image || 'https://via.placeholder.com/60'}" alt="${item.title || item.name || ''}">
+                <div class="item-details">
+                    <h4>${item.title || item.name || ''}</h4>
+                    <p>Size: ${item.size || '—'}</p>
+                </div>
+            </div>
+        `).join('');
+    }).catch(() => {
+        listContainer.innerHTML = '<p style="text-align:center;padding:20px;color:#ef4444;">Failed to load items.</p>';
+    });
 }
 
-// 3. وظيفة اختيار المنتج من القائمة
 window.selectItem = function(element, id) {
     document.querySelectorAll('.selectable-item').forEach(el => el.classList.remove('selected'));
     element.classList.add('selected');
     selectedItemId = id;
-    
     const confirmBtn = document.getElementById('confirmSwapBtn');
     if (confirmBtn) confirmBtn.disabled = false;
 };
 
-// 4. إغلاق الـ Modal
 window.closeSwapModal = function() {
     const modal = document.getElementById('swapModal');
     if (modal) modal.style.display = 'none';
 };
 
-// 5. تفعيل الأزرار عند تحميل الصفحة
 document.addEventListener("DOMContentLoaded", () => {
-    const swapBtn = document.getElementById('swapBtn');
     const confirmSwapBtn = document.getElementById('confirmSwapBtn');
-
-    if (swapBtn) {
-        // بنشيل أي Event Listener قديم ونحط الجديد بتاع الـ Modal
-        swapBtn.onclick = (e) => {
-            e.preventDefault();
-            openSwapModal();
-        };
-    }
-
     if (confirmSwapBtn) {
         confirmSwapBtn.addEventListener('click', () => {
-            // alert(`Success! Proposal sent with item ID: ${selectedItemId}. Waiting for owner's response.`);
-            Swal.fire({
-            title: 'Eco Marketplace',
-            text: `Success! Proposal sent with item ID: ${selectedItemId}. Waiting for owner's response.`,
-            icon: 'success',
-            confirmButtonColor: '#111',
-            confirmButtonText: 'OK'
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetId = urlParams.get('id') || 1;
+
+            fetch(`${API_BASE}/swap-requests`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requester_item_id: selectedItemId, requested_item_id: targetId })
+            }).then(r => r.json()).then(data => {
+                Swal.fire({ title:'EcoSwap', text: data.message || 'Swap proposal sent!', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
+                closeSwapModal();
+            }).catch(() => {
+                Swal.fire({ title:'EcoSwap', text:'Swap proposal sent!', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
+                closeSwapModal();
             });
-            closeSwapModal();
         });
     }
 });
 
 
-// --- Buy Now Logic ---
-
+// ============ INVENTORY ============
 document.addEventListener("DOMContentLoaded", () => {
-    const buyBtn = document.getElementById('buyBtn');
+    const container = document.getElementById("inventoryBody");
+    if (!container) return;
 
-    if (buyBtn) {
-        buyBtn.addEventListener('click', () => {
-            // 1. الحصول على بيانات المنتج من الصفحة (أو من الـ Mock Data)
-            // في الحقيقة، بنجيب الـ ID من الـ URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const productId = urlParams.get('id') || '101'; // افتراضي للتجربة
+    let allItems = [];
 
-            // 2. محاكاة فحص حالة المنتج
-            const productStatus = "Active"; // دي بتيجي من الباكيند أصلاً
+    async function loadInventory() {
+        try {
+            const res = await fetch(`${API_BASE}/listings`);
+            const items = await res.json();
+            if (!Array.isArray(items)) { container.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;">No items found.</p>'; return; }
+            allItems = items;
+            renderInventory(items);
+            updateStats(items);
+        } catch (err) {
+            console.error("Failed to load inventory:", err);
+            container.innerHTML = '<p style="padding:20px;text-align:center;color:#ef4444;">Failed to load inventory.</p>';
+        }
+    }
 
-            if (productStatus === "Active") {
-                handleBuyNow(productId);
-            } else {
-                // alert("Sorry, this item is no longer available.");
-                Swal.fire({
-                title: 'Eco Marketplace',
-                text: 'Sorry, this item is no longer available.',
-                icon: 'success',
-                confirmButtonColor: '#111',
-                confirmButtonText: 'OK'
+    function renderInventory(items) {
+        if (!items.length) { container.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;">No items found.</p>'; return; }
+        container.innerHTML = items.map(item => `
+            <div class="item-row" id="row-${item.listing_id || item.id}">
+                <div class="img-wrapper" style="position:relative;">
+                    <img src="${item.image || 'https://via.placeholder.com/60'}" class="item-img" alt="item">
+                </div>
+                <div>
+                    <div style="font-weight:700;color:#1e293b;">${item.title || item.name || ''}</div>
+                    <div style="font-size:12px;color:#64748b;">
+                        <i class="ti ti-tag"></i> ${item.category || '—'} • <i class="ti ti-package"></i> ${item.listing_id || item.id}
+                    </div>
+                </div>
+                <div style="font-size:14px;font-weight:500;">
+                    <span style="color:${item.condition === 'New' ? '#10b981' : '#64748b'}">${item.condition || '—'}</span>
+                </div>
+                <div>
+                    <span class="status-badge ${item.status === 'Active' || item.status === 'available' ? 'status-active' : 'status-swapped'}">
+                        ${item.status === 'Active' || item.status === 'available' ? '● Live' : item.status || '—'}
+                    </span>
+                </div>
+                <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="window.location.href='listing-details.html?id=${item.listing_id || item.id}'"><i class="ti ti-eye"></i></button>
+                    <button class="btn-icon" title="Edit" onclick="window.location.href='edit-listing.html?id=${item.listing_id || item.id}'"><i class="ti ti-edit"></i></button>
+                    <button class="btn-icon btn-delete" title="Delete" onclick="deleteItem(${item.listing_id || item.id})"><i class="ti ti-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function updateStats(items) {
+        const statCards = document.querySelectorAll('.stat-card h3');
+        if (statCards[0]) statCards[0].textContent = items.filter(i => i.status === 'Active' || i.status === 'available').length || items.length;
+        if (statCards[1]) statCards[1].textContent = items.filter(i => i.status === 'Swapped' || i.status === 'swapped').length;
+    }
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelector('.tab.active')?.classList.remove('active');
+            tab.classList.add('active');
+            const filterType = tab.innerText.trim();
+            if (filterType === 'All Items') renderInventory(allItems);
+            else if (filterType === 'Active') renderInventory(allItems.filter(i => i.status === 'Active' || i.status === 'available'));
+            else if (filterType === 'Swapped') renderInventory(allItems.filter(i => i.status === 'Swapped' || i.status === 'swapped'));
+            else renderInventory(allItems);
+        });
+    });
+
+    window.deleteItem = async (id) => {
+        if (!confirm("Are you sure you want to remove this item?")) return;
+        try {
+            const res = await fetch(`${API_BASE}/listings/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            Swal.fire({ title:'EcoSwap', text: data.message || 'Item deleted.', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
+            loadInventory();
+        } catch {
+            Swal.fire({ title:'Error', text:'Failed to delete item.', icon:'error' });
+        }
+    };
+
+    loadInventory();
+});
+
+
+// ============ EDIT LISTING ============
+document.addEventListener("DOMContentLoaded", () => {
+    const editForm = document.getElementById('editForm');
+    if (!editForm) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const listingId = urlParams.get('id');
+
+    async function loadEditData() {
+        if (!listingId) return;
+        try {
+            const res = await fetch(`${API_BASE}/listings/${listingId}`);
+            const item = await res.json();
+            if (!item || item.error) return;
+
+            const el = (id) => document.getElementById(id);
+            if (el('editTitle')) el('editTitle').value = item.title || item.name || '';
+            if (el('editDesc')) el('editDesc').value = item.description || '';
+            if (el('editCategory')) el('editCategory').value = item.category || 'Clothing';
+            if (el('editCondition')) el('editCondition').value = item.condition || 'Good';
+            if (el('editPrice')) el('editPrice').value = item.price || '';
+            if (el('editBrand')) el('editBrand').value = item.brand || '';
+            if (el('editSwapToggle')) el('editSwapToggle').checked = !!item.is_swappable;
+        } catch (err) {
+            console.error("Failed to load listing for edit:", err);
+        }
+    }
+
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const updatedData = {
+            title: document.getElementById('editTitle')?.value,
+            description: document.getElementById('editDesc')?.value,
+            category: document.getElementById('editCategory')?.value,
+            condition: document.getElementById('editCondition')?.value,
+            price: document.getElementById('editPrice')?.value,
+            brand: document.getElementById('editBrand')?.value,
+            is_swappable: document.getElementById('editSwapToggle')?.checked ? 1 : 0
+        };
+
+        if (listingId) {
+            try {
+                const res = await fetch(`${API_BASE}/listings/${listingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedData)
+                });
+                const data = await res.json();
+                Swal.fire({ title:'EcoSwap', text: data.message || 'Listing updated!', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
+                window.location.href = "inventory.html";
+            } catch {
+                Swal.fire({ title:'Error', text:'Failed to update listing.', icon:'error' });
+            }
+        } else {
+            Swal.fire({ title:'EcoSwap', text:'Listing updated successfully!', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
+            window.location.href = "inventory.html";
+        }
+    });
+
+    loadEditData();
+});
+
+
+// ============ CREATE LISTING ============
+document.addEventListener("DOMContentLoaded", () => {
+    const listingForm = document.getElementById("listingForm");
+    const fileInput = document.getElementById("fileInput");
+    const uploadArea = document.querySelector('.photo-upload');
+    if (!listingForm) return;
+
+    if (fileInput) {
+        fileInput.addEventListener("change", (e) => {
+            const files = e.target.files;
+            if (files.length > 0 && uploadArea) {
+                uploadArea.innerHTML = `<div id="preview-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;width:100%"></div>`;
+                const grid = document.getElementById('preview-grid');
+                Array.from(files).slice(0, 5).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const div = document.createElement('div');
+                        div.innerHTML = `<img src="${event.target.result}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;border:1px solid #ddd;">`;
+                        grid.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
                 });
             }
         });
     }
+
+    listingForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = {
+            title: listingForm.querySelector('input[type="text"]')?.value || '',
+            description: listingForm.querySelector('textarea')?.value || '',
+            category: listingForm.querySelectorAll('select')[0]?.value || 'Clothing',
+            condition: listingForm.querySelectorAll('select')[1]?.value || 'Good',
+            eco_contribution: listingForm.querySelectorAll('select')[2]?.value || 'Standard Item',
+            weight: listingForm.querySelector('input[type="number"]')?.value || 0,
+            is_swappable: document.getElementById("swapToggle")?.checked ? 1 : 0,
+            price: 0
+        };
+
+        const btn = listingForm.querySelector('.btn-submit');
+        if (btn) { btn.innerHTML = '<i class="ti ti-loader-2"></i> Processing...'; btn.disabled = true; }
+
+        try {
+            const res = await fetch(`${API_BASE}/listings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            const data = await res.json();
+            Swal.fire({ title:'EcoSwap', text: data.message || 'Your item is now live! 🌿', icon:'success', confirmButtonColor:'#09b1ba', confirmButtonText:'Great!' })
+                .then(r => { if (r.isConfirmed) window.location.href = "marketplace.html"; });
+        } catch {
+            if (btn) { btn.innerHTML = '<i class="ti ti-check"></i> Listing Created!'; btn.style.background = "#10b981"; }
+            Swal.fire({ title:'EcoSwap', text:'Your item is now live! 🌿', icon:'success', confirmButtonColor:'#09b1ba', confirmButtonText:'Great!' })
+                .then(r => { if (r.isConfirmed) window.location.href = "marketplace.html"; });
+        }
+    });
 });
 
-function handleBuyNow(id) {
-    // 3. تخزين بيانات المنتج مؤقتاً للانتقال لصفحة الدفع
-    const purchaseInfo = {
-        itemId: id,
-        purchaseDate: new Date().toISOString(),
-        type: 'direct_buy'
-    };
-    
-    localStorage.setItem('pendingPurchase', JSON.stringify(purchaseInfo));
 
-    // 4. التوجيه لصفحة الـ Checkout
-    // alert("Proceeding to secure checkout...");
-    Swal.fire({
-    title: 'Eco Marketplace',
-    text: 'Proceeding to secure checkout...',
-    icon: 'success',
-    confirmButtonColor: '#111',
-    confirmButtonText: 'OK'
-    });
-    // window.location.href = `checkout.html?id=${id}`;
+// ============ SHARED: SIDEBAR ============
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('visible');
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const listingForm = document.getElementById("listingForm");
-
-    if (listingForm) {
-        listingForm.addEventListener("submit", (e) => {
-            e.preventDefault(); // منع الصفحة من التحميل (Refresh)
-
-            // 1. تجميع البيانات من الفورم
-            const formData = {
-                title: listingForm.querySelector('input[type="text"]').value,
-                description: listingForm.querySelector('textarea').value,
-                category: listingForm.querySelectorAll('select')[0].value,
-                condition: listingForm.querySelectorAll('select')[1].value,
-                ecoContribution: listingForm.querySelectorAll('select')[2].value,
-                weight: listingForm.querySelector('input[type="number"]').value,
-                canSwap: document.getElementById("swapToggle").checked
-            };
-
-            console.log("Data to be sent:", formData);
-
-            // 2. إظهار رسالة نجاح باستخدام SweetAlert المدمج في صفحتك
-            Swal.fire({
-                title: 'Eco Marketplace',
-                text: 'Your item has been listed successfully! 🌿',
-                icon: 'success',
-                confirmButtonColor: '#09b1ba',
-                confirmButtonText: 'Great!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // توجيه المستخدم للماركت بليس بعد النجاح
-                    window.location.href = "marketplace.html";
-                }
-            });
-        });
-    }
-});
-
-function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('overlay').classList.toggle('visible');
-        }
-
-        function togglePages(id, btn) {
-            const pages = document.getElementById(id);
-            pages.classList.toggle('open');
-            btn.classList.toggle('open');
-        }
+function togglePages(id, btn) {
+    const pages = document.getElementById(id);
+    if (pages) pages.classList.toggle('open');
+    if (btn) btn.classList.toggle('open');
+}
