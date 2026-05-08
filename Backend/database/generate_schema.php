@@ -104,6 +104,7 @@ CREATE TABLE Review (
     listing_id INT NOT NULL,
     rating INT CHECK (rating >= 1 AND rating <= 5),
     comment TEXT,
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE,
     FOREIGN KEY (listing_id) REFERENCES Listing(listing_id) ON DELETE CASCADE
 );
 
@@ -218,7 +219,7 @@ CREATE TABLE Notification (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE
 );
---added role and ban status to User table
+-- added role and ban status to User table
 ALTER TABLE User
 ADD COLUMN is_banned BOOLEAN DEFAULT FALSE;
 
