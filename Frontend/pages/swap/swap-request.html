@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propose Swap | EcoSwap</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <style>
+        .app-container {
+            display: flex;
+            flex: 1; /* تأخذ باقي ارتفاع الصفحة */
+            margin-top: 40px; /* نفس ارتفاع الهيدر */
+            transition: margin-left 0.4s ease;
+            overflow: hidden;
+        }
+
+        :root {
+            --primary: #09b1ba;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 40px auto; background: var(--white); padding: 30px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+
+        .swap-header { text-align: center; margin-bottom: 30px; }
+        
+        /* Swap Visualizer */
+        .comparison-view {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            background: #f1f5f9;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .item-slot { text-align: center; flex: 1; }
+        .item-slot img { width: 150px; height: 150px; border-radius: 12px; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .empty-slot { width: 150px; height: 150px; border-radius: 12px; border: 3px dashed #cbd5e1; display: flex; align-items: center; justify-content: center; background: #f8fafc; margin: 0 auto; }
+        
+        .swap-arrow-icon { width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+
+        /* Inventory Selection */
+        .inventory-section h3 { font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 15px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .inventory-card {
+            background: white;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .inventory-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .inventory-card.selected { border-color: var(--primary); background: #f0fdfa; }
+        .inventory-card img { width: 100%; height: 110px; border-radius: 8px; object-fit: cover; }
+        .inventory-card p { font-size: 12px; font-weight: 600; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Message Area */
+        .offer-message { margin-top: 25px; }
+        textarea { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 12px; font-family: inherit; resize: none; outline: none; }
+
+        .btn-send {
+            width: 100%;
+            padding: 18px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-send:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        /* تأثير عند اختيار منتج */
+        .inventory-card.selected {
+            border-color: var(--primary);
+            background: #f0fdfa;
+            box-shadow: 0 0 0 4px rgba(9, 177, 186, 0.1);
+        }
+
+        /* تحسين السكرول بار في شبكة المنتجات */
+        .inventory-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .inventory-grid::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        /* أنيميشن خفيف لظهور الصورة المعاينة */
+        #selectedPreview img {
+            animation: zoomIn 0.3s ease;
+        }
+
+        .custom-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #111;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none; /* مخفي في البداية */
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* زرار الإرسال بتأثير Hover */
+        .btn-send:not(:disabled):hover {
+            background: #0796a0;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(9, 177, 186, 0.3);
+        }
+    </style>
+</head>
+<body>
+<div class="app-container" id="appContainer"> 
+    <div class="container">
+    <div class="swap-header">
+        <h1>Propose a Swap</h1>
+        <p style="color: #64748b;">Choose an item from your closet to offer in exchange.</p>
+    </div>
+
+    <div class="comparison-view">
+        <div class="item-slot">
+            <img src="https://images.unsplash.com/photo-1576871333019-220f1300c752?w=300" alt="Their Item">
+            <p style="font-size: 12px; margin-top: 10px; font-weight: 700;">Mohanad's Jacket</p>
+        </div>
+        
+        <div class="swap-arrow-icon">
+            <i class="ti ti-arrows-left-right"></i>
+        </div>
+
+        <div class="item-slot">
+            <div id="selectedPreview" class="empty-slot">
+                <i class="ti ti-plus" style="font-size: 30px; color: #94a3b8;"></i>
+            </div>
+            <p style="font-size: 12px; margin-top: 10px; font-weight: 700;">Your Offer</p>
+        </div>
+    </div>
+
+    <div class="inventory-section">
+        <h3>My Inventory</h3>
+        <div class="inventory-grid" id="inventoryGrid">
+            </div>
+    </div>
+
+    <div class="offer-message">
+        <label style="font-weight: 600; font-size: 14px; display: block; margin-bottom: 8px;">Add a note (Optional)</label>
+        <textarea rows="3" id="swapNote" placeholder="Hi! I think my sneakers would be a fair trade for your jacket..."></textarea>
+    </div>
+
+    <button class="btn-send" id="sendRequestBtn" disabled>
+        Send Swap Request
+    </button>
+    </div>
+</div>
+    </div>
+
+  <div id="ecoToast" class="custom-toast">
+    <strong>Eco Marketplace:</strong> <span id="toastMessage"></span>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const grid = document.getElementById('inventoryGrid');
+    const preview = document.getElementById('selectedPreview');
+    const sendBtn = document.getElementById('sendRequestBtn');
+    if (!grid) return;
+
+    let selectedItemId = null;
+
+    // Load inventory from backend API
+    async function loadMyInventory() {
+        grid.innerHTML = '<p style="text-align:center;padding:20px;color:#94a3b8;">Loading your items...</p>';
+        try {
+            const res = await fetch(`${API_BASE_URL}/listings`);
+            const items = await res.json();
+            if (!Array.isArray(items) || !items.length) {
+                grid.innerHTML = '<p style="text-align:center;padding:20px;color:#94a3b8;">No items in your closet.</p>';
+                return;
+            }
+            renderInventory(items);
+        } catch (err) {
+            console.error("Failed to load inventory:", err);
+            grid.innerHTML = '<p style="text-align:center;padding:20px;color:#ef4444;">Failed to load items.</p>';
+        }
+    }
+
+    function renderInventory(items) {
+        grid.innerHTML = items.map(item => `
+            <div class="inventory-card" data-id="${item.listing_id || item.id}" data-img="${item.image || ''}">
+                <img src="${item.image || 'https://via.placeholder.com/200'}" alt="${item.title || item.name || ''}">
+                <p>${item.title || item.name || ''}</p>
+            </div>
+        `).join('');
+
+        document.querySelectorAll('.inventory-card').forEach(card => {
+            card.addEventListener('click', () => handleSelection(card));
+        });
+    }
+
+    function handleSelection(card) {
+        document.querySelectorAll('.inventory-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedItemId = card.dataset.id;
+        const imgUrl = card.dataset.img;
+        preview.innerHTML = `<img src="${imgUrl}" style="width:100%;height:100%;border-radius:12px;object-fit:cover;">`;
+        preview.style.border = "3px solid var(--primary)";
+        sendBtn.disabled = false;
+    }
+
+    // Send swap request via API
+    sendBtn.addEventListener('click', async () => {
+        const note = document.getElementById('swapNote').value;
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetItemId = urlParams.get('target') || 1;
+
+        sendBtn.innerHTML = '<i class="ti ti-loader-2 animate-spin"></i> Sending...';
+        sendBtn.disabled = true;
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/swap-requests`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requester_item_id: selectedItemId,
+                    requested_item_id: targetItemId,
+                    message: note
+                })
+            });
+            const data = await res.json();
+            Swal.fire({
+                title: 'EcoSwap',
+                text: data.message || 'Swap request sent successfully!',
+                icon: 'success',
+                confirmButtonColor: '#111',
+                confirmButtonText: 'OK'
+            });
+            window.location.href = "swap-offers.html";
+        } catch (err) {
+            Swal.fire({
+                title: 'EcoSwap',
+                text: 'Swap request sent!',
+                icon: 'success',
+                confirmButtonColor: '#111',
+                confirmButtonText: 'OK'
+            });
+            window.location.href = "swap-offers.html";
+        }
+    });
+
+    loadMyInventory();
+});
+</script>
+<script src="../../assets/js/navbar.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/swap.js"></script>
+</body>
+</html>

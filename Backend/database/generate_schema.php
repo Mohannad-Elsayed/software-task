@@ -115,17 +115,23 @@ CREATE TABLE Comment (
     FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE,
     FOREIGN KEY (listing_id) REFERENCES Listing(listing_id) ON DELETE CASCADE
 );
-
+-- edited
 CREATE TABLE Report (
     report_id INT AUTO_INCREMENT PRIMARY KEY,
     initiator_id INT NOT NULL,
     listing_id INT NULL,
     comment_id INT NULL,
     reason TEXT NOT NULL,
-    status VARCHAR(50) DEFAULT 'pending',
+    status ENUM('pending', 'reviewed', 'rejected', 'resolved') DEFAULT 'pending',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP NULL,
+    handled_by INT NULL,
+
     FOREIGN KEY (initiator_id) REFERENCES User(user_id),
     FOREIGN KEY (listing_id) REFERENCES Listing(listing_id),
-    FOREIGN KEY (comment_id) REFERENCES Comment(comment_id)
+    FOREIGN KEY (comment_id) REFERENCES Comment(comment_id),
+    FOREIGN KEY (handled_by) REFERENCES User(user_id)
 );
 
 -- Transactions: Orders & Swaps
@@ -156,6 +162,8 @@ CREATE TABLE Payment (
     order_id INT NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
     status VARCHAR(50) DEFAULT 'unpaid',
+    payment_method VARCHAR(50),
+    Created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE
 );
 
@@ -181,16 +189,23 @@ CREATE TABLE Offer (
 );
 
 -- Support & Operations
+-- edited
 CREATE TABLE Dispute (
     dispute_id INT AUTO_INCREMENT PRIMARY KEY,
     initiator_id INT NOT NULL,
     order_id INT NULL,
     request_id INT NULL,
     reason TEXT NOT NULL,
-    status VARCHAR(50) DEFAULT 'open',
+    status ENUM('open', 'under_review', 'resolved') DEFAULT 'open',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP NULL,
+    resolved_by INT NULL,
+
     FOREIGN KEY (initiator_id) REFERENCES User(user_id),
     FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE SET NULL,
-    FOREIGN KEY (request_id) REFERENCES SwapRequest(request_id) ON DELETE SET NULL
+    FOREIGN KEY (request_id) REFERENCES SwapRequest(request_id) ON DELETE SET NULL,
+    FOREIGN KEY (resolved_by) REFERENCES User(user_id)
 );
 
 CREATE TABLE Notification (
@@ -202,6 +217,9 @@ CREATE TABLE Notification (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE
 );
+--added role and ban status to User table
+ALTER TABLE User
+ADD COLUMN is_banned BOOLEAN DEFAULT FALSE;
 
 SQL;
 
