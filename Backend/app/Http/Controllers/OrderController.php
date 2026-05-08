@@ -5,7 +5,7 @@ namespace app\Http\Controllers;
 use app\Services\OrderService;
 
 require_once __DIR__ . '/../../Services/OrderService.php';
-
+require_once __DIR__ . '/../Middleware/RoleMiddleware.php';
 class OrderController
 {
     private $orderService;
@@ -50,9 +50,20 @@ class OrderController
         header('Content-Type: application/json');
 
         $data = json_decode(file_get_contents('php://input'), true);
-
+       
+        
         $buyerId = $data['buyer_id'] ?? null;
         $items = $data['items'] ?? [];
+        
+        $check = RoleMiddleware::checkNotBanned($buyerId);
+
+            if (!$check['allowed']) {
+                http_response_code(403);
+                echo json_encode($check);
+                return;
+            }
+        
+
         $shippingStreet = $data['shipping_street'] ?? null;
         $shippingCity = $data['shipping_city'] ?? null;
 

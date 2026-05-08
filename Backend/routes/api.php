@@ -287,6 +287,16 @@ if (preg_match('#^/api/admin/report/?$#', $requestUri)) {
     exit;
 }
 
+//resolve dipute
+    if (preg_match('#^/api/admin/dispute/resolve/?$#', $requestUri)) {
+    $controller = new AdminController();
+
+    if ($method === 'POST') {
+        $controller->resolveDispute();
+    }
+
+    exit;
+}
 
 // =========================
 // REPORTS endpoints
@@ -311,6 +321,26 @@ if (preg_match('#^/api/reports/?$#', $requestUri)) {
         http_response_code(405);
         echo json_encode(["error" => "Method Not Allowed"]);
     }
+    exit;
+}
+//seller analytics
+if (preg_match('#^/api/admin/seller-analytics/?$#', $requestUri)) {
+    $controller = new AdminController();
+
+    if ($method === 'GET') {
+        $controller->sellerAnalytics();
+    }
+
+    exit;
+}
+//SUSTAINABILITY REPORT
+if (preg_match('#^/api/admin/sustainability/?$#', $requestUri)) {
+    $controller = new AdminController();
+
+    if ($method === 'GET') {
+        $controller->sustainabilityReport();
+    }
+
     exit;
 }
 
