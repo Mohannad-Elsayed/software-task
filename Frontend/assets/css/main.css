@@ -1,3 +1,27 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Colors */
+:root {
+    --primary: #2ecc71;
+    --secondary: #27ae60;
+    --bg: #f4f6f8;
+    --white: #fff;
+    --text: #333;
+    --gray: #777;
+}
+
+/* Body */
+body {
+    background: var(--bg);
+    color: var(--text);
+     line-height: 1.6;
+}
 
 /* Global Styles */
 
@@ -93,8 +117,4 @@ h1, h2, h3 {
       margin-bottom:20px;
       color:#0f172a;
     }
-
- 
-
- 
 

@@ -3,6 +3,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community</title>
+
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/Layout.css">
+   <style>
+    /* Active sidebar link */
+.sidebar .active {
+    color: var(--primary);
+}
+
+/* Create Post */
+.create-post {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.create-post textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    font-size: 14px;
+}
+
+.create-post button {
+    margin-top: 10px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Feed */
+.feed {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Post Card */
+.post {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+/* Header */
+.post-header {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ddd;
+    margin-right: 10px;
+}
+
+/* Content */
+.post-content {
+    padding: 0 12px 10px;
+    font-size: 15px;
+}
+
+/* Actions */
+.post-actions {
+    display: flex;
+    gap: 15px;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-top: 1px solid #eee;
+}
+
+.post-actions span {
+    cursor: pointer;
+}
+
+/* Comments */
+.comments {
+    padding: 0 12px 10px;
+}
+
+.comment {
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* Comment Input */
+.comment-input {
+    display: flex;
+    border-top: 1px solid #eee;
+}
+
+.comment-input input {
+    flex: 1;
+    border: none;
+    padding: 10px;
+}
+
+.comment-input button {
+    border: none;
+    background: none;
+    color: var(--primary);
+    padding: 10px;
+    cursor: pointer;
+}
+/* Menu container */
+.menu-container {
+    margin-left: auto;
+    position: relative;
+}
+
+/* 3 dots button */
+.menu-btn {
+    cursor: pointer;
+    font-size: 20px;
+    padding: 5px;
+}
+
+/* Dropdown menu */
+.menu {
+    position: absolute;
+    right: 0;
+    top: 25px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Show menu */
+.menu.show {
+    display: block;
+}
+
+/* Button */
+.menu button {
+    background: none;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+}
+
+.menu button:hover {
+    background: #f5f5f5;
+}
+   </style>
+</head>
+
+<body>
+
+    <!-- ── Sidebar Overlay ── -->
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- ── Sidebar ── -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo2"><b>Eco System</b></div>
+
+        <div class="module">
+            <button onclick="togglePages('admin', this)"><b>Admin</b></button>
+            <div class="pages" id="admin">
+                <a href="../admin/admin-dashboard.html">Admin Dashboard</a>
+                <a href="../admin/user-management.html">User Management</a>
+                <a href="../admin/dispute-management.html">Dispute Management</a>
+                <a href="../admin/reports.html">Reports</a>
+                <a href="../admin/seller-analytics.html">Seller Analytics</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('auth', this)"><b>Auth</b></button>
+            <div class="pages" id="auth">
+                <a href="../auth/login.html">Login</a>
+                <a href="../auth/register.html">Register</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('community', this)"><b>Community</b></button>
+            <div class="pages" id="community-pages">
+                <a href="community.html" class="active">Community</a>
+                <a href="reviews.html">Reviews Section</a>
+                <a href="comments.html">Comments Section</a>
+                <a href="report-content.html">Report Content Form</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('listings', this)"><b>Listings</b></button>
+            <div class="pages" id="listings">
+                <a href="../listings/marketplace.html">Marketplace</a>
+                <a href="../listings/listing-details.html">Listing Details</a>
+                <a href="../listings/create-listing.html">Create Listing</a>
+                <a href="../listings/edit-listing.html">Edit Listing</a>
+                <a href="../listings/inventory.html">Inventory</a>
+                <a href="../listings/upcycle-log.html">Upcycle Log</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('orders', this)"><b>Orders</b></button>
+            <div class="pages" id="orders">
+                <a href="../orders/cart.html">Cart</a>
+                <a href="../orders/checkout.html">Checkout</a>
+                <a href="../orders/order-details.html">Order Details</a>
+                <a href="../orders/payment-simulation.html">Payment Simulation</a>
+                <a href="../orders/shipping-label.html">Shipping Label</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('swap', this)"><b>Swap</b></button>
+            <div class="pages" id="swap">
+                <a href="../swap/swap-request.html">Swap Request</a>
+                <a href="../swap/swap-offers.html">Swap Offers</a>
+                <a href="../swap/swap-negotiation.html">Swap Negotiation</a>
+                <a href="../swap/swap-lock-confirmation.html">Swap Lock Confirmation</a>
+            </div>
+        </div>
+
+        <div class="module">
+            <button onclick="togglePages('user', this)"><b>User</b></button>
+            <div class="pages" id="user">
+                <a href="../user/profile.html">User Profile</a>
+                <a href="../user/eco-impact.html">EcoImpact Dashboard</a>
+                <a href="../user/trust-score.html">Trust Score</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Header ── -->
+    <header class="header">
+
+        <!-- Left: hamburger + logo -->
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h2>EcoSwap</h2>
+        </div>
+
+        <!-- Center: main nav links -->
+        <nav class="header-nav">
+            <a href="../listings/marketplace.html">Marketplace</a>
+            <a href="community.html" class="active">Community</a>
+            <a href="../swap/swap-request.html">Swap</a>
+            <a href="../orders/cart.html">Cart</a>
+        </nav>
+
+        <!-- Right: profile + logout -->
+        <div class="header-right">
+            <a href="../user/profile.html">Profile</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+    </header>
+
+    <!-- ── Main Container ── -->
+    <div class="container">
+        <main class="content">
+
+            <!-- Create Post -->
+            <section class="create-post">
+                <textarea id="postInput" placeholder="Share your eco activity..."></textarea>
+                <button onclick="createPost()">Post</button>
+            </section>
+
+            <!-- Feed -->
+            <section id="feed" class="feed"></section>
+
+        </main>
+    </div>
+
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/community.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('visible');
+        }
+
+        function togglePages(id, btn) {
+            const pages = document.getElementById(id);
+            pages.classList.toggle('open');
+            btn.classList.toggle('open');
+        }
+    </script>
+
+</body>
+</html>
     <title>Community | EcoSwap</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <link rel="stylesheet" href="/assets/css/main.css">
