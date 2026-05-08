@@ -98,7 +98,7 @@ class AuthController {
                 "email" => $user["email"],
                 "trust_score" => $user["trust_score"],
                 "eco_points" => $user["eco_points"] ?? 0,
-                "account_type" => "normal_user"
+                "role" => $user["role_name"] ?? "user"
             ]
         ]);
     }
