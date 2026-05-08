@@ -5,7 +5,13 @@ use app\Http\Controllers\OrderController;
 use app\Http\Controllers\AdminController;
 use app\Http\Controllers\ReportController;
 use app\Http\Controllers\SwapController;
+use app\Http\Controllers\UserController;
+use app\Http\Controllers\CommunityController;
+use app\Http\Controllers\AuthController;
 
+require_once __DIR__ . '/../app/Http/Controllers/AuthController.php';
+require_once __DIR__ . '/../app/Http/Controllers/UserController.php';
+require_once __DIR__ . '/../app/Http/Controllers/CommunityController.php';
 require_once __DIR__ . '/../app/Http/Controllers/ListingController.php';
 require_once __DIR__ . '/../app/Http/Controllers/OrderController.php';
 require_once __DIR__ . '/../app/Http/Controllers/AdminController.php';
@@ -430,6 +436,136 @@ if (preg_match('#^/api/swap-requests/(\d+)/expire$#', $requestUri, $matches)) {
     } else {
         http_response_code(405);
         echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+// =========================
+// SUSTAINABILITY endpoints
+// =========================
+
+if (preg_match('#^/api/sustainability/calculate-impact/?$#', $requestUri)) {
+    $controller = new UserController();
+
+    if ($method === 'POST') {
+        $controller->calculateImpact();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/sustainability/trust-score/?$#', $requestUri)) {
+    $controller = new UserController();
+
+    if ($method === 'POST') {
+        $controller->calculateTrustScore();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+
+// =========================
+// COMMUNITY endpoints
+// =========================
+
+if (preg_match('#^/api/community/reviews/?$#', $requestUri)) {
+    $controller = new CommunityController();
+
+    if ($method === 'POST') {
+        $controller->addReview();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/community/comments/?$#', $requestUri)) {
+    $controller = new CommunityController();
+
+    if ($method === 'POST') {
+        $controller->addComment();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/community/comments/(\d+)/?$#', $requestUri, $matches)) {
+    $controller = new CommunityController();
+    $commentId = $matches[1];
+
+    if ($method === 'PUT') {
+        $controller->editComment($commentId);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/community/notifications/?$#', $requestUri)) {
+    $controller = new CommunityController();
+
+    if ($method === 'POST') {
+        $controller->notifyUser();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+// =========================
+// AUTH endpoints
+// =========================
+
+if (preg_match('#^/api/auth/register/?$#', $requestUri)) {
+    $controller = new AuthController();
+
+    if ($method === 'POST') {
+        $controller->register();
+    } else {
+        http_response_code(405);
+        echo json_encode([
+            "success" => false,
+            "message" => "Method Not Allowed"
+        ]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/auth/login/?$#', $requestUri)) {
+    $controller = new AuthController();
+
+    if ($method === 'POST') {
+        $controller->login();
+    } else {
+        http_response_code(405);
+        echo json_encode([
+            "success" => false,
+            "message" => "Method Not Allowed"
+        ]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/auth/logout/?$#', $requestUri)) {
+    $controller = new AuthController();
+
+    if ($method === 'POST') {
+        $controller->logout();
+    } else {
+        http_response_code(405);
+        echo json_encode([
+            "success" => false,
+            "message" => "Method Not Allowed"
+        ]);
     }
     exit;
 }
