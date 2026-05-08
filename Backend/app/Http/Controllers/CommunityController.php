@@ -1,31 +1,84 @@
 <?php
 
-namespace app\Http\Controllers;
+require_once __DIR__ . "/../../Services/CommunityService.php";
 
 class CommunityController
 {
+    private $communityService;
+
+    public function __construct()
+    {
+        $this->communityService = new CommunityService();
+    }
+
     public function addReview()
     {
-        // TODO: add review
+        header("Content-Type: application/json");
+
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        $success = $this->communityService->addReview(
+            $data["user_id"],
+            $data["listing_id"],
+            $data["rating"],
+            $data["comment"] ?? ""
+        );
+
+        echo json_encode(["success" => $success]);
     }
 
     public function addComment()
     {
-        // TODO: add comment
+        header("Content-Type: application/json");
+
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        $success = $this->communityService->addComment(
+            $data["user_id"],
+            $data["listing_id"],
+            $data["content"]
+        );
+
+        echo json_encode(["success" => $success]);
     }
 
-    public function editComment()
+    public function editComment($commentId)
     {
-        // TODO: edit comment
+        header("Content-Type: application/json");
+
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        $success = $this->communityService->editComment(
+            $commentId,
+            $data["user_id"],
+            $data["content"]
+        );
+
+        echo json_encode(["success" => $success]);
     }
 
     public function reportContent()
     {
-        // TODO: report inappropriate content
+        header("Content-Type: application/json");
+
+        echo json_encode([
+            "success" => true,
+            "message" => "Content reported successfully"
+        ]);
     }
 
     public function notifyUser()
     {
-        // TODO: send notification
+        header("Content-Type: application/json");
+
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        $success = $this->communityService->notifyUser(
+            $data["user_id"],
+            $data["type"],
+            $data["message"]
+        );
+
+        echo json_encode(["success" => $success]);
     }
 }

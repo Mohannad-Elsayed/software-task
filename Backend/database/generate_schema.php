@@ -54,7 +54,7 @@ CREATE TABLE UserRole (
 
 CREATE TABLE EcoImpact (
     impact_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id INT NOT NULL UNIQUE,
     co2_saved DECIMAL(10, 2) DEFAULT 0.00,
     waste_reduced DECIMAL(10, 2) DEFAULT 0.00,
     water_saved DECIMAL(10, 2) DEFAULT 0.00,
@@ -100,6 +100,7 @@ CREATE TABLE UpcycleTransformation (
 
 CREATE TABLE Review (
     review_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
     listing_id INT NOT NULL,
     rating INT CHECK (rating >= 1 AND rating <= 5),
     comment TEXT,
