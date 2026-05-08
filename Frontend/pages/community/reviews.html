@@ -209,19 +209,19 @@
             feed.innerHTML = reviews.map(function(r) {
                 return '<div class="review-card">' +
                     '<div class="top">' +
-                        '<span class="name">' + (r.user && r.user.name ? r.user.name : 'User') + '</span>' +
+                        '<span class="name">' + (r.username || 'User') + '</span>' +
                         '<span class="date">' + (r.date || '') + '</span>' +
                     '</div>' +
                     '<div class="stars-display">' + '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating) + '</div>' +
-                    '<p>' + r.content + '</p>' +
+                    '<p>' + (r.comment || '') + '</p>' +
                 '</div>';
             }).join('');
         }
 
         async function loadReviews() {
             try {
-                var reviews = await req('/api/reviews');
-                render(reviews);
+                var response = await req('/api/community/reviews');
+                render(response.reviews);
             } catch(e) {
                 render([
                     { user: { name: 'Layla M.' }, rating: 5, content: 'Amazing community!', date: '2025-04-28' },
@@ -234,7 +234,14 @@
         async function submitReview() {
             var text = document.getElementById('reviewText').value.trim();
             if (!rating || !text) { alert('Please pick stars and write something.'); return; }
-            try { await req('/api/reviews', 'POST', { rating: rating, content: text }); } catch(e) {}
+            try { 
+                await req('/api/community/reviews', 'POST', {
+                    user_id: 1,
+                    listing_id: 1,
+                    rating: rating,
+                    comment: text
+                });
+            } catch(e) {}
             document.getElementById('reviewText').value = '';
             rating = 0;
             document.querySelectorAll('#stars span').forEach(function(s) {
@@ -267,22 +274,3 @@
 
         loadReviews();
     </script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reviews | EcoSwap</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-    <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="stylesheet" href="/assets/css/layout.css">
-    <link rel="stylesheet" href="/assets/css/components.css">
-</head>
-<body>
-    <main class="app-container" style="padding-top: 100px; text-align: center;">
-        <h1>Reviews</h1>
-        <p>This page is currently under development.</p>
-        <a href="/pages/listings/marketplace.html" class="btn" style="display: inline-block; margin-top: 20px; background: var(--primary-green); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none;">Back to Marketplace</a>
-    </main>
-
-    <script src="/assets/js/navbar.js"></script>
-    <script src="/assets/js/api.js"></script>
-</body>
-</html>

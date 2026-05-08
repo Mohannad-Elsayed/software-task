@@ -1,15 +1,29 @@
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'http://localhost:8000/software-task/Backend/routes/api.php';
 
-async function testBackendConnection() {
+async function request(endpoint, method = 'GET', body = null) {
     try {
-        const response = await fetch(`${API_BASE_URL}/listings`);
-        const data = await response.json();
-        console.log('Backend says:', data.message);
-        // You can display this on the page if you like
+        const response = await fetch(API_BASE_URL + endpoint, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: body ? JSON.stringify(body) : null
+        });
+
+        return await response.json();
+
     } catch (error) {
-        console.error('Failed to connect to backend:', error);
+        console.error('Failed API request:', error);
+        return {
+            success: false,
+            message: 'Failed to connect to backend'
+        };
     }
 }
 
-// Automatically test connection when api.js loads
+async function testBackendConnection() {
+    const data = await request('/api/health');
+    console.log('Backend says:', data.message);
+}
+
 testBackendConnection();
