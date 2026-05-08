@@ -141,35 +141,7 @@ body{
         </div>
 
     </div>
-<script>
-        // Wait until page loads
-document.addEventListener("DOMContentLoaded", function () {
-
-    const form = document.querySelector("form");
-    const email = document.querySelector('input[type="email"]');
-    const password = document.querySelector('input[type="password"]');
-
-    form.addEventListener("submit", function (e) {
-        e.preventDefault(); // stop page refresh
-
-        // Check if fields are empty
-        if (email.value === "" || password.value === "") {
-            alert("Please fill all fields.");
-            return;
-        }
-
-        // Fake login success
-        if (email.value === "admin@gmail.com" && password.value === "1234") {
-            alert("Login Successful!");
-            window.location.href = "UserPage.html";
-        } else {
-            alert("Invalid Email or Password");
-        }
-    });
-
-});
-</script>
-
+ <script src="../../assets/js/auth.js"></script>
     <!-- <script src="/assets/js/navbar.js"></script> -->
     <script src="/assets/js/api.js"></script>
 </body>
