@@ -55,9 +55,13 @@ class UserService {
                 User.email,
                 User.password,
                 User.trust_score,
-                EcoImpact.eco_points
+                EcoImpact.eco_points,
+                UserRole.role_name
             FROM User
-            LEFT JOIN EcoImpact ON User.user_id = EcoImpact.user_id
+            LEFT JOIN EcoImpact 
+                ON User.user_id = EcoImpact.user_id
+            LEFT JOIN UserRole 
+                ON User.user_id = UserRole.user_id
             WHERE User.email = ?
         ");
 

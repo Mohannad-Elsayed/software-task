@@ -9,21 +9,6 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
     exit;
 }
 
-echo json_encode([
-    "success" => true,
-    "message" => "You are hitting the correct api.php"
-]);
-exit;
-
-use app\Http\Controllers\ListingController;
-use app\Http\Controllers\OrderController;
-use app\Http\Controllers\AdminController;
-use app\Http\Controllers\ReportController;
-use app\Http\Controllers\SwapController;
-use app\Http\Controllers\UserController;
-use app\Http\Controllers\CommunityController;
-use app\Http\Controllers\AuthController;
-
 require_once __DIR__ . '/../app/Http/Controllers/AuthController.php';
 require_once __DIR__ . '/../app/Http/Controllers/UserController.php';
 require_once __DIR__ . '/../app/Http/Controllers/CommunityController.php';
@@ -33,17 +18,7 @@ require_once __DIR__ . '/../app/Http/Controllers/AdminController.php';
 require_once __DIR__ . '/../app/Http/Controllers/ReportController.php';
 require_once __DIR__ . '/../app/Http/Controllers/SwapController.php';
 
-$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-$basePath = dirname($_SERVER['SCRIPT_NAME']);
-// Remove basePath from request URI only when necessary (supports web root deploy)
-if ($basePath && $basePath !== '/' && strpos($requestUri, $basePath) === 0) {
-    $requestUri = substr($requestUri, strlen($basePath));
-}
-
-// Remove /index.php if present
-$requestUri = str_replace('/index.php', '', $requestUri);
-
+$requestUri = $_GET["route"] ?? '/';
 $method = $_SERVER['REQUEST_METHOD'];
 
 
@@ -592,3 +567,11 @@ if (preg_match('#^/api/health/?$#', $requestUri)) {
     ]);
     exit;
 }
+
+http_response_code(404);
+echo json_encode([
+    "success" => false,
+    "message" => "Route Not Found",
+    "request_uri" => $requestUri
+]);
+exit;
