@@ -100,4 +100,42 @@ class CommunityService {
 
         return $stmt->execute();
     }
+    public function getReviews($listingId = null)
+    {
+        if ($listingId) {
+            $stmt = $this->conn->prepare("
+                SELECT 
+                    Review.review_id,
+                    Review.user_id,
+                    User.username,
+                    Review.listing_id,
+                    Review.rating,
+                    Review.comment
+                FROM Review
+                JOIN User ON Review.user_id = User.user_id
+                WHERE Review.listing_id = ?
+                ORDER BY Review.review_id DESC
+            ");
+
+            $stmt->bind_param("i", $listingId);
+        } else {
+            $stmt = $this->conn->prepare("
+                SELECT 
+                    Review.review_id,
+                    Review.user_id,
+                    User.username,
+                    Review.listing_id,
+                    Review.rating,
+                    Review.comment
+                FROM Review
+                JOIN User ON Review.user_id = User.user_id
+                ORDER BY Review.review_id DESC
+            ");
+        }
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
 }
