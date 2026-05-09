@@ -1,109 +1,504 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upcycle Log | EcoSwap</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-    <link rel="stylesheet" href="../../assets/css/main.css">
-    <link rel="stylesheet" href="../../assets/css/layout.css">
-    <link rel="stylesheet" href="../../assets/css/components.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upcycle Transformations | EcoSwap</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+    />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link rel="stylesheet" href="../../assets/css/layout.css" />
+    <link rel="stylesheet" href="../../assets/css/components.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root {
-            --primary: #09b1ba;
-            --accent: #f59e0b;
-            --bg: #f8fafc;
-            --white: #ffffff;
-            --border: #e2e8f0;
+      :root {
+        --primary: #09b1ba;
+        --bg: #f8fafc;
+        --white: #ffffff;
+        --border: #e2e8f0;
+        --text: #1e293b;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        margin: 0;
+        padding: 20px;
+      }
+
+      .main-container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header-section {
+        margin-bottom: 40px;
+        text-align: center;
+      }
+
+      .header-section h1 {
+        font-size: 28px;
+        color: #1e293b;
+        margin-bottom: 10px;
+      }
+
+      .header-section p {
+        color: #64748b;
+        font-size: 16px;
+      }
+
+      .content-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+      }
+
+      .log-section {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .form-container {
+        background: var(--white);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      }
+
+      .form-container h2 {
+        font-size: 20px;
+        margin-top: 0;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 14px;
+        outline: none;
+        transition: 0.2s;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(9, 177, 186, 0.1);
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .btn-submit {
+        width: 100%;
+        padding: 15px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .btn-submit:hover {
+        opacity: 0.9;
+      }
+
+      .btn-cancel {
+        width: 100%;
+        padding: 12px;
+        background: none;
+        border: 1px solid var(--border);
+        color: #64748b;
+        border-radius: 10px;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+
+      .upcycle-card {
+        background: var(--white);
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+
+      .transformation-box {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px;
+        background: var(--border);
+        height: 300px;
+      }
+
+      .image-container {
+        position: relative;
+        background: white;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .label {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .label-before {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .label-after {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .content-body {
+        padding: 25px;
+      }
+
+      .project-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 12px 0;
+      }
+
+      .description-text {
+        color: #475569;
+        font-size: 14px;
+        margin-bottom: 12px;
+      }
+
+      .process-tags {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+      }
+
+      .tag {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #94a3b8;
+      }
+
+      @media (max-width: 1024px) {
+        .content-wrapper {
+          grid-template-columns: 1fr;
         }
+      }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-
-        .container { max-width: 900px; margin: 0 auto; }
-
-        .header-section { margin-bottom: 40px; text-align: center; }
-        .header-section h1 { color: #1e293b; margin-bottom: 10px; }
-        .header-section p { color: #64748b; }
-
-        .upcycle-card {
-            background: var(--white);
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      @media (max-width: 768px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
         }
 
         .transformation-box {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2px;
-            background: var(--border);
-            height: 350px;
+          height: 200px;
         }
-
-        .image-container { position: relative; background: white; overflow: hidden; }
-        .image-container img { width: 100%; height: 100%; object-fit: cover; }
-        .label {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            padding: 5px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .label-before { background: #fee2e2; color: #991b1b; }
-        .label-after { background: #dcfce7; color: #166534; }
-
-        .content-body { padding: 25px; }
-        .meta-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .project-title { font-size: 20px; font-weight: 700; color: #1e293b; margin: 0; }
-
-        .process-tags { display: flex; gap: 8px; margin: 15px 0; }
-        .tag { background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 12px; }
-
-        .btn-create {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: var(--primary);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 30px;
-            border: none;
-            box-shadow: 0 10px 15px -3px rgba(9, 177, 186, 0.4);
-            cursor: pointer;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 15px;
-        }
-        .btn-create:hover { opacity: 0.9; }
+      }
     </style>
 </head>
 <body>
-<div id="upcycleLogContainer">
-    <div class="container">
+    <div class="main-container">
         <div class="header-section">
-            <h1>Creative Transformations</h1>
+            <h1><i class="ti ti-sparkles"></i> Creative Transformations</h1>
             <p>See how old items are getting a second life in our community.</p>
         </div>
 
-        <div id="logContainer"></div>
+        <div class="content-wrapper">
+            <div class="log-section">
+                <div class="form-container">
+                    <h2><i class="ti ti-plus"></i> Log New Transformation</h2>
+                    <form id="transformationForm">
+                        <div class="form-group">
+                            <label for="listingId">Select Listing *</label>
+                            <select id="listingId" name="listing_id" required>
+                                <option value="">Loading your listings...</option>
+                            </select>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="beforeImageUrl">Before Image URL *</label>
+                                <input type="url" id="beforeImageUrl" name="before_image_url" placeholder="https://example.com/image.jpg" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="afterImageUrl">After Image URL *</label>
+                                <input type="url" id="afterImageUrl" name="after_image_url" placeholder="https://example.com/image.jpg" required />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="materialsUsed">Materials Used</label>
+                            <select id="materialsUsed" name="materials_used" multiple>
+                                <option value="">Loading materials...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="steps">Transformation Steps</label>
+                            <textarea id="steps" name="steps" rows="4" placeholder="Describe the steps you took to transform this item..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit">Log Transformation</button>
+                        <button type="button" class="btn-cancel" onclick="resetForm()">
+                            Clear
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="log-section" id="gallerySectionWrapper">
+                <div id="galleryContainer"></div>
+            </div>
+        </div>
     </div>
 
-    <button class="btn-create" onclick="openNewLog()">
-        <i class="ti ti-plus"></i> Log New Transformation
-    </button>
-</div>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/navbar.js"></script>
+    <script src="../../assets/js/listings.js"></script>
+    <script>
+        // const API_BASE = 'http://localhost:8000/Backend/index.php?route=/api';
 
-<script src="../../assets/js/api.js"></script>
-<script src="../../assets/js/auth.js"></script>
-<script src="../../assets/js/navbar.js"></script>
-<script src="../../assets/js/listings.js"></script>
+        // ============ UPCYCLE LOG PAGE ============
+        document.addEventListener("DOMContentLoaded", async () => {
+            const listingSelect = document.getElementById("listingId");
+            const materialsSelect = document.getElementById("materialsUsed");
+            const transformationForm = document.getElementById("transformationForm");
+            const galleryContainer = document.getElementById("galleryContainer");
+
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+            // Load user's listings
+            async function loadUserListings() {
+                try {
+                    const res = await fetch(`${API_BASE}/listings`);
+                    let listings = await res.json();
+                    if (listings && listings.data) listings = listings.data;
+
+                    if (!Array.isArray(listings) || !listings.length) {
+                        listingSelect.innerHTML = '<option value="">No listings available. Create one first.</option>';
+                        return;
+                    }
+
+                    let options = '<option value="">Select a listing...</option>';
+                    listings.forEach(l => {
+                        options += `<option value="${l.listing_id}">${l.title} (ID: ${l.listing_id})</option>`;
+                    });
+                    listingSelect.innerHTML = options;
+                } catch (err) {
+                    console.error("Failed to load listings:", err);
+                    listingSelect.innerHTML = '<option value="">Failed to load listings</option>';
+                }
+            }
+
+            // Load materials
+            async function loadMaterials() {
+                try {
+                    const res = await fetch(`${API_BASE}/materials`);
+                    const data = await res.json();
+
+                    if (data.status === 'success' && Array.isArray(data.data)) {
+                        let options = '';
+                        data.data.forEach(m => {
+                            options += `<option value="${m.material_id}">${m.name}</option>`;
+                        });
+                        materialsSelect.innerHTML = options;
+                    }
+                } catch (err) {
+                    console.error("Failed to load materials:", err);
+                }
+            }
+
+            // Load and display upcycle transformations
+            async function loadTransformations() {
+                try {
+                    const res = await fetch(`${API_BASE}/upcycle-transformations`);
+                    const data = await res.json();
+                    let transformations = data.data || data;
+
+                    if (!Array.isArray(transformations) || !transformations.length) {
+                        galleryContainer.innerHTML = '<div class="form-container empty-state"><p>No upcycle transformations yet. Be the first to log one!</p></div>';
+                        return;
+                    }
+
+                    let html = '';
+                    for (const transformation of transformations) {
+                        let listingTitle = 'Upcycle Project';
+                        let materialsUsed = transformation.materials_used || 'N/A';
+
+                        if (transformation.listing_id) {
+                            try {
+                                const lRes = await fetch(`${API_BASE}/listings/${transformation.listing_id}`);
+                                const lData = await lRes.json();
+                                const listing = lData.data || lData;
+                                if (listing && listing.title) {
+                                    listingTitle = listing.title;
+                                }
+                            } catch (e) {}
+                        }
+
+                        html += `
+                            <div class="upcycle-card">
+                                <div class="transformation-box">
+                                    <div class="image-container">
+                                        <span class="label label-before">Before</span>
+                                        <img src="${transformation.before_image_url || 'https://via.placeholder.com/500x300?text=Before'}" alt="Before transformation">
+                                    </div>
+                                    <div class="image-container">
+                                        <span class="label label-after">After</span>
+                                        <img src="${transformation.after_image_url || 'https://via.placeholder.com/500x300?text=After'}" alt="After transformation">
+                                    </div>
+                                </div>
+                                <div class="content-body">
+                                    <h3 class="project-title">${listingTitle}</h3>
+                                    <p class="description-text">${transformation.steps || ''}</p>
+                                    <div class="process-tags">
+                                        <span class="tag"><i class="ti ti-package"></i> ${materialsUsed}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    galleryContainer.innerHTML = html;
+                } catch (err) {
+                    console.error("Failed to load transformations:", err);
+                    galleryContainer.innerHTML = '<div class="form-container empty-state"><p>Failed to load transformations.</p></div>';
+                }
+            }
+
+            // Form submission
+            transformationForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                if (!user.user_id) {
+                    Swal.fire({
+                        title: 'Login Required',
+                        text: 'Please log in to log a transformation.',
+                        icon: 'warning',
+                        confirmButtonColor: '#09b1ba'
+                    });
+                    return;
+                }
+
+                const listingId = document.getElementById('listingId').value;
+                if (!listingId) {
+                    Swal.fire({
+                        title: 'Validation Error',
+                        text: 'Please select a listing.',
+                        icon: 'error'
+                    });
+                    return;
+                }
+
+                const materialsSelected = Array.from(materialsSelect.selectedOptions).map(opt => opt.value).join(',');
+
+                const payload = {
+                    user_id: user.user_id,
+                    before_image_url: document.getElementById('beforeImageUrl').value,
+                    after_image_url: document.getElementById('afterImageUrl').value,
+                    steps: document.getElementById('steps').value,
+                    materials_used: materialsSelected
+                };
+
+                const btn = transformationForm.querySelector('.btn-submit');
+                if (btn) {
+                    btn.innerHTML = '<i class="ti ti-loader-2"></i> Processing...';
+                    btn.disabled = true;
+                }
+
+                try {
+                    const res = await fetch(`${API_BASE}/listings/${listingId}/upcycle`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await res.json();
+
+                    Swal.fire({
+                        title: 'EcoSwap',
+                        text: data.message || 'Transformation logged successfully!',
+                        icon: 'success',
+                        confirmButtonColor: '#09b1ba'
+                    });
+
+                    transformationForm.reset();
+                    await loadTransformations();
+                } catch (err) {
+                    console.error("Error:", err);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Failed to log transformation.',
+                        icon: 'error'
+                    });
+                } finally {
+                    if (btn) {
+                        btn.innerHTML = 'Log Transformation';
+                        btn.disabled = false;
+                    }
+                }
+            });
+
+            window.resetForm = () => {
+                transformationForm.reset();
+            };
+
+            // Initialize
+            await Promise.all([loadUserListings(), loadMaterials(), loadTransformations()]);
+        });
+    </script>
 </body>
 </html>

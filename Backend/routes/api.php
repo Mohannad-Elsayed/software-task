@@ -44,6 +44,27 @@ if ($requestUri === '/api/materials') {
 }
 
 // =========================
+// UPCYCLE TRANSFORMATIONS endpoints
+// =========================
+if (preg_match('#^/api/upcycle-transformations/?$#', $requestUri)) {
+    if ($method === 'GET') {
+        $db = db();
+        $result = $db->query("SELECT * FROM UpcycleTransformation");
+        $transformations = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $transformations[] = $row;
+            }
+        }
+        echo json_encode(["status" => "success", "data" => $transformations]);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+// =========================
 // LISTINGS endpoints
 // =========================
 if (preg_match('#^/api/listings/?$#', $requestUri)) {
