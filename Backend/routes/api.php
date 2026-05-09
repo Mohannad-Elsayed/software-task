@@ -23,6 +23,27 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 
 // =========================
+// MATERIALS endpoint
+// =========================
+if ($requestUri === '/api/materials') {
+    if ($method === 'GET') {
+        $db = db();
+        $result = $db->query("SELECT * FROM MaterialTaxonomy");
+        $materials = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $materials[] = $row;
+            }
+        }
+        echo json_encode(["status" => "success", "data" => $materials]);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+// =========================
 // LISTINGS endpoints
 // =========================
 if (preg_match('#^/api/listings/?$#', $requestUri)) {

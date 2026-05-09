@@ -27,19 +27,24 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         grid.innerHTML = productsToRender.map(p => `
-            <a href="listing-details.html?id=${p.listing_id}" class="product-card">
-                <div style="position:relative;">
-                    <img src="${p.image || 'https://via.placeholder.com/400x500?text=No+Image'}" class="product-image" alt="${p.title || ''}">
-                    <button class="wishlist-btn" onclick="event.preventDefault();event.stopPropagation();"><i class="ti ti-heart"></i></button>
-                    ${p.listing_type === 'swap' ? '<span class="swap-badge" style="position:absolute;bottom:10px;right:10px;background:var(--primary);color:white;"><i class="ti ti-refresh"></i> Swap</span>' : ''}
-                </div>
-                <div class="product-info">
-                    <div style="font-weight:bold;font-size:1.1rem;">$${p.price || 0}</div>
-                    <div class="brand-name">${p.category || ''}</div>
-                    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">
-                        ${p.condition_status || '—'}
+            <a href="listing-details.html?id=${p.listing_id}" class="product-card" style="padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+                <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <h3 style="font-size:1.2rem; font-weight:700; margin:0; color:var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${p.title || 'Untitled Listing'}
+                        </h3>
+                        ${p.listing_type === 'swap' ? '<span class="swap-badge" style="margin:0; flex-shrink:0;">Swap</span>' : ''}
                     </div>
-                    <button class="btn-swap" onclick="event.preventDefault();event.stopPropagation();handleSwapRequest(${p.listing_id})">
+                    <div style="display:flex; gap: 16px; font-size:13px; color:var(--muted); margin-top: 8px;">
+                        <span><i class="ti ti-tag"></i> ${p.category || 'N/A'}</span>
+                        <span><i class="ti ti-star"></i> ${p.condition_status || '—'}</span>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 24px; flex-shrink: 0;">
+                    <div style="font-weight:700; font-size:1.4rem; color:var(--primary); text-align: right;">
+                        $${p.price || 0}
+                    </div>
+                    <button class="btn-swap" style="margin:0; padding:10px 20px; width: auto; font-size:14px;" onclick="event.preventDefault();event.stopPropagation();handleSwapRequest(${p.listing_id})">
                         <i class="ti ti-arrows-exchange"></i> Propose Swap
                     </button>
                 </div>
@@ -47,10 +52,10 @@ document.addEventListener("DOMContentLoaded", () => {
         `).join('');
 
         const observer = new IntersectionObserver(entries => {
-            entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity=1; e.target.style.transform="translateY(0)"; }});
-        }, {threshold:0.1});
+            entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity = 1; e.target.style.transform = "translateY(0)"; } });
+        }, { threshold: 0.1 });
         document.querySelectorAll('.product-card').forEach(c => {
-            c.style.opacity=0; c.style.transform="translateY(20px)"; c.style.transition="all 0.5s ease-out";
+            c.style.opacity = 0; c.style.transform = "translateY(20px)"; c.style.transition = "all 0.5s ease-out";
             observer.observe(c);
         });
     }
@@ -308,7 +313,7 @@ function openSwapModal() {
     });
 }
 
-window.selectItem = function(element, id) {
+window.selectItem = function (element, id) {
     document.querySelectorAll('.selectable-item').forEach(el => el.classList.remove('selected'));
     element.classList.add('selected');
     selectedItemId = id;
@@ -316,7 +321,7 @@ window.selectItem = function(element, id) {
     if (confirmBtn) confirmBtn.disabled = false;
 };
 
-window.closeSwapModal = function() {
+window.closeSwapModal = function () {
     const modal = document.getElementById('swapModal');
     if (modal) modal.style.display = 'none';
 };
@@ -532,24 +537,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const uploadArea = document.querySelector('.photo-upload');
     if (!listingForm) return;
 
-    if (fileInput) {
-        fileInput.addEventListener("change", (e) => {
-            const files = e.target.files;
-            if (files.length > 0 && uploadArea) {
-                uploadArea.innerHTML = `<div id="preview-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;width:100%"></div>`;
-                const previewGrid = document.getElementById('preview-grid');
-                Array.from(files).slice(0, 5).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const div = document.createElement('div');
-                        div.innerHTML = `<img src="${event.target.result}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;border:1px solid #ddd;">`;
-                        previewGrid.appendChild(div);
-                    };
-                    reader.readAsDataURL(file);
+    async function loadMaterials() {
+        const materialSelect = document.getElementById('listingMaterial');
+        if (!materialSelect) return;
+        try {
+            const res = await fetch(`${API_BASE}/materials`);
+            const data = await res.json();
+            if (data.status === 'success' && Array.isArray(data.data)) {
+                let options = '';
+                data.data.forEach(m => {
+                    options += `<option value="${m.material_id}">${m.name}</option>`;
                 });
+                options += `<option value="null">Other</option>`;
+                materialSelect.innerHTML = options;
             }
-        });
+        } catch (e) {
+            console.error('Failed to load materials:', e);
+        }
     }
+    loadMaterials();
 
     listingForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -569,6 +575,7 @@ document.addEventListener("DOMContentLoaded", () => {
             condition_status: document.getElementById('listingCondition')?.value || 'Good',
             listing_type: document.getElementById('listingType')?.value || 'sale',
             price: parseFloat(document.getElementById('listingPrice')?.value) || 0,
+            material_id: (document.getElementById('listingMaterial')?.value && document.getElementById('listingMaterial')?.value !== 'null') ? parseInt(document.getElementById('listingMaterial').value) : null,
             status: 'active'
         };
 
