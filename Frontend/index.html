@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +19,7 @@
             --text: #1f2937;
             --muted: #6b7280;
             --white: #fff;
-            --card-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
         }
 
         body {
@@ -56,7 +57,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.15);
             color: #fff;
             font-size: 13px;
             font-weight: 600;
@@ -64,7 +65,7 @@
             border-radius: 20px;
             margin-bottom: 22px;
             backdrop-filter: blur(4px);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .hero h1 {
@@ -82,7 +83,7 @@
 
         .hero p {
             font-size: 18px;
-            color: rgba(255,255,255,0.85);
+            color: rgba(255, 255, 255, 0.85);
             margin-bottom: 36px;
             line-height: 1.7;
         }
@@ -106,7 +107,7 @@
             align-items: center;
             gap: 8px;
             transition: all 0.2s;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
         }
 
         .btn-primary:hover {
@@ -127,12 +128,12 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            border: 2px solid rgba(255,255,255,0.55);
+            border: 2px solid rgba(255, 255, 255, 0.55);
             transition: all 0.2s;
         }
 
         .btn-outline:hover {
-            background: rgba(255,255,255,0.12);
+            background: rgba(255, 255, 255, 0.12);
             border-color: #fff;
             text-decoration: none;
             color: #fff;
@@ -206,7 +207,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--primary);
-            background: rgba(9,177,186,0.1);
+            background: rgba(9, 177, 186, 0.1);
             padding: 4px 12px;
             border-radius: 20px;
             margin-bottom: 12px;
@@ -231,7 +232,7 @@
 
         .step-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 10px 24px rgba(0,0,0,0.09);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
         }
 
         .step-icon {
@@ -283,7 +284,7 @@
             border-color: var(--primary);
             color: var(--primary);
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(9,177,186,0.12);
+            box-shadow: 0 8px 20px rgba(9, 177, 186, 0.12);
             text-decoration: none;
         }
 
@@ -315,7 +316,7 @@
 
         .features-section .tag {
             color: var(--accent);
-            background: rgba(78,204,163,0.1);
+            background: rgba(78, 204, 163, 0.1);
         }
 
         .features-grid {
@@ -327,15 +328,15 @@
         }
 
         .feature-card {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 14px;
             padding: 28px 24px;
             transition: background 0.2s;
         }
 
         .feature-card:hover {
-            background: rgba(255,255,255,0.09);
+            background: rgba(255, 255, 255, 0.09);
         }
 
         .feature-card i {
@@ -447,19 +448,40 @@
 
         /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
-            .hero h1 { font-size: 34px; }
-            .hero p { font-size: 15px; }
-            .stats-inner { gap: 30px; }
-            .section { padding: 44px 16px; }
-            .section-header h2 { font-size: 24px; }
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .hero p {
+                font-size: 15px;
+            }
+
+            .stats-inner {
+                gap: 30px;
+            }
+
+            .section {
+                padding: 44px 16px;
+            }
+
+            .section-header h2 {
+                font-size: 24px;
+            }
         }
 
         @media (max-width: 480px) {
-            .hero h1 { font-size: 28px; }
-            .hero { min-height: 400px; padding: 60px 16px 44px; }
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .hero {
+                min-height: 400px;
+                padding: 60px 16px 44px;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <!-- Header -->
@@ -467,7 +489,9 @@
         <!-- Left: hamburger + logo -->
         <div class="header-left">
             <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-            <a href="index.html" style="text-decoration: none; color: inherit;"><h2>EcoSwap</h2></a>
+            <a href="index.html" style="text-decoration: none; color: inherit;">
+                <h2>EcoSwap</h2>
+            </a>
         </div>
 
         <!-- Center: main nav links -->
@@ -495,8 +519,8 @@
         <div class="module">
             <button onclick="togglePages('navAuth', this)"><b>Auth</b></button>
             <div class="pages" id="navAuth">
-                <a href="pages/auth/login.html">Login</a>
-                <a href="pages/auth/register.html">Register</a>
+                <a href="Frontend/pages/auth/login.html">Login</a>
+                <a href="Frontend/pages/auth/register.html">Register</a>
             </div>
         </div>
 
@@ -555,7 +579,8 @@
                 Sustainable Marketplace
             </div>
             <h1>Give Items a <span>Second Life</span>,<br>Save the Planet</h1>
-            <p>Buy, sell, and swap pre-loved items with a community that cares about the environment. Every trade reduces waste.</p>
+            <p>Buy, sell, and swap pre-loved items with a community that cares about the environment. Every trade
+                reduces waste.</p>
             <div class="hero-actions">
                 <a href="pages/listings/marketplace.html" class="btn-primary">
                     <i class="ti ti-shopping-bag"></i> Explore Marketplace
@@ -720,7 +745,17 @@
     </footer>
 
     <script src="assets/js/api.js"></script>
-    <script src="assets/js/user.js"></script>
+    <script>
+        async function loadUserProfile() {
+            const storedUser = JSON.parse(localStorage.getItem("user"));
+
+            if (!storedUser) {
+                window.location.href = "pages/auth/login.html";
+                return;
+            }
+        }
+        loadUserProfile();
+    </script>
     <script>
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
@@ -737,8 +772,9 @@
             localStorage.removeItem("user");
             localStorage.removeItem("user_id");
 
-            window.location.href = "pages/auth/login.html";
+            window.location.href = "Frontend/pages/auth/login.html";
         }
     </script>
 </body>
+
 </html>
