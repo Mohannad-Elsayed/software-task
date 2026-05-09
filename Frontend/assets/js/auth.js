@@ -58,3 +58,10 @@ if (loginForm) {
         }
     });
 }
+
+function logout() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("user_id");
+
+    window.location.href = "../../pages/auth/login.html";
+}

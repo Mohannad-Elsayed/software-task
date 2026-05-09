@@ -133,23 +133,6 @@
         </div>
     </div>
 
-    <header class="header">
-        <div class="header-left">
-            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-            <h2>EcoSwap</h2>
-        </div>
-        <nav class="header-nav">
-            <a href="../listings/marketplace.html">Marketplace</a>
-            <a href="community.html">Community</a>
-            <a href="../swap/swap-request.html">Swap</a>
-            <a href="../orders/cart.html">Cart</a>
-        </nav>
-        <div class="header-right">
-            <a href="../user/profile.html">Profile</a>
-            <button class="logout-btn">Logout</button>
-        </div>
-    </header>
-
     <div class="page">
         <h1>⭐ Reviews</h1>
 
@@ -171,6 +154,8 @@
 
     <!-- api.js first, then page script -->
     <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/navbar.js"></script>
     <script>
         // Use API_BASE_URL from api.js — no redeclaration
         var rating = 0;
@@ -260,6 +245,5 @@
 
         loadReviews();
     </script>
-    <script src="/assets/js/navbar.js"></script>
 </body>
 </html>
