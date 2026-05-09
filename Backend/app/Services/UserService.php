@@ -78,33 +78,45 @@ class UserService {
     }
 
     public function findById($userId) {
-        $conn = db();
+    $conn = db();
 
-        $stmt = $conn->prepare("
-            SELECT 
-                User.user_id,
-                User.username,
-                User.email,
-                User.trust_score,
-                User.created_at,
-                EcoImpact.co2_saved,
-                EcoImpact.waste_reduced,
-                EcoImpact.water_saved,
-                EcoImpact.eco_points
-            FROM User
-            LEFT JOIN EcoImpact ON User.user_id = EcoImpact.user_id
-            WHERE User.user_id = ?
-        ");
+    $stmt = $conn->prepare("
+        SELECT 
+            User.user_id,
+            User.username,
+            User.email,
+            User.trust_score,
+            User.created_at,
 
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
+            EcoImpact.co2_saved,
+            EcoImpact.waste_reduced,
+            EcoImpact.water_saved,
+            EcoImpact.eco_points,
 
-        $result = $stmt->get_result();
+            UserRole.role_name
 
-        if ($result->num_rows === 0) {
-            return null;
-        }
+        FROM User
 
-        return $result->fetch_assoc();
+        LEFT JOIN EcoImpact 
+            ON User.user_id = EcoImpact.user_id
+
+        LEFT JOIN UserRole 
+            ON User.user_id = UserRole.user_id
+
+        WHERE User.user_id = ?
+
+        LIMIT 1
+    ");
+
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 0) {
+        return null;
     }
+
+    return $result->fetch_assoc();
+}
 }
