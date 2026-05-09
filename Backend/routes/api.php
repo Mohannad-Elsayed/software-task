@@ -26,7 +26,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 // LISTINGS endpoints
 // =========================
 if (preg_match('#^/api/listings/?$#', $requestUri)) {
-    $controller = new ListingController();
+    $controller = new \app\Http\Controllers\ListingController();
 
     if ($method === 'GET') {
         $controller->index();
@@ -40,7 +40,7 @@ if (preg_match('#^/api/listings/?$#', $requestUri)) {
 }
 
 if (preg_match('#^/api/listings/(\d+)/condition$#', $requestUri, $matches)) {
-    $controller = new ListingController();
+    $controller = new \app\Http\Controllers\ListingController();
     $id = $matches[1];
     if ($method === 'POST') {
         $controller->assessCondition($id);
@@ -52,7 +52,7 @@ if (preg_match('#^/api/listings/(\d+)/condition$#', $requestUri, $matches)) {
 }
 
 if (preg_match('#^/api/listings/(\d+)/care$#', $requestUri, $matches)) {
-    $controller = new ListingController();
+    $controller = new \app\Http\Controllers\ListingController();
     $id = $matches[1];
     if ($method === 'POST' || $method === 'GET') {
         $controller->generateCareInstructions($id);
@@ -64,7 +64,7 @@ if (preg_match('#^/api/listings/(\d+)/care$#', $requestUri, $matches)) {
 }
 
 if (preg_match('#^/api/listings/(\d+)/upcycle$#', $requestUri, $matches)) {
-    $controller = new ListingController();
+    $controller = new \app\Http\Controllers\ListingController();
     $id = $matches[1];
     if ($method === 'POST') {
         $controller->logUpcycleTransformation($id);
@@ -76,7 +76,7 @@ if (preg_match('#^/api/listings/(\d+)/upcycle$#', $requestUri, $matches)) {
 }
 
 if (preg_match('#^/api/listings/(\d+)$#', $requestUri, $matches)) {
-    $controller = new ListingController();
+    $controller = new \app\Http\Controllers\ListingController();
     $id = $matches[1];
 
     if ($method === 'GET') {
