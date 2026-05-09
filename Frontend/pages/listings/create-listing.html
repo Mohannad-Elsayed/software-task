@@ -9,17 +9,13 @@
     <link rel="stylesheet" href="../../assets/css/layout.css">
     <link rel="stylesheet" href="../../assets/css/components.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-   <style>
-
-      
-
-        /* تعديل الـ app-container عشان السايد بار */
-         .app-container {
+    <style>
+        .app-container {
             display: flex;
-             justify-content: center; /*سنترة الفورم */
+            justify-content: center;
             padding: 20px;
             transition: margin-left 0.4s ease;
-        } 
+        }
 
         :root {
             --primary: #09b1ba;
@@ -29,16 +25,11 @@
             --text: #1e293b;
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0 0 0 0;  }
-        /* body {
-            padding-top: 90px !important; مسافة عشان الهيدر الأساسي
-            background: #f8fafc;
-        } */
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
 
-        /* .form-container { max-width: 700px; margin: 0 auto; background: var(--white); padding: 30px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); } */
         .form-container {
             width: 100%;
-            max-width: 800px; /* تكبير بسيط للفورم عشان تبقى مريحة */
+            max-width: 800px;
             background: white;
             padding: 40px;
             border-radius: 20px;
@@ -47,8 +38,6 @@
 
         h1 { font-size: 24px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
 
-        /* Photo Upload Area */
-        /* تأثيرات الـ Photo Upload */
         .photo-upload {
             border: 2px dashed #cbd5e1;
             background: #fdfdfd;
@@ -58,6 +47,10 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            cursor: pointer;
         }
         .photo-upload:hover {
             border-color: var(--primary);
@@ -66,17 +59,16 @@
         }
         .photo-upload i { font-size: 40px; color: var(--primary); }
 
-        /* Form Layout */
         .form-group { margin-bottom: 20px; }
-        /* شكل الـ Labels */
         label {
+            display: block;
             color: #475569;
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 10px;
         }
-        
+
         input, select, textarea {
             width: 100%;
             padding: 12px;
@@ -87,11 +79,10 @@
             outline: none;
             transition: 0.2s;
         }
-        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(9, 177, 186, 0.1); }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(9, 177, 186, 0.1); }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-        /* Swap Toggle */
         .swap-option {
             display: flex;
             align-items: center;
@@ -101,7 +92,7 @@
             border-radius: 10px;
             margin-top: 10px;
         }
-        
+
         .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
@@ -126,86 +117,71 @@
     </style>
 </head>
 <body>
-<div class="app-container" id="appContainer"> 
-
+<div class="app-container" id="appContainer">
     <div class="form-container">
-    <h1 style="margin-top: 15px;"><i class="ti ti-package-export" style="margin-top: 15px;"></i> List New Item</h1>
+        <h1 style="margin-top: 15px;"><i class="ti ti-package-export"></i> List New Item</h1>
 
-    <div class="photo-upload" onclick="document.getElementById('fileInput').click()">
-        <i class="ti ti-camera-plus"></i>
-        <p style="margin-top: 10px;">Click to upload photos (Max 5)</p>
-        <input type="file" id="fileInput" hidden multiple>
+        <div class="photo-upload" onclick="document.getElementById('fileInput').click()">
+            <i class="ti ti-camera-plus"></i>
+            <p style="margin-top: 10px;">Click to upload photos (Max 5)</p>
+            <input type="file" id="fileInput" hidden multiple accept="image/*">
+        </div>
+
+        <form id="listingForm">
+            <div class="form-group">
+                <label for="listingTitle">Item Title *</label>
+                <input type="text" id="listingTitle" name="title" placeholder="e.g., Vintage Oversized Denim Jacket" required>
+            </div>
+
+            <div class="form-group">
+                <label for="listingDesc">Description</label>
+                <textarea id="listingDesc" name="description" rows="4" placeholder="Tell us about the fit, material, and any flaws..."></textarea>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="listingCategory">Category</label>
+                    <select id="listingCategory" name="category">
+                        <option value="Clothing">Clothing</option>
+                        <option value="Shoes">Shoes</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="Home">Home</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="listingCondition">Condition</label>
+                    <select id="listingCondition" name="condition_status">
+                        <option value="New with tags">New with tags</option>
+                        <option value="Excellent">Excellent</option>
+                        <option value="Good">Good</option>
+                        <option value="Fair">Fair</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="listingPrice">Price ($) *</label>
+                    <input type="number" id="listingPrice" name="price" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                <div class="form-group">
+                    <label for="listingType">Listing Type</label>
+                    <select id="listingType" name="listing_type">
+                        <option value="sale">Sale</option>
+                        <option value="swap">Swap</option>
+                        <option value="upcycle">Upcycle</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">List Item Now</button>
+        </form>
     </div>
-
-    <form id="listingForm">
-        <div class="form-group">
-            <label>Item Title</label>
-            <input type="text" placeholder="e.g., Vintage Oversized Denim Jacket" required>
-        </div>
-
-        <div class="form-group">
-            <label>Description</label>
-            <textarea rows="4" placeholder="Tell us about the fit, material, and any flaws..."></textarea>
-        </div>
-
-        <div class="grid-2">
-            <div class="form-group">
-                <label>Category</label>
-                <select>
-                    <option>Clothing</option>
-                    <option>Shoes</option>
-                    <option>Accessories</option>
-                    <option>Home</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Condition</label>
-                <select>
-                    <option>New with tags</option>
-                    <option>Excellent</option>
-                    <option>Good</option>
-                    <option>Fair (Upcyclable)</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="grid-2">
-        <!-- حتة الـ Eco-Contribution -->
-          <div class="form-group">
-              <label><i class="ti ti-leaf"></i> Eco Contribution</label>
-              <select style="border-left: 4px solid #2e8b57;">
-                  <option>Standard Item</option>
-                  <option>100% Recycled Material</option>
-                  <option>Organic Fabric</option>
-                  <option>Upcycled Piece</option>
-              </select>
-          </div>
-          
-          <!-- حتة الـ Estimated Weight -->
-          <div class="form-group">
-              <label>Estimated Weight (kg)</label>
-              <input type="number" step="0.1" placeholder="0.5 kg">
-          </div>
-        </div>
-
-        <div class="swap-option">
-            <div>
-                <strong style="display: block;">Available for Swap</strong>
-                <span style="font-size: 12px; color: #64748b;">Allow other members to offer items in exchange.</span>
-            </div>
-            <label class="switch">
-                <input type="checkbox" checked id="swapToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <button type="submit" class="btn-submit">List Item Now</button>
-    </form>
 </div>
-<script src="../../assets/js/api.js"></script>
-    <script src="../../assets/js/auth.js"></script>
-    <script src="../../assets/js/navbar.js"></script>
-<script src="../../assets/js/listings.js"></script>
 
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/navbar.js"></script>
+<script src="../../assets/js/listings.js"></script>
 </body>
 </html>

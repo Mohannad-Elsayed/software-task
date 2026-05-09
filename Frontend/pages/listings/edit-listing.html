@@ -25,7 +25,8 @@
         font-family: "Inter", sans-serif;
         background: var(--bg);
         color: var(--text);
-        margin: 0 0 0 0;
+        margin: 0;
+        padding: 20px;
       }
 
       .form-container {
@@ -46,7 +47,6 @@
         gap: 10px;
       }
 
-      /* Current Photos Preview */
       .current-photos {
         display: flex;
         gap: 10px;
@@ -80,9 +80,7 @@
         font-size: 12px;
       }
 
-      .form-group {
-        margin-bottom: 20px;
-      }
+      .form-group { margin-bottom: 20px; }
       label {
         display: block;
         font-weight: 600;
@@ -90,9 +88,7 @@
         font-size: 14px;
       }
 
-      input,
-      select,
-      textarea {
+      input, select, textarea {
         width: 100%;
         padding: 12px;
         border: 1px solid var(--border);
@@ -100,43 +96,26 @@
         box-sizing: border-box;
         font-size: 14px;
         outline: none;
+        transition: 0.2s;
+      }
+      input:focus, select:focus, textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(9, 177, 186, 0.1);
       }
 
-      .grid-2 {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-      }
+      .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-      .swap-option {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background: #f1f5f9;
-        padding: 15px;
-        border-radius: 10px;
-        margin: 20px 0;
-      }
-
-      /* Switch UI */
       .switch {
         position: relative;
         display: inline-block;
         width: 50px;
         height: 26px;
       }
-      .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
+      .switch input { opacity: 0; width: 0; height: 0; }
       .slider {
         position: absolute;
         cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        top: 0; left: 0; right: 0; bottom: 0;
         background-color: #cbd5e1;
         transition: 0.4s;
         border-radius: 34px;
@@ -152,12 +131,8 @@
         transition: 0.4s;
         border-radius: 50%;
       }
-      input:checked + .slider {
-        background-color: var(--primary);
-      }
-      input:checked + .slider:before {
-        transform: translateX(24px);
-      }
+      input:checked + .slider { background-color: var(--primary); }
+      input:checked + .slider:before { transform: translateX(24px); }
 
       .btn-update {
         width: 100%;
@@ -201,12 +176,7 @@
       <h1><i class="ti ti-edit"></i> Edit Listing</h1>
 
       <label>Current Photos</label>
-      <div class="current-photos" id="photoGallery"></div>
-
-      <!-- داخل الـ form-container وقبل الـ form -->
-      <label>Current Photos</label>
       <div class="current-photos" id="photoGallery">
-        <!-- الصور بتنزل هنا بالـ JS -->
         <div
           class="upload-more"
           onclick="document.getElementById('newPhotoInput').click()"
@@ -215,60 +185,61 @@
           <span>Add</span>
         </div>
       </div>
-      <input type="file" id="newPhotoInput" hidden multiple />
+      <input type="file" id="newPhotoInput" hidden multiple accept="image/*" />
 
       <form id="editForm">
         <div class="form-group">
-          <label>Item Title</label>
-          <input type="text" id="editTitle" required />
+          <label for="editTitle">Item Title *</label>
+          <input type="text" id="editTitle" name="title" required />
         </div>
 
         <div class="form-group">
-          <label>Description</label>
-          <textarea id="editDesc" rows="4"></textarea>
+          <label for="editDesc">Description</label>
+          <textarea id="editDesc" name="description" rows="4"></textarea>
         </div>
 
         <div class="grid-2">
           <div class="form-group">
-            <label>Category</label>
-            <select id="editCategory">
+            <label for="editCategory">Category</label>
+            <select id="editCategory" name="category">
               <option value="Clothing">Clothing</option>
               <option value="Shoes">Shoes</option>
               <option value="Accessories">Accessories</option>
+              <option value="Home">Home</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Condition</label>
-            <select id="editCondition">
+            <label for="editCondition">Condition</label>
+            <select id="editCondition" name="condition_status">
               <option value="New with tags">New with tags</option>
               <option value="Excellent">Excellent</option>
               <option value="Good">Good</option>
+              <option value="Fair">Fair</option>
             </select>
           </div>
         </div>
 
         <div class="grid-2">
           <div class="form-group">
-            <label>Price ($)</label>
-            <input type="number" id="editPrice" />
+            <label for="editPrice">Price ($) *</label>
+            <input type="number" id="editPrice" name="price" step="0.01" min="0" />
           </div>
           <div class="form-group">
-            <label>Brand</label>
-            <input type="text" id="editBrand" />
+            <label for="editListingType">Listing Type</label>
+            <select id="editListingType" name="listing_type">
+              <option value="sale">Sale</option>
+              <option value="swap">Swap</option>
+              <option value="upcycle">Upcycle</option>
+            </select>
           </div>
         </div>
 
-        <div class="swap-option">
-          <div>
-            <strong>Available for Swap</strong>
-            <p style="font-size: 12px; margin: 0">
-              Update swap status for this item.
-            </p>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="editSwapToggle" />
-            <span class="slider"></span>
-          </label>
+        <div class="form-group">
+          <label for="editStatus">Status</label>
+          <select id="editStatus" name="status">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
 
         <button type="submit" class="btn-update">Save Changes</button>

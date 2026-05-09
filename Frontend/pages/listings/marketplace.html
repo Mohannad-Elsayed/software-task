@@ -14,7 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
       :root {
-        --primary: #09b1ba; /* Vinted Teal */
+        --primary: #09b1ba;
         --bg: #f8fafc;
         --text: #1f2937;
         --muted: #6b7280;
@@ -24,21 +24,10 @@
       body {
         font-family: "Inter", sans-serif;
         background-color: var(--bg);
-        margin: 70 0 0 0;
+        margin: 70px 0 0 0;
         color: var(--text);
       }
 
-      /* تحسين الـ Search Bar ليصبح مثل Vinted */
-
-      /* .market-header {
-            background: #2e8b57;
-            padding: 10px 0;
-            border-bottom: 1px solid #f1f5f9;
-            position: sticky;
-            top: 0; تأكد إنه بيبدأ من الصفر لو مفيش nav فوقه
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-        } */
       .search-bar {
         width: 45%;
         position: relative;
@@ -68,7 +57,6 @@
         color: var(--muted);
       }
 
-      /* Main Container */
       .container {
         max-width: 1200px;
         margin: 30px auto;
@@ -78,15 +66,12 @@
         padding: 0 20px;
       }
 
-      /* RESPONSIVE */
-
       @media (max-width: 768px) {
         .filters {
           width: 100%;
         }
       }
 
-      /* Product Grid */
       .product-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -97,11 +82,15 @@
       .product-card {
         border: 1px solid #eee;
         background: white;
-        border-radius: 12px; /* زوايا أنعم */
+        border-radius: 12px;
         overflow: hidden;
         transition:
           transform 0.3s ease,
           box-shadow 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        display: block;
       }
 
       .product-card:hover {
@@ -111,13 +100,13 @@
 
       .product-image {
         width: 100%;
-        aspect-ratio: 3/4; /* ده الستاندرد بتاع مواقع اللبس */
+        aspect-ratio: 3/4;
         object-fit: cover;
         display: block;
       }
 
       .product-info {
-        padding: 12px 4px; /* تقليل الحواف الجانبية */
+        padding: 12px 4px;
       }
 
       .price-tag {
@@ -125,7 +114,6 @@
         letter-spacing: -0.5px;
       }
 
-      /* إضافة زر "القلب" (Wishlist) على الصورة */
       .wishlist-btn {
         position: absolute;
         top: 12px;
@@ -189,7 +177,6 @@
         background: #078a92;
       }
 
-      /* Floating Action Button */
       .fab {
         position: fixed;
         bottom: 30px;
@@ -215,36 +202,6 @@
           display: none;
         }
       }
-
-      @media (max-width: 900px) {
-        .search-box {
-          display: none;
-        }
-
-        .hero-content h1 {
-          font-size: 38px;
-        }
-      }
-
-      @media (max-width: 600px) {
-        nav {
-          padding: 15px 20px;
-        }
-
-        .hero {
-          height: 280px;
-        }
-
-        .hero-content h1 {
-          font-size: 30px;
-        }
-
-        .hero-content p {
-          font-size: 14px;
-        }
-      }
-
-      /* تعديل الـ Product Card لتكون "Clean & Fashionable" */
     </style>
   </head>
   <body>
