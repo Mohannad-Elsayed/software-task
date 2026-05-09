@@ -514,6 +514,22 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!item || item.status === 'error') return;
 
             const el = (id) => document.getElementById(id);
+            
+            // Fetch and populate materials first so we can select the correct one
+            const materialSelect = el('editMaterial');
+            if (materialSelect) {
+                try {
+                    const mRes = await fetch(`${API_BASE}/materials`);
+                    const mData = await mRes.json();
+                    if (mData.status === 'success' && Array.isArray(mData.data)) {
+                        let options = '';
+                        mData.data.forEach(m => { options += `<option value="${m.material_id}">${m.name}</option>`; });
+                        options += `<option value="null">Other</option>`;
+                        materialSelect.innerHTML = options;
+                    }
+                } catch(e) {}
+            }
+
             if (el('editTitle')) el('editTitle').value = item.title || '';
             if (el('editDesc')) el('editDesc').value = item.description || '';
             if (el('editCategory')) el('editCategory').value = item.category || 'Clothing';
@@ -521,6 +537,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (el('editPrice')) el('editPrice').value = item.price || '';
             if (el('editListingType')) el('editListingType').value = item.listing_type || 'sale';
             if (el('editStatus')) el('editStatus').value = item.status || 'active';
+            if (materialSelect) materialSelect.value = item.material_id || 'null';
         } catch (err) {
             console.error("Failed to load listing for edit:", err);
         }
@@ -535,7 +552,8 @@ document.addEventListener("DOMContentLoaded", () => {
             condition_status: document.getElementById('editCondition')?.value,
             price: parseFloat(document.getElementById('editPrice')?.value) || 0,
             listing_type: document.getElementById('editListingType')?.value || 'sale',
-            status: document.getElementById('editStatus')?.value || 'active'
+            status: document.getElementById('editStatus')?.value || 'active',
+            material_id: document.getElementById('editMaterial')?.value === 'null' ? null : parseInt(document.getElementById('editMaterial')?.value)
         };
 
         if (!listingId) {
