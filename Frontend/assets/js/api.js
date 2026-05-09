@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000/software-task/Backend/routes/api.php?route=';
+const API_BASE_URL = 'http://localhost:8000/Backend/routes/api.php?route=';
 
 async function request(endpoint, method = 'GET', body = null) {
     try {

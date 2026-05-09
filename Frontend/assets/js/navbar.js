@@ -39,17 +39,6 @@
         <div class="logo2"><b>Eco System</b></div>
 
         <div class="module">
-            <button onclick="togglePages('navAdmin', this)"><b>Admin</b></button>
-            <div class="pages" id="navAdmin">
-                <a href="../../pages/admin/admin-dashboard.html">Admin Dashboard</a>
-                <a href="../../pages/admin/user-management.html">User Management</a>
-                <a href="../../pages/admin/disputes.html">Dispute Management</a>
-                <a href="../../pages/admin/reports.html">Reports</a>
-                <a href="../../pages/admin/seller-analytics.html">Seller Analytics</a>
-            </div>
-        </div>
-
-        <div class="module">
             <button onclick="togglePages('navAuth', this)"><b>Auth</b></button>
             <div class="pages" id="navAuth">
                 <a href="../../pages/auth/login.html">Login</a>
@@ -62,8 +51,6 @@
             <div class="pages" id="navCommunity">
                 <a href="../../pages/community/community.html">Community</a>
                 <a href="../../pages/community/reviews.html">Reviews Section</a>
-                <a href="../../pages/community/comments.html">Comments Section</a>
-                <a href="../../pages/community/report-content.html">Report Content Form</a>
             </div>
         </div>
 
@@ -83,10 +70,6 @@
             <button onclick="togglePages('navOrders', this)"><b>Orders</b></button>
             <div class="pages" id="navOrders">
                 <a href="../../pages/orders/cart.html">Cart</a>
-                <a href="../../pages/orders/checkout.html">Checkout</a>
-                <a href="../../pages/orders/order-details.html">Order Details</a>
-                <a href="../../pages/orders/payment.html">Payment Simulation</a>
-                <a href="../../pages/orders/shipping-label.html">Shipping Label</a>
             </div>
         </div>
 
