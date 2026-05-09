@@ -18,7 +18,7 @@
             --border: #e2e8f0;
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0 0 0 0; padding: 20px; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
 
         .container { max-width: 900px; margin: 0 auto; }
 
@@ -26,7 +26,6 @@
         .header-section h1 { color: #1e293b; margin-bottom: 10px; }
         .header-section p { color: #64748b; }
 
-        /* Upcycle Card */
         .upcycle-card {
             background: var(--white);
             border-radius: 16px;
@@ -62,23 +61,10 @@
         .content-body { padding: 25px; }
         .meta-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .project-title { font-size: 20px; font-weight: 700; color: #1e293b; margin: 0; }
-        
+
         .process-tags { display: flex; gap: 8px; margin: 15px 0; }
         .tag { background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; font-size: 12px; }
 
-        .impact-score {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 14px;
-            background: #f0fdfa;
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        /* Create Button - Floating */
         .btn-create {
             position: fixed;
             bottom: 30px;
@@ -94,28 +80,30 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 15px;
         }
+        .btn-create:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
-<div id="upcycleLogContainer"> 
-    <div class="container" >
+<div id="upcycleLogContainer">
+    <div class="container">
         <div class="header-section">
             <h1>Creative Transformations</h1>
             <p>See how old items are getting a second life in our community.</p>
         </div>
 
-        <div id="logContainer">
-            </div>
+        <div id="logContainer"></div>
     </div>
 
     <button class="btn-create" onclick="openNewLog()">
         <i class="ti ti-plus"></i> Log New Transformation
     </button>
+</div>
+
 <script src="../../assets/js/api.js"></script>
-    <script src="../../assets/js/auth.js"></script>
-    <script src="../../assets/js/navbar.js"></script>
-    <script src="../../assets/js/listings.js"></script>
-     
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/navbar.js"></script>
+<script src="../../assets/js/listings.js"></script>
 </body>
 </html>
