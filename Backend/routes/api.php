@@ -23,10 +23,52 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 
 // =========================
+// MATERIALS endpoint
+// =========================
+if ($requestUri === '/api/materials') {
+    if ($method === 'GET') {
+        $db = db();
+        $result = $db->query("SELECT * FROM MaterialTaxonomy");
+        $materials = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $materials[] = $row;
+            }
+        }
+        echo json_encode(["status" => "success", "data" => $materials]);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+// =========================
+// UPCYCLE TRANSFORMATIONS endpoints
+// =========================
+if (preg_match('#^/api/upcycle-transformations/?$#', $requestUri)) {
+    if ($method === 'GET') {
+        $db = db();
+        $result = $db->query("SELECT * FROM UpcycleTransformation");
+        $transformations = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $transformations[] = $row;
+            }
+        }
+        echo json_encode(["status" => "success", "data" => $transformations]);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+// =========================
 // LISTINGS endpoints
 // =========================
 if (preg_match('#^/api/listings/?$#', $requestUri)) {
-    $controller = new ListingController();
+    $controller = new \app\Http\Controllers\ListingController();
 
     if ($method === 'GET') {
         $controller->index();
@@ -40,7 +82,7 @@ if (preg_match('#^/api/listings/?$#', $requestUri)) {
 }
 
 if (preg_match('#^/api/listings/(\d+)/condition$#', $requestUri, $matches)) {
-    $controller = new ListingController();
+    $controller = new \app\Http\Controllers\ListingController();
     $id = $matches[1];
     if ($method === 'POST') {
         $controller->assessCondition($id);
@@ -52,7 +94,7 @@ if (preg_match('#^/api/listings/(\d+)/condition$#', $requestUri, $matches)) {
 }
 
 if (preg_match('#^/api/listings/(\d+)/care$#', $requestUri, $matches)) {
-    $controller = new ListingController();
+    $controller = new \app\Http\Controllers\ListingController();
     $id = $matches[1];
     if ($method === 'POST' || $method === 'GET') {
         $controller->generateCareInstructions($id);
@@ -64,7 +106,7 @@ if (preg_match('#^/api/listings/(\d+)/care$#', $requestUri, $matches)) {
 }
 
 if (preg_match('#^/api/listings/(\d+)/upcycle$#', $requestUri, $matches)) {
-    $controller = new ListingController();
+    $controller = new \app\Http\Controllers\ListingController();
     $id = $matches[1];
     if ($method === 'POST') {
         $controller->logUpcycleTransformation($id);
@@ -76,7 +118,7 @@ if (preg_match('#^/api/listings/(\d+)/upcycle$#', $requestUri, $matches)) {
 }
 
 if (preg_match('#^/api/listings/(\d+)$#', $requestUri, $matches)) {
-    $controller = new ListingController();
+    $controller = new \app\Http\Controllers\ListingController();
     $id = $matches[1];
 
     if ($method === 'GET') {
