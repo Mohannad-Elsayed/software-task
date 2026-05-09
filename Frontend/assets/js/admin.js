@@ -1,31 +1,20 @@
 document.addEventListener("DOMContentLoaded", function() {
 
-    // 1. UI Logic (Sidebar & Tabs)
-    const toggleBtn = document.getElementById('toggleBtn');
-    const sidebar = document.getElementById('sidebar');
-    const mainContent = document.getElementById('mainContent');
-    const navLinks = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('.section-tab');
-
-    if(toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
-        });
+    // ==========================================
+    // 1. Helper Function: Switch Sections (If Single Page)
+    // ==========================================
+    function switchTab(targetId) {
+        const sections = document.querySelectorAll('.section-tab');
+        if (sections.length > 0) {
+            sections.forEach(s => s.classList.remove('active'));
+            const targetSection = document.getElementById(targetId);
+            if(targetSection) targetSection.classList.add('active');
+        }
     }
 
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            navLinks.forEach(l => l.classList.remove('active'));
-            sections.forEach(s => s.classList.remove('active'));
-            this.classList.add('active');
-            const targetSection = document.getElementById(this.getAttribute('data-target'));
-            if(targetSection) targetSection.classList.add('active');
-        });
-    });
-
-    // 2. API Configuration (Localhost:8000)
+    // ==========================================
+    // 2. API Configuration
+    // ==========================================
     const API_BASE_URL = 'http://localhost:8000/api/'; 
 
     async function fetchFromAPI(endpoint, method = 'GET', data = null) {
@@ -39,19 +28,29 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         try {
             const response = await fetch(url, options);
-            const result = await response.json();
-            return result;
+            return await response.json();
         } catch (error) {
             console.error("API Error:", error);
             return null;
         }
     }
 
+    // ==========================================
     // 3. Customer Portal Logic (Orders & Payments)
+    // ==========================================
+    
+    // --- FIX: Proceed to Checkout Button ---
     const proceedToCheckoutBtn = document.getElementById('proceedToCheckout');
     if(proceedToCheckoutBtn) {
         proceedToCheckoutBtn.addEventListener('click', () => {
-            document.querySelector('.nav-link[data-target="checkout"]').click();
+            const checkoutSection = document.getElementById('checkout');
+            if (checkoutSection) {
+                // لو كل حاجة في صفحة واحدة
+                switchTab('checkout');
+            } else {
+                // لو متقسمين لصفحات منفصلة بناءً على navbar.js
+                window.location.href = '/pages/orders/checkout.html';
+            }
         });
     }
 
@@ -67,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Place Order & Pay (Integrated with OrderController)
+    // --- FIX: Pay Now Button ---
     const payNowBtn = document.getElementById('payNowBtn');
     if (payNowBtn) {
         payNowBtn.addEventListener('click', async function() {
@@ -75,23 +74,27 @@ document.addEventListener("DOMContentLoaded", function() {
             payNowBtn.disabled = true;
 
             const orderData = {
-                buyer_id: 1, // Mock user ID
+                buyer_id: 1, 
                 shipping_street: "123 Main St",
                 shipping_city: "Cairo",
                 items: [{ listing_id: 1, quantity: 1 }]
             };
 
-            // 1. Create Order
             const response = await fetchFromAPI('orders', 'POST', orderData);
 
             if(response && response.success) {
                 window.currentOrderId = response.order_id;
-                
-                // 2. Process Payment (Escrow)
                 await fetchFromAPI('orders/pay', 'POST', { order_id: response.order_id });
                 
                 alert(`Success! Order #${response.order_id} secured in Escrow.`);
-                document.querySelector('.nav-link[data-target="orderDetails"]').click();
+                
+                // الانتقال لصفحة تفاصيل الطلب
+                const orderDetailsSection = document.getElementById('orderDetails');
+                if (orderDetailsSection) {
+                    switchTab('orderDetails');
+                } else {
+                    window.location.href = '/pages/orders/order-details.html';
+                }
             } else {
                 alert("Order Failed: " + (response ? response.error : "Server Error"));
             }
@@ -128,11 +131,13 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    // ==========================================
     // 4. Admin Portal Logic
+    // ==========================================
     async function loadUsers() {
         const usersTableBody = document.getElementById('usersTableBody');
         if(!usersTableBody) return;
-        const users = await fetchFromAPI('admin/users', 'GET');
+        const users = await fetchFromAPI('admin/users', 'GET'); 
         if (users && Array.isArray(users)) {
             usersTableBody.innerHTML = users.map(user => `
                 <tr>
@@ -147,17 +152,32 @@ document.addEventListener("DOMContentLoaded", function() {
 
     window.deleteUser = async function(userId) {
         if(confirm("Delete this user?")) {
-            const res = await fetchFromAPI(`admin/user?user_id=${userId}`, 'DELETE');
+            const res = await fetchFromAPI(`admin/user?user_id=${userId}`, 'DELETE'); 
             if(res && res.success) loadUsers();
         }
     };
 
+    async function loadDisputes() {
+        const disputesTableBody = document.getElementById('disputesTableBody');
+        if(!disputesTableBody) return;
+        const disputes = await fetchFromAPI('admin/disputes', 'GET');
+        if (disputes && Array.isArray(disputes)) {
+            disputesTableBody.innerHTML = disputes.map(d => `
+                <tr>
+                    <td>#${d.dispute_id}</td>
+                    <td>${d.reason}</td>
+                    <td>Order ID: ${d.order_id || 'N/A'}</td>
+                    <td><span style="color: red;">${d.status}</span></td>
+                    <td><button class="btn">Take Action</button></td>
+                </tr>
+            `).join('');
+        }
+    }
+
     async function loadReports() {
         const reportsTableBody = document.getElementById('reportsTableBody');
         if(!reportsTableBody) return;
-        
         const reports = await fetchFromAPI('admin/reports', 'GET'); 
-        
         if (reports && Array.isArray(reports)) {
             reportsTableBody.innerHTML = reports.map(report => `
                 <tr>
@@ -174,11 +194,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     window.updateReportStatus = async function(id, status) {
-        await fetchFromAPI(`admin/report?report_id=${id}`, 'PUT', { status: status });
+        await fetchFromAPI(`admin/report?report_id=${id}`, 'PUT', { status: status }); 
         loadReports();
     };
 
-    // Initialize
+    // Initialize Admin Data
     loadUsers();
+    loadDisputes();
     loadReports();
 });
