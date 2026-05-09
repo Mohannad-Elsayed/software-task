@@ -72,24 +72,19 @@
         body { font-family: 'Inter', sans-serif; margin: 0; background: #f8fafc; color: var(--text); }
 
         .details-container {
-            max-width: 1100px;
+            max-width: 800px;
             margin: 40px auto;
-            display: grid;
-            grid-template-columns: 1fr 450px;
-            gap: 40px;
             padding: 0 20px;
         }
 
-        .image-gallery { display: grid; gap: 10px; }
-        .main-img { width: 100%; border-radius: 12px; object-fit: cover; height: 600px; }
-        .thumb-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .thumb-grid img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
-        .thumb-grid img:hover { border-color: var(--primary); }
-
-        .info-sidebar { background: white; padding: 30px; border-radius: 16px; height: fit-content; border: 1px solid #e5e7eb; position: sticky; top: 100px; }
+        .info-card { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 16px; 
+            border: 1px solid #e5e7eb; 
+        }
 
         .seller-info { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
-        .seller-avatar { width: 45px; height: 45px; border-radius: 50%; background: #eee; }
 
         .price-row { font-size: 28px; font-weight: 800; margin: 15px 0; }
         .item-title { font-size: 22px; margin-bottom: 10px; }
@@ -107,30 +102,17 @@
 
         .eco-benefit { background: #ecfdf5; color: #065f46; padding: 15px; border-radius: 10px; font-size: 13px; margin-top: 20px; border: 1px dashed #10b981; }
 
-        @media (max-width: 850px) {
-            .details-container { grid-template-columns: 1fr; }
-            .main-img { height: 400px; }
-        }
+
     </style>
 </head>
 <body>
 
 <div class="details-container">
-    <div class="image-gallery">
-        <img src="https://images.unsplash.com/photo-1576871333019-220f1300c752?w=800" class="main-img" id="mainDisplay" alt="Item image">
-        <div class="thumb-grid">
-            <img src="https://images.unsplash.com/photo-1576871333019-220f1300c752?w=200" onclick="updateImg(this.src)" alt="thumb 1">
-            <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=200" onclick="updateImg(this.src)" alt="thumb 2">
-            <img src="https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=200" onclick="updateImg(this.src)" alt="thumb 3">
-        </div>
-    </div>
-
-    <aside class="info-sidebar">
+    <div class="info-card">
         <div class="seller-info">
-            <img src="https://ui-avatars.com/api/?name=Seller&background=random" class="seller-avatar" alt="Seller avatar">
             <div>
                 <div style="font-weight: 700;" id="sellerName">Loading...</div>
-                <div style="font-size: 12px; color: var(--muted);">EcoSwap Seller</div>
+                <div style="font-size: 12px; color: var(--muted);" id="sellerRole">Loading seller info...</div>
             </div>
         </div>
 
@@ -155,6 +137,9 @@
                 <div style="color: var(--muted);">Type</div>
                 <div style="font-weight: 600;" id="specListingType">—</div>
 
+                <div style="color: var(--muted);">Material</div>
+                <div style="font-weight: 600;" id="specMaterial">—</div>
+
                 <div style="color: var(--muted);">Status</div>
                 <div style="font-weight: 600;" id="specStatus">—</div>
             </div>
@@ -168,28 +153,13 @@
                 <i class="ti ti-arrows-exchange"></i> Propose a Swap
             </button>
 
-            <div style="display: flex; gap: 10px; margin-top: 5px;">
-                <button class="btn" style="flex: 1; background: #fff; border: 1px solid #e2e8f0; color: var(--text);">
-                    <i class="ti ti-heart"></i> Favorite
-                </button>
-                <button class="btn" style="flex: 1; background: #fff; border: 1px solid #e2e8f0; color: var(--text);">
-                    <i class="ti ti-share"></i> Share
-                </button>
-            </div>
         </div>
 
         <div class="eco-benefit">
             <strong>Eco Impact:</strong> By swapping this item, you help reduce textile waste and save resources!
         </div>
-    </aside>
-</div>
-
-<section style="max-width: 1100px; margin: 60px auto; padding: 0 20px;">
-    <h3 style="margin-bottom: 20px;">Similar Items You Might Like</h3>
-    <div id="similarItemsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
-        <p style="color:#94a3b8;">Loading similar items...</p>
     </div>
-</section>
+</div>
 
 <!-- Swap Proposal Modal -->
 <div id="swapModal" class="modal-overlay">

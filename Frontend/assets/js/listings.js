@@ -177,16 +177,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ============ LISTING DETAILS ============
 document.addEventListener("DOMContentLoaded", () => {
-    const mainDisplay = document.getElementById('mainDisplay');
-    if (!mainDisplay) return;
+    const titleEl = document.getElementById('listingTitle');
+    if (!titleEl && !document.getElementById('listingPrice')) return; // Check for a valid details page element
 
     const urlParams = new URLSearchParams(window.location.search);
     const listingId = urlParams.get('id');
-
-    window.updateImg = (src) => {
-        mainDisplay.style.opacity = '0.5';
-        setTimeout(() => { mainDisplay.src = src; mainDisplay.style.opacity = '1'; }, 100);
-    };
 
     async function loadListingDetails() {
         if (!listingId) return;
@@ -210,7 +205,42 @@ document.addEventListener("DOMContentLoaded", () => {
             const priceEl = document.getElementById('listingPrice');
             if (priceEl) priceEl.textContent = `$${item.price || 0}`;
 
-            if (item.image) mainDisplay.src = item.image;
+            if (item.material_id) {
+                try {
+                    const mRes = await fetch(`${API_BASE}/materials`);
+                    const mData = await mRes.json();
+                    if (mData.status === 'success' && mData.data) {
+                        const mat = mData.data.find(m => m.material_id == item.material_id);
+                        set('specMaterial', mat ? mat.name : item.material_id);
+                    }
+                } catch (e) { }
+            } else {
+                set('specMaterial', 'N/A');
+            }
+
+            if (item.user_id) {
+                try {
+                    const uRes = await fetch(`${API_BASE}/user/profile&user_id=${item.user_id}`);
+                    const uData = await uRes.json();
+                    if (uData.success && uData.user) {
+                        const sellerNameEl = document.getElementById('sellerName');
+                        if (sellerNameEl) sellerNameEl.textContent = uData.user.username;
+
+                        const sellerRoleEl = document.getElementById('sellerRole');
+                        if (sellerRoleEl) sellerRoleEl.textContent = `Trust Score: ${uData.user.trust_score || 0}`;
+                    } else {
+                        set('sellerName', 'Unknown Seller');
+                        set('sellerRole', '');
+                    }
+                } catch (e) {
+                    console.error("Failed to load seller info:", e);
+                    set('sellerName', 'Unknown Seller');
+                    set('sellerRole', '');
+                }
+            } else {
+                set('sellerName', 'Unknown Seller');
+                set('sellerRole', '');
+            }
         } catch (err) {
             console.error("Failed to load listing details:", err);
         }
