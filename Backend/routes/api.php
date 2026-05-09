@@ -458,6 +458,25 @@ if (preg_match('#^/api/sustainability/trust-score/?$#', $requestUri)) {
     exit;
 }
 
+// =========================
+// USER endpoints
+// =========================
+
+if (preg_match('#^/api/user/profile/?$#', $requestUri)) {
+    $controller = new UserController();
+
+    if ($method === 'GET') {
+        $controller->getUserProfile();
+    } else {
+        http_response_code(405);
+        echo json_encode([
+            "success" => false,
+            "message" => "Method not allowed"
+        ]);
+    }
+
+    exit;
+}
 
 // =========================
 // COMMUNITY endpoints

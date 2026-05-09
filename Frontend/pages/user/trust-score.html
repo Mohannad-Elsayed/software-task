@@ -1,166 +1,198 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trust Score</title>
-    <link rel="stylesheet" href="../../assets/css/main.css">
-    <link rel="stylesheet" href="../../assets/css/components.css">
-    <link rel="stylesheet" href="../../assets/css/Layout.css">
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link rel="stylesheet" href="../../assets/css/components.css" />
+    <link rel="stylesheet" href="../../assets/css/layout.css" />
     <style>
-        /* Trust Card */
-.trust-card {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    text-align: center;
-    margin-bottom: 30px;
-}
+      /* Trust Card */
+      .trust-card {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 30px;
+      }
 
-/* Circle Score */
-.score-circle {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    border: 10px solid #2ecc71;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 20px auto;
-    font-size: 28px;
-    font-weight: bold;
-}
+      /* Circle Score */
+      .score-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 10px solid #2ecc71;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px auto;
+        font-size: 28px;
+        font-weight: bold;
+      }
 
-/* Label */
-.score-label {
-    font-size: 18px;
-    color: #555;
-}
+      /* Label */
+      .score-label {
+        font-size: 18px;
+        color: #555;
+      }
 
-/* Breakdown */
-.breakdown {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-}
+      /* Breakdown */
+      .breakdown {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+      }
 
-.item {
-    margin-bottom: 20px;
-}
+      .item {
+        margin-bottom: 20px;
+      }
 
-.item span {
-    display: block;
-    margin-bottom: 5px;
-}
+      .item span {
+        display: block;
+        margin-bottom: 5px;
+      }
 
-/* Progress Bars */
-.bar {
-    width: 100%;
-    height: 10px;
-    background: #eee;
-    border-radius: 5px;
-    overflow: hidden;
-}
+      /* Progress Bars */
+      .bar {
+        width: 100%;
+        height: 10px;
+        background: #eee;
+        border-radius: 5px;
+        overflow: hidden;
+      }
 
-.bar div {
-    height: 100%;
-    background: #2ecc71;
-    width: 0%;
-    transition: 0.5s;
-}
+      .bar div {
+        height: 100%;
+        background: #2ecc71;
+        width: 0%;
+        transition: 0.5s;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <!-- ── Main Container ── -->
     <div class="container">
-        <main class="content">
+      <main class="content">
+        <!-- Score Card -->
+        <section class="trust-card">
+          <h2>Your Trust Score</h2>
 
-            <!-- Score Card -->
-            <section class="trust-card">
-                <h2>Your Trust Score</h2>
+          <div class="score-circle">
+            <span id="scoreValue">0%</span>
+          </div>
 
-                <div class="score-circle">
-                    <span id="scoreValue">0%</span>
-                </div>
+          <p class="score-label" id="scoreLabel">Loading...</p>
+        </section>
 
-                <p class="score-label" id="scoreLabel">Loading...</p>
-            </section>
+        <!-- Breakdown -->
+        <section class="breakdown">
+          <h3>Score Breakdown</h3>
 
-            <!-- Breakdown -->
-            <section class="breakdown">
-                <h3>Score Breakdown</h3>
+          <div class="item">
+            <span>Successful Swaps</span>
+            <div class="bar"><div id="swapBar"></div></div>
+          </div>
 
-                <div class="item">
-                    <span>Successful Swaps</span>
-                    <div class="bar"><div id="swapBar"></div></div>
-                </div>
+          <div class="item">
+            <span>User Reviews</span>
+            <div class="bar"><div id="reviewBar"></div></div>
+          </div>
 
-                <div class="item">
-                    <span>User Reviews</span>
-                    <div class="bar"><div id="reviewBar"></div></div>
-                </div>
-
-                <div class="item">
-                    <span>Account Activity</span>
-                    <div class="bar"><div id="activityBar"></div></div>
-                </div>
-
-            </section>
-
-        </main>
+          <div class="item">
+            <span>Account Activity</span>
+            <div class="bar"><div id="activityBar"></div></div>
+          </div>
+        </section>
+      </main>
     </div>
-
-    <script>
-        function loadTrustScore() {
-    
-    async function loadTrust() {
-    const data = await request("/trust");
-
-    document.getElementById("scoreValue").textContent = data.score + "%";
-}
-
-loadTrust();
-
-    // Set score
-    document.getElementById("scoreValue").textContent = data.score + "%";
-
-    // Label logic
-    let label = "Low";
-    if (data.score > 80) label = "Excellent";
-    else if (data.score > 60) label = "Good";
-    else if (data.score > 40) label = " متوسط";
-
-    document.getElementById("scoreLabel").textContent = label;
-
-    // Bars
-    document.getElementById("swapBar").style.width = data.swaps + "%";
-    document.getElementById("reviewBar").style.width = data.reviews + "%";
-    document.getElementById("activityBar").style.width = data.activity + "%";
-}
-
-loadTrustScore();
-
-    </script>
-
-    <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('overlay').classList.toggle('visible');
-        }
-
-        function togglePages(id, btn) {
-            const pages = document.getElementById(id);
-            pages.classList.toggle('open');
-            btn.classList.toggle('open');
-        }
-
-        function logout() {
-            window.location.href = '../auth/login.html';
-        }
-    </script>
-    <!-- <script src="/assets/js/navbar.js"></script> -->
     <script src="../../assets/js/api.js"></script>
     <script src="../../assets/js/auth.js"></script>
     <script src="../../assets/js/navbar.js"></script>
-</body>
+    <script>
+      async function loadTrustScore() {
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+
+        if (!storedUser) {
+          window.location.href = "../auth/login.html";
+
+          return;
+        }
+
+        const userId = storedUser.user_id;
+
+        const data = await request(`/api/user/profile&user_id=${userId}`);
+
+        if (!data.success) {
+          console.error(data.message);
+          return;
+        }
+
+        const user = data.user;
+
+        const score = user.trust_score || 0;
+
+        // Main score
+        document.getElementById("scoreValue").textContent = score + "%";
+
+        // Label
+        let label = "Low Trust";
+
+        if (score >= 80) {
+          label = "Excellent";
+        } else if (score >= 60) {
+          label = "Good";
+        } else if (score >= 40) {
+          label = "Average";
+        }
+
+        document.getElementById("scoreLabel").textContent = label;
+
+        // Fake demo metrics based on score
+        const swaps = Math.min(score, 100);
+
+        const reviews = Math.min(score * 0.9, 100);
+
+        const activity = Math.min(score * 0.8, 100);
+
+        // Bars
+        document.getElementById("swapBar").style.width = swaps + "%";
+
+        document.getElementById("reviewBar").style.width = reviews + "%";
+
+        document.getElementById("activityBar").style.width = activity + "%";
+
+        // Dynamic color
+        const circle = document.querySelector(".score-circle");
+
+        if (score >= 80) {
+          circle.style.borderColor = "#2ecc71";
+        } else if (score >= 60) {
+          circle.style.borderColor = "#f1c40f";
+        } else {
+          circle.style.borderColor = "#e74c3c";
+        }
+      }
+
+      loadTrustScore();
+    </script>
+
+    <script>
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("overlay").classList.toggle("visible");
+      }
+
+      function togglePages(id, btn) {
+        const pages = document.getElementById(id);
+        pages.classList.toggle("open");
+        btn.classList.toggle("open");
+      }
+
+      function logout() {
+        window.location.href = "../auth/login.html";
+      }
+    </script>
+    <!-- <script src="/assets/js/navbar.js"></script> -->
+  </body>
 </html>

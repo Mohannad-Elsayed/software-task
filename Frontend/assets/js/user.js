@@ -1,30 +1,27 @@
-const API_BASE_URL = 'http://localhost:8000';
+async function loadUserProfile() {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
 
-async function request(endpoint, method = "GET", body = null) {
-    const options = {
-        method,
-        headers: { "Content-Type": "application/json" },
-    };
-    if (body) options.body = JSON.stringify(body);
-
-    const response = await fetch(`${API_BASE_URL}/api${endpoint}`, options);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    return response.json();
-}
-
-async function loadUser() {
-    try {
-        const user = await request("/user");
-
-        document.getElementById("username").textContent = user.name;
-        document.getElementById("email").textContent = user.email;
-        document.getElementById("role").textContent = user.role;
-        document.getElementById("ecoPoints").textContent = user.ecoPoints;
-        document.getElementById("trustScore").textContent = user.trustScore + "%";
-
-    } catch (err) {
-        console.error("Failed to load user", err);
+    if (!storedUser) {
+        window.location.href = "../../pages/auth/login.html";
+        return;
     }
+
+    const userId = storedUser.user_id;
+
+    const data = await request(`/api/user/profile&user_id=${userId}`);
+
+    if (!data.success) {
+        console.error(data.message);
+        return;
+    }
+
+    const user = data.user;
+
+    document.getElementById("username").textContent = user.username;
+    document.getElementById("email").textContent = user.email;
+    document.getElementById("role").textContent = user.role_name || "user";
+    document.getElementById("ecoPoints").textContent = user.eco_points || 0;
+    document.getElementById("trustScore").textContent = (user.trust_score || 0) + "%";
 }
 
-loadUser();
+loadUserProfile();
