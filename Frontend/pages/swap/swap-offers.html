@@ -10,15 +10,6 @@
     <link rel="stylesheet" href="../../assets/css/components.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-
-        .app-container {
-            display: flex;
-            flex: 1; /* تأخذ باقي ارتفاع الصفحة */
-            margin-top: 90px; /* نفس ارتفاع الهيدر */
-            transition: margin-left 0.4s ease;
-            overflow: hidden;
-        }
-
         :root {
             --primary: #09b1ba;
             --pending: #f59e0b;
@@ -29,18 +20,16 @@
             --border: #e2e8f0;
         }
 
-        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0;  }
-        .dashboard-container { max-width: 1000px; margin: 0 auto; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; }
+        .dashboard-container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
 
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         
-        /* Tabs Style */
         .tabs { display: flex; gap: 30px; border-bottom: 2px solid var(--border); margin-bottom: 25px; }
         .tab { padding: 12px 5px; cursor: pointer; font-weight: 600; color: #64748b; position: relative; transition: 0.3s; }
         .tab.active { color: var(--primary); }
         .tab.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: var(--primary); }
 
-        /* Offer Card */
         .offer-card {
             background: var(--white);
             border-radius: 16px;
@@ -48,185 +37,172 @@
             margin-bottom: 15px;
             border: 1px solid var(--border);
             display: grid;
-            grid-template-columns: auto 1fr auto;
+            grid-template-columns: 1fr auto;
             align-items: center;
             gap: 20px;
             transition: 0.2s;
         }
-        .offer-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .offer-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
 
-        .swap-visual { display: flex; align-items: center; gap: 12px; }
-        .mini-img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; border: 2px solid #f1f5f9; }
-        .exchange-icon { color: var(--primary); font-size: 20px; background: #f0fdfa; padding: 8px; border-radius: 50%; }
-
-        .offer-details h4 { margin: 0 0 5px 0; font-size: 16px; }
-        .offer-details p { margin: 0; font-size: 13px; color: #64748b; }
+        .swap-deal { display: flex; align-items: center; gap: 20px; }
+        .deal-item { text-align: center; }
+        .deal-item p { margin: 5px 0 0; font-size: 13px; font-weight: 600; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
-        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        .exchange-icon { color: var(--primary); font-size: 20px; }
+
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-completed { background: #dcfce7; color: #166534; }
         .status-pending { background: #fffbeb; color: #92400e; }
-        .status-accepted { background: #dcfce7; color: #166534; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
 
         .action-group { display: flex; gap: 10px; }
-        .btn-action { 
-            padding: 10px 18px; 
-            border-radius: 8px; 
-            border: none; 
-            font-weight: 600; 
-            cursor: pointer; 
-            font-size: 14px; 
-            display: flex; 
-            align-items: center; 
-            gap: 6px;
-        }
-        .btn-view { background: var(--primary); color: white; }
-        .btn-outline { background: white; border: 1px solid var(--border); color: var(--text); }
-        .btn-outline:hover { background: #f8fafc; }
+        .btn-approve { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-deny { background: #fee2e2; color: #dc2626; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-approve:hover { background: #089ba3; box-shadow: 0 4px 10px rgba(9, 177, 186, 0.3); }
 
         @media (max-width: 768px) {
             .offer-card { grid-template-columns: 1fr; text-align: center; justify-items: center; }
-            .action-group { width: 100%; justify-content: center; }
-        }
-
-        /* تحسين شكل الـ Badge */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 6px 12px;
-            border-radius: 30px;
-            font-size: 11px;
-            letter-spacing: 0.5px;
-        }
-
-        /* حركة عند تمرير الماوس على الكارت */
-        .offer-card {
-            border: 1px solid #edf2f7;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .offer-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-            border-color: var(--primary);
-        }
-
-        /* شكل الأزرار داخل الكارت */
-        .btn-view {
-            background: var(--primary);
-            color: white;
-            transition: 0.3s;
-        }
-
-        .btn-view:hover {
-            background: #089ba3;
-            box-shadow: 0 4px 10px rgba(9, 177, 186, 0.3);
         }
     </style>
 </head>
 <body>
-<div class="app-container" id="appContainer"> 
     <div class="dashboard-container">
-    <div class="header">
-        <h1>Swap Control Center</h1>
-        <div class="impact-mini">
-            <span style="font-size: 14px; color: var(--success); font-weight: 700;">
-                <i class="ti ti-leaf"></i> 3 Pending Swaps
-            </span>
+        <div class="header">
+            <h1>Swap Control Center</h1>
+            <div id="pendingCount" style="font-size: 14px; color: var(--pending); font-weight: 700;"></div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('incoming', this)">Received Offers</div>
+            <div class="tab" onclick="switchTab('outgoing', this)">Sent Requests</div>
+        </div>
+
+        <div id="offersList">
+            <p style="text-align:center;padding:40px;color:#94a3b8;">Loading swap offers...</p>
         </div>
     </div>
 
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab('incoming')">Received Offers</div>
-        <div class="tab" onclick="switchTab('outgoing')">Sent Requests</div>
-    </div>
-
-    <div id="offersList">
-        </div>
-</div>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const listContainer = document.getElementById('offersList');
-    if (!listContainer) return;
-
-    // Load swap offers from backend
-    async function loadSwapOffers() {
-        listContainer.innerHTML = '<p style="text-align:center;padding:40px;color:#94a3b8;">Loading swap offers...</p>';
-        try {
-            // Try loading from swap API, fall back to listings
-            const res = await fetch(`${API_BASE_URL}/listings`);
-            const items = await res.json();
-            if (!Array.isArray(items) || !items.length) {
-                listContainer.innerHTML = '<p style="text-align:center;color:#64748b;padding:40px;">No swap offers yet.</p>';
-                return;
-            }
-            // Show swappable items as potential offers
-            const swappable = items.filter(i => i.is_swappable || i.canSwap);
-            renderOffers(swappable.length ? swappable : items);
-        } catch (err) {
-            console.error("Failed to load swap offers:", err);
-            listContainer.innerHTML = '<p style="text-align:center;padding:40px;color:#ef4444;">Failed to load swap offers.</p>';
-        }
-    }
-
-    function renderOffers(offers) {
-        if (!offers.length) {
-            listContainer.innerHTML = '<p style="text-align:center;color:#64748b;padding:40px;">No offers found.</p>';
-            return;
-        }
-        listContainer.innerHTML = offers.map(offer => `
-            <div class="offer-card">
-                <div class="swap-visual">
-                    <img src="${offer.image || 'https://via.placeholder.com/70'}" class="mini-img" title="Item">
-                    <div class="exchange-icon"><i class="ti ti-arrows-exchange"></i></div>
-                    <img src="${offer.image || 'https://via.placeholder.com/70'}" class="mini-img" title="Swap Item">
-                </div>
-                <div class="offer-details">
-                    <h4>${offer.title || offer.name || 'Swap Offer'}</h4>
-                    <p><i class="ti ti-tag"></i> ${offer.category || '—'} • $${offer.price || 0}</p>
-                    <div style="margin-top:8px;">
-                        <span class="status-badge status-pending">
-                            <i class="ti ti-clock"></i> ${offer.status || 'Pending'}
-                        </span>
-                    </div>
-                </div>
-                <div class="action-group">
-                    <a href="swap-negotiation.html?id=${offer.listing_id || offer.id}" class="btn-action btn-view">
-                        <i class="ti ti-message-dots"></i> View & Chat
-                    </a>
-                    <button class="btn-action btn-outline" title="Archive"><i class="ti ti-archive"></i></button>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    window.switchTab = (type) => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        event.target.classList.add('active');
-        loadSwapOffers();
-    };
-
-    window.goToNegotiation = (id) => {
-        window.location.href = `swap-negotiation.html?id=${id}`;
-    };
-
-    window.declineOffer = async (id) => {
-        if (!confirm("Are you sure you want to decline this offer?")) return;
-        try {
-            await fetch(`${API_BASE_URL}/swap-requests/${id}/reject`, { method: 'POST' });
-            Swal.fire({ title:'EcoSwap', text:'Offer Declined.', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
-            loadSwapOffers();
-        } catch {
-            Swal.fire({ title:'EcoSwap', text:'Offer Declined.', icon:'success', confirmButtonColor:'#111', confirmButtonText:'OK' });
-        }
-    };
-
-    loadSwapOffers();
-});
-</script>
-
-<script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/api.js"></script>
     <script src="../../assets/js/auth.js"></script>
     <script src="../../assets/js/navbar.js"></script>
-<script src="../../assets/js/swap.js"></script>
+    <script>
+    const API_BASE = 'http://localhost:8000/Backend/index.php?route=/api';
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const listContainer = document.getElementById('offersList');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        let currentTab = 'incoming';
+
+        if (!user.user_id) {
+            window.location.href = '../auth/login.html';
+            return;
+        }
+
+        async function loadSwapOffers() {
+            listContainer.innerHTML = '<p style="text-align:center;padding:40px;color:#94a3b8;">Loading swap offers...</p>';
+            try {
+                const response = await fetch(`${API_BASE}/swap-requests&user_id=${user.user_id}&type=${currentTab}`);
+                const result = await response.json();
+                const offers = result.data || [];
+
+                if (offers.length === 0) {
+                    listContainer.innerHTML = `
+                        <div style="text-align:center; padding:50px; color:#64748b;">
+                            <i class="ti ti-arrows-exchange" style="font-size:48px; opacity:0.2;"></i>
+                            <p>No ${currentTab === 'incoming' ? 'received' : 'sent'} offers found.</p>
+                        </div>`;
+                    return;
+                }
+
+                if (currentTab === 'incoming') {
+                    const pending = offers.filter(o => o.status === 'pending').length;
+                    document.getElementById('pendingCount').innerHTML = pending > 0 ? `<i class="ti ti-leaf"></i> ${pending} New Offers` : '';
+                }
+
+                renderOffers(offers);
+            } catch (err) {
+                console.error("Failed to load swap offers:", err);
+                listContainer.innerHTML = '<p style="text-align:center;padding:40px;color:#ef4444;">Failed to load swap offers.</p>';
+            }
+        }
+
+        function renderOffers(offers) {
+            listContainer.innerHTML = offers.map(offer => {
+                const isPending = offer.status === 'pending';
+                const statusClass = `status-${offer.status}`;
+                
+                return `
+                    <div class="offer-card">
+                        <div class="swap-deal">
+                            <div class="deal-item">
+                                <p style="font-size:10px; color:#94a3b8; text-transform:uppercase;">${currentTab === 'incoming' ? offer.initiator_name : 'Me'}</p>
+                                <p title="${offer.offered_title}">${offer.offered_title || 'N/A'}</p>
+                            </div>
+                            
+                            <div class="exchange-icon">
+                                <i class="ti ti-arrows-exchange"></i>
+                            </div>
+
+                            <div class="deal-item">
+                                <p style="font-size:10px; color:#94a3b8; text-transform:uppercase;">${currentTab === 'incoming' ? 'Me' : offer.partner_name}</p>
+                                <p title="${offer.requested_title}">${offer.requested_title}</p>
+                            </div>
+                        </div>
+
+                        <div style="text-align: right;">
+                            <div style="margin-bottom: 15px;">
+                                <span class="status-badge ${statusClass}">${offer.status}</span>
+                            </div>
+                            
+                            ${currentTab === 'incoming' && isPending ? `
+                                <div class="action-group">
+                                    <button class="btn-deny" onclick="respondSwap(${offer.request_id}, 'reject')">Deny</button>
+                                    <button class="btn-approve" onclick="respondSwap(${offer.request_id}, 'accept')">Approve</button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.switchTab = (tab, el) => {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            loadSwapOffers();
+        };
+
+        window.respondSwap = async (requestId, action) => {
+            const confirm = await Swal.fire({
+                title: action === 'accept' ? 'Approve Swap?' : 'Deny Swap?',
+                text: action === 'accept' ? 'Ownership of items will be swapped immediately.' : 'This proposal will be removed.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: action === 'accept' ? '#09b1ba' : '#ef4444',
+                confirmButtonText: action === 'accept' ? 'Yes, Swap!' : 'Yes, Deny'
+            });
+
+            if (confirm.isConfirmed) {
+                try {
+                    const response = await fetch(`${API_BASE}/swap-requests/${requestId}/${action}`, {
+                        method: 'POST'
+                    });
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        Swal.fire('Updated', result.message, 'success');
+                        loadSwapOffers();
+                    } else {
+                        Swal.fire('Error', result.message || 'Action failed', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'Connection failed', 'error');
+                }
+            }
+        };
+
+        loadSwapOffers();
+    });
+    </script>
 </body>
 </html>

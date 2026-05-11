@@ -39,6 +39,36 @@ class ListingService {
         return $listings;
     }
 
+    public function getListingsByUser($userId) {
+        $stmt = $this->db->prepare("
+            SELECT l.*, u.username, m.name as material_name 
+            FROM Listing l 
+            LEFT JOIN User u ON l.user_id = u.user_id 
+            LEFT JOIN MaterialTaxonomy m ON l.material_id = m.material_id
+            WHERE l.user_id = ?
+            ORDER BY l.listing_id DESC
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $listings = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $listing = $this->mapListingRow($row);
+            $listings[] = $this->listingToArray($listing, [
+                'user' => [
+                    'user_id' => $row['user_id'],
+                    'username' => $row['username'],
+                ],
+                'material' => $row['material_name'] ? [
+                    'material_id' => $row['material_id'],
+                    'name' => $row['material_name'],
+                ] : null,
+            ]);
+        }
+        return $listings;
+    }
+
     public function showListing($id) {
         $stmt = $this->db->prepare("
             SELECT l.*, u.username, m.name as material_name 
