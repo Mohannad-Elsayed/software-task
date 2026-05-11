@@ -14,6 +14,7 @@ class ListingService {
                   FROM Listing l 
                   LEFT JOIN User u ON l.user_id = u.user_id 
                   LEFT JOIN MaterialTaxonomy m ON l.material_id = m.material_id
+                  WHERE l.status = 'active'
                   ORDER BY l.listing_id DESC";
 
         $result = $this->db->query($query);
