@@ -124,7 +124,7 @@ CREATE TABLE Report (
     listing_id INT NULL,
     comment_id INT NULL,
     reason TEXT NOT NULL,
-    status ENUM('pending', 'reviewed', 'rejected', 'resolved') DEFAULT 'pending',
+    status ENUM('pending', 'rejected', 'resolved') DEFAULT 'pending',
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     resolved_at TIMESTAMP NULL,
@@ -198,7 +198,7 @@ CREATE TABLE Dispute (
     order_id INT NULL,
     request_id INT NULL,
     reason TEXT NOT NULL,
-    status ENUM('open', 'under_review', 'resolved') DEFAULT 'open',
+    status ENUM('under_review', 'resolved') DEFAULT 'under_review',
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     resolved_at TIMESTAMP NULL,

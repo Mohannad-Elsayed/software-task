@@ -319,12 +319,36 @@ if (preg_match('#^/api/admin/report/?$#', $requestUri)) {
     exit;
 }
 
+// show disputes
+if (preg_match('#^/api/admin/disputes/?$#', $requestUri)) {
+
+    $controller = new AdminController();
+
+    if ($method === 'GET') {
+
+        $controller->getDisputes();
+
+    } else {
+
+        http_response_code(405);
+
+        echo json_encode([
+            "error" => "Method Not Allowed"
+        ]);
+    }
+
+    exit;
+}
+
 //resolve dipute
-    if (preg_match('#^/api/admin/dispute/resolve/?$#', $requestUri)) {
+if (preg_match('#^/api/admin/dispute/resolve/?$#', $requestUri)) {
     $controller = new AdminController();
 
     if ($method === 'POST') {
         $controller->resolveDispute();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
     }
 
     exit;
