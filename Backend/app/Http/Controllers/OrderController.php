@@ -3,6 +3,7 @@
 namespace app\Http\Controllers;
 
 use app\Services\OrderService;
+use app\Http\Middleware\RoleMiddleware;
 
 require_once __DIR__ . '/../../Services/OrderService.php';
 require_once __DIR__ . '/../Middleware/RoleMiddleware.php';
@@ -13,6 +14,26 @@ class OrderController
     public function __construct()
     {
         $this->orderService = new OrderService();
+    }
+
+    /*
+    =========================================
+    GET /api/orders/pending?user_id=X
+    =========================================
+    */
+    public function getPendingOrders()
+    {
+        header('Content-Type: application/json');
+        $userId = $_GET['user_id'] ?? null;
+
+        if (!$userId) {
+            http_response_code(400);
+            echo json_encode(["error" => "user_id is required"]);
+            return;
+        }
+
+        $orders = $this->orderService->getPendingOrdersByUser($userId);
+        echo json_encode(["status" => "success", "data" => $orders]);
     }
 
     /*
@@ -105,9 +126,73 @@ class OrderController
         );
     }
 
-    public function processPayment($orderId)
+    /*
+    =========================================
+    GET /api/orders/cart?order_id=X
+    =========================================
+    */
+    public function getCart()
     {
-        return $this->orderService->processEscrowPayment($orderId);
+        header('Content-Type: application/json');
+        $orderId = $_GET['order_id'] ?? null;
+
+        if (!$orderId) {
+            http_response_code(400);
+            echo json_encode(["error" => "order_id is required"]);
+            return;
+        }
+
+        $data = $this->orderService->getCartData($orderId);
+        if (!$data) {
+            http_response_code(404);
+            echo json_encode(["error" => "Order/Cart not found"]);
+            return;
+        }
+
+        echo json_encode(["status" => "success", "data" => $data]);
+    }
+
+    /*
+    =========================================
+    DELETE /api/order-items/:id
+    =========================================
+    */
+    public function removeItem($id)
+    {
+        header('Content-Type: application/json');
+        $result = $this->orderService->removeItemFromOrder($id);
+
+        if (isset($result['error'])) {
+            http_response_code(400);
+        }
+
+        echo json_encode($result);
+    }
+
+    /*
+    =========================================
+    POST /api/orders/payment
+    =========================================
+    */
+    public function processPayment()
+    {
+        header('Content-Type: application/json');
+        $data = json_decode(file_get_contents('php://input'), true);
+        $orderId = $data['order_id'] ?? null;
+
+        if (!$orderId) {
+            http_response_code(400);
+            echo json_encode(["error" => "order_id is required"]);
+            return;
+        }
+
+        $result = $this->orderService->processEscrowPayment($orderId);
+        
+        if (isset($result['error'])) {
+            http_response_code(400);
+        }
+
+        echo json_encode($result);
     }
 
     /*
