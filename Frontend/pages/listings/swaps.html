@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Swap Proposals | EcoSwap</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+    <link rel="stylesheet" href="../../assets/css/layout.css" />
+    <link rel="stylesheet" href="../../assets/css/components.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .swaps-container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .tabs { display: flex; gap: 20px; border-bottom: 2px solid #e5e7eb; margin-bottom: 30px; }
+        .tab { padding: 10px 5px; cursor: pointer; font-weight: 600; color: #6b7280; position: relative; }
+        .tab.active { color: var(--primary-green); }
+        .tab.active::after { content: ""; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: var(--primary-green); }
+        
+        .proposal-card { 
+            background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px;
+            border: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between;
+            transition: 0.3s;
+        }
+        .proposal-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        
+        .swap-deal { display: flex; align-items: center; gap: 30px; }
+        .deal-item { text-align: center; }
+        .deal-item img { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; border: 1px solid #eee; }
+        .deal-item p { margin: 5px 0 0; font-size: 13px; font-weight: 600; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        .swap-icon { font-size: 24px; color: var(--primary-green); }
+        
+        .actions { display: flex; gap: 10px; }
+        .btn-approve { background: var(--primary-green); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-deny { background: #fee2e2; color: #dc2626; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        .status-completed { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="swaps-container">
+        <h1 style="margin-bottom: 30px;">Swap Proposals</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('incoming', this)">Incoming Offers</div>
+            <div class="tab" onclick="switchTab('outgoing', this)">My Sent Offers</div>
+        </div>
+
+        <div id="proposalsList">
+            <!-- Populated by swaps.js -->
+            <p style="text-align:center; padding:50px; color:#6b7280;">Loading proposals...</p>
+        </div>
+    </div>
+
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/swaps.js"></script>
+</body>
+</html>

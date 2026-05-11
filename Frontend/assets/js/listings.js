@@ -1,88 +1,111 @@
 const API_BASE = 'http://localhost:8000/Backend/index.php?route=/api';
 
 // ============ MARKETPLACE ============
-document.addEventListener("DOMContentLoaded", () => {
+// ============ MARKETPLACE ============
+let allProducts = [];
+
+async function loadMarketplace() {
     const grid = document.getElementById("productGrid");
     if (!grid) return;
+    try {
+        const res = await fetch(`${API_BASE}/listings`);
+        let products = await res.json();
+        if (products && products.data) products = products.data;
+        if (!Array.isArray(products)) { grid.innerHTML = '<p style="text-align:center;padding:40px;color:#94a3b8;">No listings available.</p>'; return; }
 
-    async function loadMarketplace() {
-        try {
-            const res = await fetch(`${API_BASE}/listings`);
-            let products = await res.json();
-            if (products && products.data) products = products.data;
-            if (!Array.isArray(products)) { grid.innerHTML = '<p style="text-align:center;padding:40px;color:#94a3b8;">No listings available.</p>'; return; }
-            
-            // Filter: only show items from other users
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            if (user.user_id) {
-                products = products.filter(p => parseInt(p.user_id) !== parseInt(user.user_id));
-            }
-
-            allProducts = products;
-            renderProducts(products);
-        } catch (err) {
-            console.error("Failed to load listings:", err);
-            grid.innerHTML = '<p style="text-align:center;padding:40px;color:#ef4444;">Failed to load listings from server.</p>';
+        // Filter: only show items from other users
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.user_id) {
+            products = products.filter(p => parseInt(p.user_id) !== parseInt(user.user_id));
         }
+
+        allProducts = products;
+        renderProducts(products);
+    } catch (err) {
+        console.error("Failed to load listings:", err);
+        grid.innerHTML = '<p style="text-align:center;padding:40px;color:#ef4444;">Failed to load listings from server.</p>';
     }
+}
 
-    function renderProducts(productsToRender) {
-        if (!productsToRender.length) {
-            grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;">
-                <i class="ti ti-search" style="font-size:48px;color:#ccc;"></i>
-                <p>No items found matching your search.</p></div>`;
-            return;
-        }
-        grid.innerHTML = productsToRender.map(p => {
-            const isSale = p.listing_type === 'sale';
-            const isSwap = p.listing_type === 'swap';
-            
-            return `
-                <a href="listing-details.html?id=${p.listing_id}" class="product-card" style="padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
-                    <div style="flex: 1; min-width: 0;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <h3 style="font-size:1.2rem; font-weight:700; margin:0; color:var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                ${p.title || 'Untitled Listing'}
-                            </h3>
-                            ${isSwap ? '<span class="swap-badge" style="margin:0; flex-shrink:0;">Swap</span>' : ''}
-                            ${isSale ? '<span class="status-badge status-active" style="margin:0; flex-shrink:0; background:#dcfce7; color:#166534; font-size:11px;">For Sale</span>' : ''}
-                        </div>
-                        <div style="display:flex; gap: 16px; font-size:13px; color:var(--muted); margin-top: 8px;">
-                            <span><i class="ti ti-tag"></i> ${p.category || 'N/A'}</span>
-                            <span><i class="ti ti-star"></i> ${p.condition_status || '—'}</span>
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 24px; flex-shrink: 0;">
-                        <div style="font-weight:700; font-size:1.4rem; color:var(--primary); text-align: right;">
-                            $${p.price || 0}
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            ${isSwap ? `
-                                <button class="btn-swap" style="margin:0; padding:10px 20px; width: auto; font-size:14px;" onclick="event.preventDefault();event.stopPropagation();handleSwapRequest(${p.listing_id})">
-                                    <i class="ti ti-arrows-exchange"></i> Propose Swap
-                                </button>
-                            ` : ''}
-                            ${isSale ? `
-                                <button class="btn-buy" style="margin:0; padding:10px 20px; width: auto; font-size:14px; background:#111; color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;" onclick="event.preventDefault();event.stopPropagation();handleBuyNow(${p.listing_id})">
-                                    <i class="ti ti-shopping-cart"></i> Buy Now
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                </a>
-            `;
-        }).join('');
+function renderProducts(productsToRender) {
+    const grid = document.getElementById("productGrid");
+    if (!grid) return;
+    if (!productsToRender.length) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;">
+            <i class="ti ti-search" style="font-size:48px;color:#ccc;"></i>
+            <p>No items found matching your search.</p></div>`;
+        return;
+    }
+    grid.innerHTML = productsToRender.map(p => {
+        const isSale = p.listing_type === 'sale';
+        const isSwap = p.listing_type === 'swap';
 
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity = 1; e.target.style.transform = "translateY(0)"; } });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.product-card').forEach(c => {
-            c.style.opacity = 0; c.style.transform = "translateY(20px)"; c.style.transition = "all 0.5s ease-out";
-            observer.observe(c);
+        return `
+            <a href="listing-details.html?id=${p.listing_id}" class="product-card" style="padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+                <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <h3 style="font-size:1.2rem; font-weight:700; margin:0; color:var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${p.title || 'Untitled Listing'}
+                        </h3>
+                        ${isSwap ? '<span class="swap-badge" style="margin:0; flex-shrink:0;">Swap</span>' : ''}
+                        ${isSale ? '<span class="status-badge status-active" style="margin:0; flex-shrink:0; background:#dcfce7; color:#166534; font-size:11px;">For Sale</span>' : ''}
+                    </div>
+                    <div style="display:flex; gap: 16px; font-size:13px; color:var(--muted); margin-top: 8px;">
+                        <span><i class="ti ti-tag"></i> ${p.category || 'N/A'}</span>
+                        <span><i class="ti ti-star"></i> ${p.condition_status || '—'}</span>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 24px; flex-shrink: 0;">
+                    <div style="font-weight:700; font-size:1.4rem; color:var(--primary); text-align: right;">
+                        $${p.price || 0}
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        ${isSwap ? `
+                            <button class="btn-swap" style="margin:0; padding:10px 20px; width: auto; font-size:14px;" onclick="event.preventDefault();event.stopPropagation();handleSwapRequest(${p.listing_id})">
+                                <i class="ti ti-arrows-exchange"></i> Propose Swap
+                            </button>
+                        ` : ''}
+                        ${isSale ? `
+                            <button class="btn-buy" style="margin:0; padding:10px 20px; width: auto; font-size:14px; background:#111; color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;" onclick="event.preventDefault();event.stopPropagation();handleBuyNow(${p.listing_id})">
+                                <i class="ti ti-shopping-cart"></i> Buy Now
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </a>
+        `;
+    }).join('');
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity = 1; e.target.style.transform = "translateY(0)"; } });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.product-card').forEach(c => {
+        c.style.opacity = 0; c.style.transform = "translateY(20px)"; c.style.transition = "all 0.5s ease-out";
+        observer.observe(c);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Initial Loaders
+    loadMarketplace();
+
+    // 2. Search Functionality
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allProducts.filter(p =>
+                (p.title || '').toLowerCase().includes(term) ||
+                (p.category || '').toLowerCase().includes(term)
+            );
+            renderProducts(filtered);
         });
     }
 
-    loadMarketplace();
+    // 3. Global Action Handlers
+    window.handleSwapRequest = (id) => {
+        window.location.href = `listing-details.html?id=${id}`;
+    };
 });
 
 window.handleBuyNow = async (listingId) => {
@@ -104,17 +127,17 @@ window.handleBuyNow = async (listingId) => {
             })
         });
         const data = await res.json();
-        
+
         if (data.error) {
             Swal.fire({ title: 'Error', text: data.error, icon: 'error' });
             return;
         }
 
-        Swal.fire({ 
-            title: 'EcoSwap', 
-            text: 'Order created successfully!', 
-            icon: 'success', 
-            confirmButtonColor: '#111' 
+        Swal.fire({
+            title: 'EcoSwap',
+            text: 'Order created successfully!',
+            icon: 'success',
+            confirmButtonColor: '#111'
         }).then(() => {
             window.location.href = 'marketplace.html';
         });
@@ -123,27 +146,6 @@ window.handleBuyNow = async (listingId) => {
         Swal.fire({ title: 'Error', text: 'Failed to initiate purchase.', icon: 'error' });
     }
 };
-
-document.addEventListener("DOMContentLoaded", () => {
-    const searchInput = document.getElementById("searchInput");
-    let allProducts = [];
-    if (searchInput) {
-        searchInput.addEventListener("input", (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = allProducts.filter(p =>
-                (p.title || '').toLowerCase().includes(term) ||
-                (p.category || '').toLowerCase().includes(term)
-            );
-            renderProducts(filtered);
-        });
-    }
-
-    window.handleSwapRequest = (id) => {
-        window.location.href = `listing-details.html?id=${id}`;
-    };
-
-    loadMarketplace();
-});
 
 
 // ============ UPCYCLE LOG ============
@@ -378,18 +380,30 @@ let selectedItemId = null;
 function openSwapModal() {
     const modal = document.getElementById('swapModal');
     const listContainer = document.getElementById('myItemsList');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    if (!user.user_id) {
+        Swal.fire({ title: 'Login Required', text: 'Please log in to propose a swap.', icon: 'warning' });
+        return;
+    }
+
     if (!modal || !listContainer) return;
 
     listContainer.innerHTML = '<p style="text-align:center;padding:20px;color:#94a3b8;">Loading your items...</p>';
     modal.style.display = 'flex';
 
     fetch(`${API_BASE}/listings`).then(r => r.json()).then(res => {
-        const items = res.data || res;
-        if (!Array.isArray(items) || !items.length) {
-            listContainer.innerHTML = '<p style="text-align:center;padding:20px;color:#94a3b8;">No items in your inventory.</p>';
+        let items = res.data || res;
+        if (!Array.isArray(items)) items = [];
+
+        // Filter: only show CURRENT USER'S items that are ACTIVE
+        const myItems = items.filter(i => parseInt(i.user_id) === parseInt(user.user_id) && i.status === 'active');
+
+        if (myItems.length === 0) {
+            listContainer.innerHTML = '<p style="text-align:center;padding:20px;color:#94a3b8;">You have no active items to swap.</p>';
             return;
         }
-        listContainer.innerHTML = items.map(item => `
+        listContainer.innerHTML = myItems.map(item => `
             <div class="selectable-item" onclick="selectItem(this, ${item.listing_id})">
                 <img src="${item.image || 'https://via.placeholder.com/60'}" alt="${item.title || ''}">
                 <div class="item-details">
@@ -445,7 +459,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify({
                         initiator_id: user.user_id,
                         partner_id: partnerId,
-                        requested_listing_id: requestedListingId
+                        requested_listing_id: requestedListingId,
+                        offered_listing_id: selectedItemId
                     })
                 });
                 const data = await res.json();
@@ -467,100 +482,84 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let allItems = [];
 
-    async function loadInventory() {
-        try {
-            const res = await fetch(`${API_BASE}/listings`);
-            let items = await res.json();
-            if (items && items.data) items = items.data;
-            if (!Array.isArray(items)) { container.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;">No items found.</p>'; return; }
-            
-            // Filter: only show items owned by the current user
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            if (user.user_id) {
-                items = items.filter(i => parseInt(i.user_id) === parseInt(user.user_id));
-            } else {
-                // If not logged in, show nothing in inventory
-                items = [];
-            }
+    let myItems = [];
 
-            allItems = items;
-            renderInventory(items);
-            updateStats(items);
+    async function loadInventory() {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.user_id) {
+            container.innerHTML = '<p style="padding:20px;text-align:center;">Please log in.</p>';
+            return;
+        }
+
+        try {
+            // Fetch ALL listings for this user specifically (including swapped/paid)
+            const res = await fetch(`${API_BASE}/listings/user&user_id=${user.user_id}`);
+            const result = await res.json();
+            myItems = result.data || [];
+
+            renderInventory(myItems);
+            updateStats(myItems);
         } catch (err) {
-            console.error("Failed to load inventory:", err);
-            container.innerHTML = '<p style="padding:20px;text-align:center;color:#ef4444;">Failed to load inventory.</p>';
+            container.innerHTML = '<p style="padding:20px;text-align:center;color:red;">Error loading items.</p>';
         }
     }
 
     function renderInventory(items) {
-        if (!items.length) { container.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;">No items found.</p>'; return; }
+        if (!items || items.length === 0) {
+            container.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;">No items found.</p>';
+            return;
+        }
         container.innerHTML = items.map(item => `
             <div class="item-row" id="row-${item.listing_id}">
+                <div><img src="${item.image || 'https://via.placeholder.com/60'}" class="item-img"></div>
                 <div>
-                    <img src="${item.image || 'https://via.placeholder.com/60'}" class="item-img" alt="item">
+                    <div style="font-weight:700;">${item.title}</div>
+                    <div style="font-size:12px;color:#64748b;">${item.category} • ID: ${item.listing_id}</div>
                 </div>
-                <div>
-                    <div style="font-weight:700;color:#1e293b;">${item.title || ''}</div>
-                    <div style="font-size:12px;color:#64748b;">
-                        <i class="ti ti-tag"></i> ${item.category || '—'} &bull; ID: ${item.listing_id}
-                    </div>
-                </div>
-                <div style="font-size:14px;font-weight:500;">
-                    ${item.condition_status || '—'}
-                </div>
+                <div style="font-size:14px;">${item.condition_status}</div>
                 <div>
                     <span class="status-badge ${item.status === 'active' ? 'status-active' : 'status-swapped'}">
-                        ${item.status === 'active' ? '● Live' : item.status || '—'}
+                        ${item.status === 'active' ? '● Live' : item.status}
                     </span>
                 </div>
                 <div class="action-btns">
-                    <button class="btn-icon" title="View" onclick="window.location.href='listing-details.html?id=${item.listing_id}'"><i class="ti ti-eye"></i></button>
-                    <button class="btn-icon" title="Edit" onclick="window.location.href='edit-listing.html?id=${item.listing_id}'"><i class="ti ti-edit"></i></button>
-                    <button class="btn-icon btn-delete" title="Delete" onclick="deleteItem(${item.listing_id})"><i class="ti ti-trash"></i></button>
+                    <button class="btn-icon" onclick="window.location.href='listing-details.html?id=${item.listing_id}'"><i class="ti ti-eye"></i></button>
+                    <button class="btn-icon" onclick="window.location.href='edit-listing.html?id=${item.listing_id}'"><i class="ti ti-edit"></i></button>
+                    <button class="btn-icon btn-delete" onclick="deleteItem(${item.listing_id})"><i class="ti ti-trash"></i></button>
                 </div>
             </div>
         `).join('');
     }
 
     function updateStats(items) {
-        const elActive = document.getElementById('statActive');
-        const elSwapped = document.getElementById('statSwapped');
-        const elTotal = document.getElementById('statTotal');
-        if (elActive) elActive.textContent = items.filter(i => i.status === 'active').length;
-        if (elSwapped) elSwapped.textContent = items.filter(i => i.status === 'swapped').length;
-        if (elTotal) elTotal.textContent = items.length;
+        if (document.getElementById('statActive')) document.getElementById('statActive').textContent = items.filter(i => i.status === 'active').length;
+        if (document.getElementById('statSwapped')) document.getElementById('statSwapped').textContent = items.filter(i => i.status === 'swapped' || i.status === 'paid').length;
+        if (document.getElementById('statTotal')) document.getElementById('statTotal').textContent = items.length;
     }
 
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
             document.querySelector('.tab.active')?.classList.remove('active');
             tab.classList.add('active');
-            const filterType = tab.innerText.trim();
-            if (filterType === 'All Items') renderInventory(allItems);
-            else if (filterType === 'Active') renderInventory(allItems.filter(i => i.status === 'active'));
-            else if (filterType === 'Swapped') renderInventory(allItems.filter(i => i.status === 'swapped'));
-            else renderInventory(allItems);
+            const filter = tab.innerText.trim().toLowerCase();
+
+            if (filter === 'active') {
+                renderInventory(myItems.filter(i => i.status === 'active'));
+            } else if (filter === 'swapped') {
+                renderInventory(myItems.filter(i => i.status === 'swapped' || i.status === 'paid'));
+            } else {
+                renderInventory(myItems);
+            }
         });
     });
 
     window.deleteItem = async (id) => {
-        const result = await Swal.fire({
-            title: 'Delete Listing?',
-            text: 'This action cannot be undone.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            confirmButtonText: 'Delete'
-        });
-        if (!result.isConfirmed) return;
+        const confirm = await Swal.fire({ title: 'Delete?', text: 'Cannot undo!', icon: 'warning', showCancelButton: true });
+        if (!confirm.isConfirmed) return;
         try {
-            const res = await fetch(`${API_BASE}/listings/${id}`, { method: 'DELETE' });
-            const data = await res.json();
-            Swal.fire({ title: 'EcoSwap', text: data.message || 'Item deleted.', icon: 'success', confirmButtonColor: '#111' });
+            await fetch(`${API_BASE}/listings/${id}`, { method: 'DELETE' });
             loadInventory();
-        } catch {
-            Swal.fire({ title: 'Error', text: 'Failed to delete item.', icon: 'error' });
-        }
+        } catch { Swal.fire('Error', 'Failed to delete', 'error'); }
     };
 
     loadInventory();
@@ -584,7 +583,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!item || item.status === 'error') return;
 
             const el = (id) => document.getElementById(id);
-            
+
             // Fetch and populate materials first so we can select the correct one
             const materialSelect = el('editMaterial');
             if (materialSelect) {
@@ -597,7 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         options += `<option value="null">Other</option>`;
                         materialSelect.innerHTML = options;
                     }
-                } catch(e) {}
+                } catch (e) { }
             }
 
             if (el('editTitle')) el('editTitle').value = item.title || '';

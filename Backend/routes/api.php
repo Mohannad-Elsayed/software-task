@@ -91,6 +91,17 @@ if (preg_match('#^/api/listings/?$#', $requestUri)) {
     exit;
 }
 
+if (preg_match('#^/api/listings/user/?$#', $requestUri)) {
+    $controller = new \app\Http\Controllers\ListingController();
+    if ($method === 'GET') {
+        $controller->userListings();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
 if (preg_match('#^/api/listings/(\d+)/condition$#', $requestUri, $matches)) {
     $controller = new \app\Http\Controllers\ListingController();
     $id = $matches[1];
@@ -443,6 +454,8 @@ if (preg_match('#^/api/swap-requests/?$#', $requestUri)) {
     $controller = new SwapController();
     if ($method === 'POST') {
         $controller->sendSwapRequest();
+    } elseif ($method === 'GET') {
+        $controller->listSwapRequests();
     } else {
         http_response_code(405);
         echo json_encode(["error" => "Method Not Allowed"]);
