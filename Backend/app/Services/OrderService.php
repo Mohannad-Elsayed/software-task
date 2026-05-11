@@ -51,13 +51,24 @@ class OrderService
 
     /*
     =========================================
-    GET ORDER ITEMS
+    GET ORDER ITEMS (WITH LISTING DETAILS)
     =========================================
     */
     public function getOrderItems($orderId)
     {
         $stmt = $this->conn->prepare("
-            SELECT * FROM OrderItem WHERE order_id = ?
+            SELECT 
+                oi.*, 
+                l.title, 
+                l.category, 
+                l.condition_status, 
+                l.listing_type, 
+                l.status as listing_status,
+                l.user_id as seller_id,
+                l.material_id
+            FROM OrderItem oi
+            JOIN Listing l ON oi.listing_id = l.listing_id
+            WHERE oi.order_id = ?
         ");
         $stmt->bind_param("i", $orderId);
         $stmt->execute();
@@ -70,6 +81,113 @@ class OrderService
         }
 
         return $items;
+    }
+
+    public function getPaymentByOrderId($orderId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT * FROM Payment WHERE order_id = ?
+        ");
+        $stmt->bind_param("i", $orderId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
+    }
+
+    public function getCartData($orderId)
+    {
+        $order = $this->getOrderById($orderId);
+        if (!$order) return null;
+
+        return [
+            "order" => $order,
+            "items" => $this->getOrderItems($orderId),
+            "payment" => $this->getPaymentByOrderId($orderId)
+        ];
+    }
+
+    public function getPendingOrdersByUser($userId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                o.order_id, 
+                o.total_amount, 
+                o.status, 
+                (SELECT l.title FROM OrderItem oi JOIN Listing l ON oi.listing_id = l.listing_id WHERE oi.order_id = o.order_id LIMIT 1) as title
+            FROM Orders o
+            WHERE o.buyer_id = ? AND o.status = 'pending'
+            ORDER BY o.order_id DESC
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $orders = [];
+        while ($row = $result->fetch_assoc()) {
+            $orders[] = $row;
+        }
+        return $orders;
+    }
+
+    public function removeItemFromOrder($orderItemId)
+    {
+        $this->conn->begin_transaction();
+        try {
+            // 1. Get item info to find listing_id and order_id
+            $stmt = $this->conn->prepare("SELECT listing_id, order_id FROM OrderItem WHERE order_item_id = ?");
+            $stmt->bind_param("i", $orderItemId);
+            $stmt->execute();
+            $item = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+
+            if (!$item) {
+                throw new \Exception("Item not found");
+            }
+
+            $listingId = $item['listing_id'];
+            $orderId = $item['order_id'];
+
+            // 2. Check if order is pending (only allow remove if pending)
+            $stmt = $this->conn->prepare("SELECT status FROM Orders WHERE order_id = ?");
+            $stmt->bind_param("i", $orderId);
+            $stmt->execute();
+            $order = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+
+            if (!$order || $order['status'] !== 'pending') {
+                throw new \Exception("Cannot remove item from a non-pending order");
+            }
+
+            // 3. Unlock listing
+            $stmt = $this->conn->prepare("UPDATE Listing SET status = 'active' WHERE listing_id = ? AND status = 'locked'");
+            $stmt->bind_param("i", $listingId);
+            $stmt->execute();
+            $stmt->close();
+
+            // 4. Delete item
+            $stmt = $this->conn->prepare("DELETE FROM OrderItem WHERE order_item_id = ?");
+            $stmt->bind_param("i", $orderItemId);
+            $stmt->execute();
+            $stmt->close();
+
+            // 5. Recalculate total
+            $items = $this->getOrderItems($orderId);
+            $newTotal = 0;
+            foreach ($items as $it) {
+                $newTotal += $it['price'] * $it['quantity'];
+            }
+            $newTotal = $this->applyBundleDiscount($newTotal);
+
+            $stmt = $this->conn->prepare("UPDATE Orders SET total_amount = ? WHERE order_id = ?");
+            $stmt->bind_param("di", $newTotal, $orderId);
+            $stmt->execute();
+            $stmt->close();
+
+            $this->conn->commit();
+            return ["success" => true];
+        } catch (\Throwable $e) {
+            $this->conn->rollback();
+            return ["error" => $e->getMessage()];
+        }
     }
 
     /*
@@ -179,7 +297,7 @@ class OrderService
                 "order_id" => $orderId,
                 "total_amount" => $total
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->conn->rollback();
             return ["error" => $e->getMessage()];
         }
@@ -237,7 +355,7 @@ class OrderService
 
             $this->conn->commit();
             return ["success" => true];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->conn->rollback();
             return ["error" => $e->getMessage()];
         }
@@ -307,7 +425,7 @@ class OrderService
 
                 $stmt2 = $this->conn->prepare("
                     UPDATE Listing 
-                    SET status = 'sold'
+                    SET status = 'paid'
                     WHERE listing_id = ?
                 ");
                 $stmt2->bind_param("i", $listingId);
@@ -323,7 +441,7 @@ class OrderService
                 "order_id" => $orderId,
                 "amount" => $amount
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->conn->rollback();
             return ["error" => $e->getMessage()];
         }

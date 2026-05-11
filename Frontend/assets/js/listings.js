@@ -11,6 +11,13 @@ document.addEventListener("DOMContentLoaded", () => {
             let products = await res.json();
             if (products && products.data) products = products.data;
             if (!Array.isArray(products)) { grid.innerHTML = '<p style="text-align:center;padding:40px;color:#94a3b8;">No listings available.</p>'; return; }
+            
+            // Filter: only show items from other users
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user.user_id) {
+                products = products.filter(p => parseInt(p.user_id) !== parseInt(user.user_id));
+            }
+
             allProducts = products;
             renderProducts(products);
         } catch (err) {
@@ -26,30 +33,45 @@ document.addEventListener("DOMContentLoaded", () => {
                 <p>No items found matching your search.</p></div>`;
             return;
         }
-        grid.innerHTML = productsToRender.map(p => `
-            <a href="listing-details.html?id=${p.listing_id}" class="product-card" style="padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
-                <div style="flex: 1; min-width: 0;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <h3 style="font-size:1.2rem; font-weight:700; margin:0; color:var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            ${p.title || 'Untitled Listing'}
-                        </h3>
-                        ${p.listing_type === 'swap' ? '<span class="swap-badge" style="margin:0; flex-shrink:0;">Swap</span>' : ''}
+        grid.innerHTML = productsToRender.map(p => {
+            const isSale = p.listing_type === 'sale';
+            const isSwap = p.listing_type === 'swap';
+            
+            return `
+                <a href="listing-details.html?id=${p.listing_id}" class="product-card" style="padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <h3 style="font-size:1.2rem; font-weight:700; margin:0; color:var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                ${p.title || 'Untitled Listing'}
+                            </h3>
+                            ${isSwap ? '<span class="swap-badge" style="margin:0; flex-shrink:0;">Swap</span>' : ''}
+                            ${isSale ? '<span class="status-badge status-active" style="margin:0; flex-shrink:0; background:#dcfce7; color:#166534; font-size:11px;">For Sale</span>' : ''}
+                        </div>
+                        <div style="display:flex; gap: 16px; font-size:13px; color:var(--muted); margin-top: 8px;">
+                            <span><i class="ti ti-tag"></i> ${p.category || 'N/A'}</span>
+                            <span><i class="ti ti-star"></i> ${p.condition_status || '—'}</span>
+                        </div>
                     </div>
-                    <div style="display:flex; gap: 16px; font-size:13px; color:var(--muted); margin-top: 8px;">
-                        <span><i class="ti ti-tag"></i> ${p.category || 'N/A'}</span>
-                        <span><i class="ti ti-star"></i> ${p.condition_status || '—'}</span>
+                    <div style="display: flex; align-items: center; gap: 24px; flex-shrink: 0;">
+                        <div style="font-weight:700; font-size:1.4rem; color:var(--primary); text-align: right;">
+                            $${p.price || 0}
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            ${isSwap ? `
+                                <button class="btn-swap" style="margin:0; padding:10px 20px; width: auto; font-size:14px;" onclick="event.preventDefault();event.stopPropagation();handleSwapRequest(${p.listing_id})">
+                                    <i class="ti ti-arrows-exchange"></i> Propose Swap
+                                </button>
+                            ` : ''}
+                            ${isSale ? `
+                                <button class="btn-buy" style="margin:0; padding:10px 20px; width: auto; font-size:14px; background:#111; color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;" onclick="event.preventDefault();event.stopPropagation();handleBuyNow(${p.listing_id})">
+                                    <i class="ti ti-shopping-cart"></i> Buy Now
+                                </button>
+                            ` : ''}
+                        </div>
                     </div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 24px; flex-shrink: 0;">
-                    <div style="font-weight:700; font-size:1.4rem; color:var(--primary); text-align: right;">
-                        $${p.price || 0}
-                    </div>
-                    <button class="btn-swap" style="margin:0; padding:10px 20px; width: auto; font-size:14px;" onclick="event.preventDefault();event.stopPropagation();handleSwapRequest(${p.listing_id})">
-                        <i class="ti ti-arrows-exchange"></i> Propose Swap
-                    </button>
-                </div>
-            </a>
-        `).join('');
+                </a>
+            `;
+        }).join('');
 
         const observer = new IntersectionObserver(entries => {
             entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity = 1; e.target.style.transform = "translateY(0)"; } });
@@ -60,6 +82,49 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    loadMarketplace();
+});
+
+window.handleBuyNow = async (listingId) => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.user_id) {
+        Swal.fire({ title: 'Login Required', text: 'Please log in to buy items.', icon: 'warning', confirmButtonColor: '#111' });
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}/orders`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                buyer_id: user.user_id,
+                items: [{ listing_id: parseInt(listingId), quantity: 1 }],
+                shipping_street: '',
+                shipping_city: ''
+            })
+        });
+        const data = await res.json();
+        
+        if (data.error) {
+            Swal.fire({ title: 'Error', text: data.error, icon: 'error' });
+            return;
+        }
+
+        Swal.fire({ 
+            title: 'EcoSwap', 
+            text: 'Order created successfully!', 
+            icon: 'success', 
+            confirmButtonColor: '#111' 
+        }).then(() => {
+            window.location.href = 'marketplace.html';
+        });
+    } catch (err) {
+        console.error("Purchase failed:", err);
+        Swal.fire({ title: 'Error', text: 'Failed to initiate purchase.', icon: 'error' });
+    }
+};
+
+document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("searchInput");
     let allProducts = [];
     if (searchInput) {
@@ -202,6 +267,24 @@ document.addEventListener("DOMContentLoaded", () => {
             set('specListingType', item.listing_type);
             set('specStatus', item.status);
 
+            // Handle button visibility
+            const buyBtn = document.getElementById('buyBtn');
+            const swapBtn = document.getElementById('swapBtn');
+            const ecoBenefit = document.querySelector('.eco-benefit');
+
+            if (item.listing_type === 'sale') {
+                if (buyBtn) buyBtn.style.display = 'flex';
+                if (swapBtn) swapBtn.style.display = 'none';
+                if (ecoBenefit) ecoBenefit.style.display = 'none'; // Only show eco benefit for swaps
+            } else if (item.listing_type === 'swap') {
+                if (buyBtn) buyBtn.style.display = 'none';
+                if (swapBtn) swapBtn.style.display = 'flex';
+                if (ecoBenefit) ecoBenefit.style.display = 'block';
+            } else {
+                if (buyBtn) buyBtn.style.display = 'none';
+                if (swapBtn) swapBtn.style.display = 'none';
+            }
+
             const priceEl = document.getElementById('listingPrice');
             if (priceEl) priceEl.textContent = `$${item.price || 0}`;
 
@@ -255,32 +338,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const buyBtn = document.getElementById('buyBtn');
     if (buyBtn) {
-        buyBtn.addEventListener('click', async () => {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            if (!user.user_id) {
-                Swal.fire({ title: 'Login Required', text: 'Please log in to place an order.', icon: 'warning', confirmButtonColor: '#111' });
-                return;
-            }
-            if (!listingId) {
-                Swal.fire({ title: 'EcoSwap', text: 'Proceeding to secure checkout...', icon: 'success', confirmButtonColor: '#111' });
-                return;
-            }
-            try {
-                const res = await fetch(`${API_BASE}/orders`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        buyer_id: user.user_id,
-                        items: [{ listing_id: parseInt(listingId), quantity: 1 }],
-                        shipping_street: '',
-                        shipping_city: ''
-                    })
-                });
-                const data = await res.json();
-                if (data.status === 'error') { Swal.fire({ title: 'Error', text: data.message, icon: 'error' }); return; }
-                Swal.fire({ title: 'EcoSwap', text: 'Order placed! Proceeding to checkout...', icon: 'success', confirmButtonColor: '#111' });
-            } catch {
-                Swal.fire({ title: 'EcoSwap', text: 'Proceeding to secure checkout...', icon: 'success', confirmButtonColor: '#111' });
+        buyBtn.addEventListener('click', () => {
+            if (listingId) {
+                window.handleBuyNow(listingId);
             }
         });
     }
@@ -413,6 +473,16 @@ document.addEventListener("DOMContentLoaded", () => {
             let items = await res.json();
             if (items && items.data) items = items.data;
             if (!Array.isArray(items)) { container.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;">No items found.</p>'; return; }
+            
+            // Filter: only show items owned by the current user
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user.user_id) {
+                items = items.filter(i => parseInt(i.user_id) === parseInt(user.user_id));
+            } else {
+                // If not logged in, show nothing in inventory
+                items = [];
+            }
+
             allItems = items;
             renderInventory(items);
             updateStats(items);

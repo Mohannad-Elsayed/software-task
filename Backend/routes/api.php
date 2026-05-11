@@ -18,7 +18,17 @@ require_once __DIR__ . '/../app/Http/Controllers/AdminController.php';
 require_once __DIR__ . '/../app/Http/Controllers/ReportController.php';
 require_once __DIR__ . '/../app/Http/Controllers/SwapController.php';
 
+use app\Http\Controllers\ListingController;
+use app\Http\Controllers\OrderController;
+use app\Http\Controllers\AdminController;
+use app\Http\Controllers\ReportController;
+use app\Http\Controllers\SwapController;
+
 $requestUri = $_GET["route"] ?? '/';
+// Safeguard: strip any trailing query string if it was accidentally included in the route param
+if (($pos = strpos($requestUri, '?')) !== false) {
+    $requestUri = substr($requestUri, 0, $pos);
+}
 $method = $_SERVER['REQUEST_METHOD'];
 
 
@@ -139,6 +149,19 @@ if (preg_match('#^/api/listings/(\d+)$#', $requestUri, $matches)) {
 // ORDERS endpoints
 // =========================
 
+// cart data (aggregated view)
+if (preg_match('#^/api/orders/cart/?$#', $requestUri)) {
+    $controller = new OrderController();
+
+    if ($method === 'GET') {
+        $controller->getCart();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
 // payment
 if (preg_match('#^/api/orders/pay/?$#', $requestUri)) {
     $controller = new OrderController();
@@ -151,6 +174,19 @@ if (preg_match('#^/api/orders/pay/?$#', $requestUri)) {
             http_response_code(400);
         }
         echo json_encode($result);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+// payment
+if (preg_match('#^/api/orders/payment/?$#', $requestUri)) {
+    $controller = new OrderController();
+
+    if ($method === 'POST') {
+        $controller->processPayment();
     } else {
         http_response_code(405);
         echo json_encode(["error" => "Method Not Allowed"]);
@@ -215,6 +251,17 @@ if (preg_match('#^/api/orders/release/?$#', $requestUri)) {
     exit;
 }
 
+if (preg_match('#^/api/orders/pending/?$#', $requestUri)) {
+    $controller = new OrderController();
+    if ($method === 'GET') {
+        $controller->getPendingOrders();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
 if (preg_match('#^/api/orders/?$#', $requestUri)) {
     $controller = new OrderController();
 
@@ -238,6 +285,19 @@ if (preg_match('#^/api/order-items/?$#', $requestUri)) {
 
     if ($method === 'GET') {
         $controller->getItems();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/order-items/(\d+)/?$#', $requestUri, $matches)) {
+    $controller = new OrderController();
+    $id = $matches[1];
+
+    if ($method === 'DELETE') {
+        $controller->removeItem($id);
     } else {
         http_response_code(405);
         echo json_encode(["error" => "Method Not Allowed"]);
@@ -319,8 +379,8 @@ if (preg_match('#^/api/admin/report/?$#', $requestUri)) {
     exit;
 }
 
-//resolve dipute
-    if (preg_match('#^/api/admin/dispute/resolve/?$#', $requestUri)) {
+// Resolve dispute
+if (preg_match('#^/api/admin/dispute/resolve/?$#', $requestUri)) {
     $controller = new AdminController();
 
     if ($method === 'POST') {
@@ -355,7 +415,8 @@ if (preg_match('#^/api/reports/?$#', $requestUri)) {
     }
     exit;
 }
-//seller analytics
+
+// Seller analytics
 if (preg_match('#^/api/admin/seller-analytics/?$#', $requestUri)) {
     $controller = new AdminController();
 
@@ -365,6 +426,7 @@ if (preg_match('#^/api/admin/seller-analytics/?$#', $requestUri)) {
 
     exit;
 }
+
 //SUSTAINABILITY REPORT
 if (preg_match('#^/api/admin/sustainability/?$#', $requestUri)) {
     $controller = new AdminController();
@@ -572,6 +634,8 @@ if (preg_match('#^/api/community/notifications/?$#', $requestUri)) {
     }
     exit;
 }
+
+
 // =========================
 // AUTH endpoints
 // =========================
