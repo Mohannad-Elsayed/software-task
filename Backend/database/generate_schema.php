@@ -101,11 +101,9 @@ CREATE TABLE UpcycleTransformation (
 CREATE TABLE Review (
     review_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    listing_id INT NOT NULL,
     rating INT CHECK (rating >= 1 AND rating <= 5),
     comment TEXT,
-    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (listing_id) REFERENCES Listing(listing_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE Comment (

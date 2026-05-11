@@ -10,26 +10,15 @@ class CommunityService {
         $this->conn = db();
     }
 
-    public function addReview(
-        $userId,
-        $listingId,
-        $rating,
-        $comment
-    ) {
-
+    public function addReview($userId, $rating, $comment)
+    {
         $stmt = $this->conn->prepare("
             INSERT INTO Review
-            (user_id, listing_id, rating, comment)
-            VALUES (?, ?, ?, ?)
+            (user_id, rating, comment)
+            VALUES (?, ?, ?)
         ");
 
-        $stmt->bind_param(
-            "iiis",
-            $userId,
-            $listingId,
-            $rating,
-            $comment
-        );
+        $stmt->bind_param("iis", $userId, $rating, $comment);
 
         return $stmt->execute();
     }
@@ -100,38 +89,19 @@ class CommunityService {
 
         return $stmt->execute();
     }
-    public function getReviews($listingId = null)
+    public function getReviews()
     {
-        if ($listingId) {
-            $stmt = $this->conn->prepare("
-                SELECT 
-                    Review.review_id,
-                    Review.user_id,
-                    User.username,
-                    Review.listing_id,
-                    Review.rating,
-                    Review.comment
-                FROM Review
-                JOIN User ON Review.user_id = User.user_id
-                WHERE Review.listing_id = ?
-                ORDER BY Review.review_id DESC
-            ");
-
-            $stmt->bind_param("i", $listingId);
-        } else {
-            $stmt = $this->conn->prepare("
-                SELECT 
-                    Review.review_id,
-                    Review.user_id,
-                    User.username,
-                    Review.listing_id,
-                    Review.rating,
-                    Review.comment
-                FROM Review
-                JOIN User ON Review.user_id = User.user_id
-                ORDER BY Review.review_id DESC
-            ");
-        }
+        $stmt = $this->conn->prepare("
+            SELECT 
+                Review.review_id,
+                Review.user_id,
+                User.username,
+                Review.rating,
+                Review.comment
+            FROM Review
+            JOIN User ON Review.user_id = User.user_id
+            ORDER BY Review.review_id DESC
+        ");
 
         $stmt->execute();
         $result = $stmt->get_result();
