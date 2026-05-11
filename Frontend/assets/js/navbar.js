@@ -17,13 +17,9 @@
         <!-- Center: main nav links -->
         <nav class="header-nav">
             <a href="../../pages/listings/marketplace.html">Marketplace</a>
-<<<<<<< HEAD
-            <a href="../../pages/swap/swap-request.html">Swap</a>
-=======
->>>>>>> 695e7193be71d55e36f1560e2d3f65521a2b0fff
             <a href="../../pages/swap/swap-offers.html">Swap</a>
             <a href="../../pages/orders/cart.html">Cart</a>
-            <a href="../../pages/community/community.html">Community</a>
+            <a href="../../pages/community/notification.html">Notification</a>
         </nav>
 
         <!-- Right: profile + logout -->
@@ -53,7 +49,7 @@
         <div class="module">
             <button onclick="togglePages('navCommunity', this)"><b>Community</b></button>
             <div class="pages" id="navCommunity">
-                <a href="../../pages/community/community.html">Community</a>
+                <a href="../../pages/community/notification.html">Notification</a>
                 <a href="../../pages/community/reviews.html">Reviews Section</a>
             </div>
         </div>
