@@ -113,7 +113,15 @@ class SwapService {
         ");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $result = $stmt->get_result();
+        
+        $requests = [];
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $requests[] = $row;
+            }
+        }
+        return $requests;
     }
 
     public function rejectSwapRequest($requestId) {

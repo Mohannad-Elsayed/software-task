@@ -18,6 +18,7 @@ require_once __DIR__ . '/../app/Http/Controllers/AdminController.php';
 require_once __DIR__ . '/../app/Http/Controllers/ReportController.php';
 require_once __DIR__ . '/../app/Http/Controllers/SwapController.php';
 
+
 $requestUri = $_GET["route"] ?? '/';
 // Safeguard: strip any trailing query string if it was accidentally included in the route param
 if (($pos = strpos($requestUri, '?')) !== false) {
@@ -156,7 +157,7 @@ if (preg_match('#^/api/listings/(\d+)$#', $requestUri, $matches)) {
 
 // cart data (aggregated view)
 if (preg_match('#^/api/orders/cart/?$#', $requestUri)) {
-    $controller = new OrderController();
+    $controller = new \app\Http\Controllers\OrderController();
 
     if ($method === 'GET') {
         $controller->getCart();
@@ -169,7 +170,7 @@ if (preg_match('#^/api/orders/cart/?$#', $requestUri)) {
 
 // payment
 if (preg_match('#^/api/orders/pay/?$#', $requestUri)) {
-    $controller = new OrderController();
+    $controller = new \app\Http\Controllers\OrderController();
 
     if ($method === 'POST') {
         $data = json_decode(file_get_contents("php://input"), true);
@@ -188,7 +189,7 @@ if (preg_match('#^/api/orders/pay/?$#', $requestUri)) {
 
 // payment
 if (preg_match('#^/api/orders/payment/?$#', $requestUri)) {
-    $controller = new OrderController();
+    $controller = new \app\Http\Controllers\OrderController();
 
     if ($method === 'POST') {
         $controller->processPayment();
@@ -201,7 +202,7 @@ if (preg_match('#^/api/orders/payment/?$#', $requestUri)) {
 
 // cancel
 if (preg_match('#^/api/orders/cancel/?$#', $requestUri)) {
-    $controller = new OrderController();
+    $controller = new \app\Http\Controllers\OrderController();
 
     if ($method === 'POST') {
         $controller->cancel();
@@ -214,7 +215,7 @@ if (preg_match('#^/api/orders/cancel/?$#', $requestUri)) {
 
 // shipping label
 if (preg_match('#^/api/orders/ship/?$#', $requestUri)) {
-    $controller = new OrderController();
+    $controller = new \app\Http\Controllers\OrderController();
 
     if ($method === 'POST') {
         $data = json_decode(file_get_contents("php://input"), true);
@@ -236,7 +237,7 @@ if (preg_match('#^/api/orders/ship/?$#', $requestUri)) {
 
 // release payment
 if (preg_match('#^/api/orders/release/?$#', $requestUri)) {
-    $controller = new OrderController();
+    $controller = new \app\Http\Controllers\OrderController();
 
     if ($method === 'POST') {
         $data = json_decode(file_get_contents("php://input"), true);
@@ -257,7 +258,7 @@ if (preg_match('#^/api/orders/release/?$#', $requestUri)) {
 }
 
 if (preg_match('#^/api/orders/pending/?$#', $requestUri)) {
-    $controller = new OrderController();
+    $controller = new \app\Http\Controllers\OrderController();
     if ($method === 'GET') {
         $controller->getPendingOrders();
     } else {
@@ -268,7 +269,7 @@ if (preg_match('#^/api/orders/pending/?$#', $requestUri)) {
 }
 
 if (preg_match('#^/api/orders/?$#', $requestUri)) {
-    $controller = new OrderController();
+    $controller = new \app\Http\Controllers\OrderController();
 
     if ($method === 'GET') {
         $controller->index();
@@ -286,7 +287,7 @@ if (preg_match('#^/api/orders/?$#', $requestUri)) {
 // ORDER ITEMS endpoints
 // =========================
 if (preg_match('#^/api/order-items/?$#', $requestUri)) {
-    $controller = new OrderController();
+    $controller = new \app\Http\Controllers\OrderController();
 
     if ($method === 'GET') {
         $controller->getItems();
@@ -298,7 +299,7 @@ if (preg_match('#^/api/order-items/?$#', $requestUri)) {
 }
 
 if (preg_match('#^/api/order-items/(\d+)/?$#', $requestUri, $matches)) {
-    $controller = new OrderController();
+    $controller = new \app\Http\Controllers\OrderController();
     $id = $matches[1];
 
     if ($method === 'DELETE') {
@@ -311,7 +312,7 @@ if (preg_match('#^/api/order-items/(\d+)/?$#', $requestUri, $matches)) {
 }
 
 if (preg_match('#^/api/payments/?$#', $requestUri)) {
-    $controller = new OrderController();
+    $controller = new \app\Http\Controllers\OrderController();
 
     if ($method === 'POST') {
         $data = json_decode(file_get_contents("php://input"), true);
@@ -424,7 +425,7 @@ if (preg_match('#^/api/admin/dispute/resolve/?$#', $requestUri)) {
 // =========================
 
 if (preg_match('#^/api/reports/?$#', $requestUri)) {
-    $controller = new ReportController();
+    $controller = new \app\Http\Controllers\ReportController();
 
     if ($method === 'GET') {
         if (isset($_GET['report_id'])) {
@@ -469,7 +470,7 @@ if (preg_match('#^/api/admin/sustainability/?$#', $requestUri)) {
 
 // Swap Requests endpoints
 if (preg_match('#^/api/swap-requests/?$#', $requestUri)) {
-    $controller = new SwapController();
+    $controller = new \app\Http\Controllers\SwapController();
     if ($method === 'POST') {
         $controller->sendSwapRequest();
     } elseif ($method === 'GET') {
@@ -482,7 +483,7 @@ if (preg_match('#^/api/swap-requests/?$#', $requestUri)) {
 }
 
 if (preg_match('#^/api/swap-requests/(\d+)/accept$#', $requestUri, $matches)) {
-    $controller = new SwapController();
+    $controller = new \app\Http\Controllers\SwapController();
     $requestId = $matches[1];
     if ($method === 'POST') {
         $controller->acceptSwapRequest($requestId);
@@ -494,7 +495,7 @@ if (preg_match('#^/api/swap-requests/(\d+)/accept$#', $requestUri, $matches)) {
 }
 
 if (preg_match('#^/api/swap-requests/(\d+)/reject$#', $requestUri, $matches)) {
-    $controller = new SwapController();
+    $controller = new \app\Http\Controllers\SwapController();
     $requestId = $matches[1];
     if ($method === 'POST') {
         $controller->rejectSwapRequest($requestId);
@@ -506,7 +507,7 @@ if (preg_match('#^/api/swap-requests/(\d+)/reject$#', $requestUri, $matches)) {
 }
 
 if (preg_match('#^/api/swap-requests/(\d+)/offers$#', $requestUri, $matches)) {
-    $controller = new SwapController();
+    $controller = new \app\Http\Controllers\SwapController();
     $requestId = $matches[1];
     if ($method === 'POST') {
         $controller->makeOffer($requestId);
@@ -518,7 +519,7 @@ if (preg_match('#^/api/swap-requests/(\d+)/offers$#', $requestUri, $matches)) {
 }
 
 if (preg_match('#^/api/swap-requests/(\d+)/counter-offer$#', $requestUri, $matches)) {
-    $controller = new SwapController();
+    $controller = new \app\Http\Controllers\SwapController();
     $requestId = $matches[1];
     if ($method === 'POST') {
         $controller->counterOffer($requestId);
@@ -530,7 +531,7 @@ if (preg_match('#^/api/swap-requests/(\d+)/counter-offer$#', $requestUri, $match
 }
 
 if (preg_match('#^/api/swap-requests/(\d+)/balance$#', $requestUri, $matches)) {
-    $controller = new SwapController();
+    $controller = new \app\Http\Controllers\SwapController();
     $requestId = $matches[1];
     if ($method === 'GET') {
         $controller->balanceSwapValue($requestId);
@@ -542,7 +543,7 @@ if (preg_match('#^/api/swap-requests/(\d+)/balance$#', $requestUri, $matches)) {
 }
 
 if (preg_match('#^/api/swap-requests/(\d+)/lock$#', $requestUri, $matches)) {
-    $controller = new SwapController();
+    $controller = new \app\Http\Controllers\SwapController();
     $requestId = $matches[1];
     if ($method === 'POST') {
         $controller->lockSwapAgreement($requestId);
@@ -554,7 +555,7 @@ if (preg_match('#^/api/swap-requests/(\d+)/lock$#', $requestUri, $matches)) {
 }
 
 if (preg_match('#^/api/swap-requests/(\d+)/expire$#', $requestUri, $matches)) {
-    $controller = new SwapController();
+    $controller = new \app\Http\Controllers\SwapController();
     $requestId = $matches[1];
     if ($method === 'POST') {
         $controller->expirePendingSwap($requestId);

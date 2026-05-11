@@ -3,6 +3,7 @@
 namespace app\Http\Controllers;
 
 use app\Services\SwapService;
+require_once __DIR__ . '/../../Services/SwapService.php';
 
 class SwapController {
     
@@ -46,7 +47,7 @@ class SwapController {
                 "message" => "Swap proposal sent!",
                 "data" => ["request_id" => $requestId]
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Server error: " . $e->getMessage()]);
         }
@@ -65,7 +66,7 @@ class SwapController {
         try {
             $requests = $this->swapService->getSwapRequestsByUser((int) $userId, $type);
             echo json_encode(["status" => "success", "data" => $requests]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => $e->getMessage()]);
         }
@@ -87,7 +88,7 @@ class SwapController {
                 http_response_code(404);
                 echo json_encode(["status" => "error", "message" => "Swap request not found."]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Server error: " . $e->getMessage()]);
         }
@@ -109,7 +110,7 @@ class SwapController {
                 http_response_code(404);
                 echo json_encode(["status" => "error", "message" => "Swap request not found."]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Server error: " . $e->getMessage()]);
         }
@@ -154,7 +155,7 @@ class SwapController {
                 "message" => "Offer created successfully.",
                 "data" => ["offer_id" => $offerId]
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Server error: " . $e->getMessage()]);
         }
@@ -197,7 +198,7 @@ class SwapController {
                 "message" => "Counter offer created successfully.",
                 "data" => ["offer_id" => $offerId]
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Server error: " . $e->getMessage()]);
         }
@@ -217,7 +218,7 @@ class SwapController {
                 "status" => "success",
                 "data" => $balance
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Server error: " . $e->getMessage()]);
         }
@@ -239,7 +240,7 @@ class SwapController {
                 http_response_code(404);
                 echo json_encode(["status" => "error", "message" => "Swap request not found."]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Server error: " . $e->getMessage()]);
         }
@@ -261,7 +262,7 @@ class SwapController {
                 http_response_code(404);
                 echo json_encode(["status" => "error", "message" => "Swap request not found."]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Server error: " . $e->getMessage()]);
         }
