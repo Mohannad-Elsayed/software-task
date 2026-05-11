@@ -172,10 +172,12 @@ CREATE TABLE SwapRequest (
     initiator_id INT NOT NULL,
     partner_id INT NOT NULL,
     requested_listing_id INT NOT NULL,
+    offered_listing_id INT NULL,
     status VARCHAR(50) DEFAULT 'pending',
     FOREIGN KEY (initiator_id) REFERENCES User(user_id),
     FOREIGN KEY (partner_id) REFERENCES User(user_id),
-    FOREIGN KEY (requested_listing_id) REFERENCES Listing(listing_id)
+    FOREIGN KEY (requested_listing_id) REFERENCES Listing(listing_id),
+    FOREIGN KEY (offered_listing_id) REFERENCES Listing(listing_id)
 );
 
 CREATE TABLE Offer (

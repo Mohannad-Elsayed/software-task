@@ -17,7 +17,7 @@
         <!-- Center: main nav links -->
         <nav class="header-nav">
             <a href="../../pages/listings/marketplace.html">Marketplace</a>
-            <a href="../../pages/swap/swap-request.html">Swap</a>
+            <a href="../../pages/swap/swap-offers.html">Swap</a>
             <a href="../../pages/orders/cart.html">Cart</a>
             <a href="../../pages/community/community.html">Community</a>
         </nav>
@@ -74,10 +74,7 @@
         <div class="module">
             <button onclick="togglePages('navSwap', this)"><b>Swap</b></button>
             <div class="pages" id="navSwap">
-                <a href="../../pages/swap/swap-request.html">Swap Request</a>
                 <a href="../../pages/swap/swap-offers.html">Swap Offers</a>
-                <a href="../../pages/swap/swap-negotiation.html">Swap Negotiation</a>
-                <a href="../../pages/swap/swap-lock-confirmation.html">Swap Lock Confirmation</a>
             </div>
         </div>
 

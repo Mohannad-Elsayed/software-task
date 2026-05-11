@@ -37,17 +37,37 @@ class SwapController {
             $requestId = $this->swapService->createSwapRequest(
                 $data['initiator_id'],
                 $data['partner_id'],
-                $data['requested_listing_id']
+                $data['requested_listing_id'],
+                $data['offered_listing_id'] ?? null
             );
             http_response_code(201);
             echo json_encode([
                 "status" => "success",
-                "message" => "Swap request created successfully.",
+                "message" => "Swap proposal sent!",
                 "data" => ["request_id" => $requestId]
             ]);
         } catch (\Exception $e) {
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Server error: " . $e->getMessage()]);
+        }
+    }
+
+    public function listSwapRequests() {
+        $userId = $_GET['user_id'] ?? null;
+        $type = $_GET['type'] ?? 'incoming'; // incoming or outgoing
+
+        if (!$userId) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "user_id is required."]);
+            return;
+        }
+
+        try {
+            $requests = $this->swapService->getSwapRequestsByUser((int) $userId, $type);
+            echo json_encode(["status" => "success", "data" => $requests]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
         }
     }
 

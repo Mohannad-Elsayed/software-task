@@ -12,39 +12,40 @@ class SwapService {
         $this->db = db();
     }
 
-    public function createSwapRequest($initiatorId, $partnerId, $requestedListingId) {
+    public function createSwapRequest($initiatorId, $partnerId, $requestedListingId, $offeredListingId = null) {
         $this->db->begin_transaction();
         try {
-            // Validate that the requested listing exists and belongs to the partner
+            // Validate requested listing
             $stmt = $this->db->prepare("SELECT user_id, status FROM Listing WHERE listing_id = ? FOR UPDATE");
             $stmt->bind_param("i", $requestedListingId);
             $stmt->execute();
-            $result = $stmt->get_result();
+            $row = $stmt->get_result()->fetch_assoc();
 
-            if ($result->num_rows === 0) {
-                throw new \Exception("Listing not found.");
+            if (!$row || $row['user_id'] != $partnerId) {
+                throw new \Exception("Requested listing does not belong to the specified partner.");
             }
 
-            $row = $result->fetch_assoc();
-            if ($row['user_id'] != $partnerId) {
-                throw new \Exception("Listing does not belong to the specified partner.");
-            }
-
-            if (!in_array($row['status'], ['active', 'pending', 'negotiating'], true)) {
-                throw new \Exception("Listing is not available for swapping.");
+            // Validate offered listing if provided
+            if ($offeredListingId) {
+                $stmt = $this->db->prepare("SELECT user_id FROM Listing WHERE listing_id = ? FOR UPDATE");
+                $stmt->bind_param("i", $offeredListingId);
+                $stmt->execute();
+                $offeredRow = $stmt->get_result()->fetch_assoc();
+                if (!$offeredRow || $offeredRow['user_id'] != $initiatorId) {
+                    throw new \Exception("Offered listing does not belong to you.");
+                }
             }
 
             // Create swap request
             $stmt = $this->db->prepare("
-                INSERT INTO SwapRequest (initiator_id, partner_id, requested_listing_id, status)
-                VALUES (?, ?, ?, 'pending')
+                INSERT INTO SwapRequest (initiator_id, partner_id, requested_listing_id, offered_listing_id, status)
+                VALUES (?, ?, ?, ?, 'pending')
             ");
-            $stmt->bind_param("iii", $initiatorId, $partnerId, $requestedListingId);
+            $stmt->bind_param("iiii", $initiatorId, $partnerId, $requestedListingId, $offeredListingId);
             $stmt->execute();
 
             $requestId = $this->db->insert_id;
             $this->db->commit();
-
             return $requestId;
         } catch (\Exception $e) {
             $this->db->rollback();
@@ -55,24 +56,34 @@ class SwapService {
     public function acceptSwapRequest($requestId) {
         $this->db->begin_transaction();
         try {
-            // Get swap request details
             $stmt = $this->db->prepare("SELECT * FROM SwapRequest WHERE request_id = ? FOR UPDATE");
             $stmt->bind_param("i", $requestId);
             $stmt->execute();
-            $result = $stmt->get_result();
+            $swapRequest = $stmt->get_result()->fetch_assoc();
 
-            if ($result->num_rows === 0) {
-                throw new \Exception("Swap request not found.");
+            if (!$swapRequest) throw new \Exception("Swap request not found.");
+            if ($swapRequest['status'] !== 'pending') throw new \Exception("Swap request is not pending.");
+
+            $initiatorId = $swapRequest['initiator_id'];
+            $partnerId = $swapRequest['partner_id'];
+            $reqId = $swapRequest['requested_listing_id'];
+            $offId = $swapRequest['offered_listing_id'];
+
+            // 1. Swap Owners
+            // Partner's item goes to Initiator
+            $stmt = $this->db->prepare("UPDATE Listing SET user_id = ?, status = 'swapped' WHERE listing_id = ?");
+            $stmt->bind_param("ii", $initiatorId, $reqId);
+            $stmt->execute();
+
+            // Initiator's item goes to Partner
+            if ($offId) {
+                $stmt = $this->db->prepare("UPDATE Listing SET user_id = ?, status = 'swapped' WHERE listing_id = ?");
+                $stmt->bind_param("ii", $partnerId, $offId);
+                $stmt->execute();
             }
 
-            $swapRequest = $result->fetch_assoc();
-
-            if (in_array($swapRequest['status'], self::FINAL_SWAP_STATUSES, true)) {
-                throw new \Exception("Swap request is no longer active.");
-            }
-
-            // Update swap request status to accepted
-            $stmt = $this->db->prepare("UPDATE SwapRequest SET status = 'accepted' WHERE request_id = ?");
+            // 2. Complete Request
+            $stmt = $this->db->prepare("UPDATE SwapRequest SET status = 'completed' WHERE request_id = ?");
             $stmt->bind_param("i", $requestId);
             $stmt->execute();
 
@@ -82,6 +93,27 @@ class SwapService {
             $this->db->rollback();
             throw $e;
         }
+    }
+
+    public function getSwapRequestsByUser($userId, $type = 'incoming') {
+        $column = ($type === 'incoming') ? 'partner_id' : 'initiator_id';
+        $stmt = $this->db->prepare("
+            SELECT sr.*, 
+                   u_init.username as initiator_name,
+                   u_part.username as partner_name,
+                   l_req.title as requested_title,
+                   l_off.title as offered_title
+            FROM SwapRequest sr
+            JOIN User u_init ON sr.initiator_id = u_init.user_id
+            JOIN User u_part ON sr.partner_id = u_part.user_id
+            JOIN Listing l_req ON sr.requested_listing_id = l_req.listing_id
+            LEFT JOIN Listing l_off ON sr.offered_listing_id = l_off.listing_id
+            WHERE sr.$column = ?
+            ORDER BY sr.request_id DESC
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
     public function rejectSwapRequest($requestId) {
