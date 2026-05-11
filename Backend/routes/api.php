@@ -18,12 +18,6 @@ require_once __DIR__ . '/../app/Http/Controllers/AdminController.php';
 require_once __DIR__ . '/../app/Http/Controllers/ReportController.php';
 require_once __DIR__ . '/../app/Http/Controllers/SwapController.php';
 
-use app\Http\Controllers\ListingController;
-use app\Http\Controllers\OrderController;
-use app\Http\Controllers\AdminController;
-use app\Http\Controllers\ReportController;
-use app\Http\Controllers\SwapController;
-
 $requestUri = $_GET["route"] ?? '/';
 // Safeguard: strip any trailing query string if it was accidentally included in the route param
 if (($pos = strpos($requestUri, '?')) !== false) {
@@ -617,6 +611,12 @@ if (preg_match('#^/api/community/reviews/?$#', $requestUri)) {
         $controller->getReviews();
     } elseif ($method === 'POST') {
         $controller->addReview();
+    } else {
+        http_response_code(405);
+        echo json_encode([
+            "success" => false,
+            "message" => "Method Not Allowed"
+        ]);
     }
 
     exit;

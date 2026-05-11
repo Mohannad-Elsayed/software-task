@@ -11,12 +11,11 @@ class CommunityController
         $this->communityService = new CommunityService();
     }
 
-    public function getReviews(){
+    public function getReviews()
+    {
         header("Content-Type: application/json");
 
-        $listingId = $_GET["listing_id"] ?? null;
-
-        $reviews = $this->communityService->getReviews($listingId);
+        $reviews = $this->communityService->getReviews();
 
         echo json_encode([
             "success" => true,
@@ -32,7 +31,6 @@ class CommunityController
 
         $success = $this->communityService->addReview(
             $data["user_id"],
-            $data["listing_id"],
             $data["rating"],
             $data["comment"] ?? ""
         );

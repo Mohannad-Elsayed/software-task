@@ -17,9 +17,9 @@
         <!-- Center: main nav links -->
         <nav class="header-nav">
             <a href="../../pages/listings/marketplace.html">Marketplace</a>
-            <a href="../../pages/community/community.html">Community</a>
             <a href="../../pages/swap/swap-request.html">Swap</a>
             <a href="../../pages/orders/cart.html">Cart</a>
+            <a href="../../pages/community/community.html">Community</a>
         </nav>
 
         <!-- Right: profile + logout -->
