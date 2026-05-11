@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Hub</title>
+
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+
+    <style>
+        .notifications-page {
+            padding: 30px;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .notification-header {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .notification-header h1 {
+            margin: 0;
+            color: var(--text);
+        }
+
+        .notification-header p {
+            color: var(--muted);
+            margin-top: 8px;
+        }
+
+        .notification-card {
+            background: white;
+            padding: 18px 20px;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: flex-start;
+        }
+
+        .notification-card.unread {
+            border-left: 5px solid var(--primary);
+            background: #f0fdf4;
+        }
+
+        .notification-type {
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .notification-message {
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .notification-date {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .read-btn {
+            border: none;
+            background: var(--primary);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .read-btn:disabled {
+            background: #cbd5e1;
+            cursor: default;
+        }
+
+        .empty-state {
+            background: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 16px;
+            color: var(--muted);
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="notifications-page">
+        <section class="notification-header">
+            <h1>Notification Hub</h1>
+            <p>See the latest marketplace updates, new listings, swap requests, and system alerts.</p>
+        </section>
+
+        <section id="notificationsList">
+            <div class="empty-state">Loading notifications...</div>
+        </section>
+    </main>
+
+    <script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script src="../../assets/js/navbar.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        checkAuth();
+        loadNotifications();
+    });
+
+    async function loadNotifications() {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const container = document.getElementById("notificationsList");
+
+        if (!user.user_id) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    Please login first to view notifications.
+                </div>
+            `;
+            return;
+        }
+
+        const result = await request(`/api/notifications&user_id=${user.user_id}`);
+
+        if (!result.success) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    Failed to load notifications.
+                </div>
+            `;
+            return;
+        }
+
+        const notifications = result.notifications || [];
+
+        if (notifications.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    No notifications yet.
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = notifications.map(n => `
+            <div class="notification-card ${Number(n.is_read) === 0 ? "unread" : ""}">
+                <div>
+                    <div class="notification-type">${n.type || "Notification"}</div>
+                    <div class="notification-message">${n.message}</div>
+                    <div class="notification-date">${n.created_at}</div>
+                </div>
+
+                <button 
+                    class="read-btn"
+                    ${Number(n.is_read) === 1 ? "disabled" : ""}
+                    onclick="markAsRead(${n.notification_id})"
+                >
+                    ${Number(n.is_read) === 1 ? "Read" : "Mark as read"}
+                </button>
+            </div>
+        `).join("");
+    }
+
+    async function markAsRead(notificationId) {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+        await request(`/api/notifications/${notificationId}/read`, "PUT", {
+            user_id: user.user_id
+        });
+
+        loadNotifications();
+    }
+</script>
+</body>
+</html>
