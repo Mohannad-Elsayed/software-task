@@ -1,7 +1,5 @@
 <?php
 
-namespace app\Services;
-
 require_once __DIR__ . '/../../database/connection.php';
 
 class AdminService
@@ -98,55 +96,111 @@ class AdminService
     // =========================
     public function updateReportStatus($reportId, $data)
     {
-        $status = $data['status'] ?? null;
+        $allowedStatuses = [
+            "pending",
+            "rejected",
+            "resolved"
+        ];
 
-        if (!$status) {
-            return ["error" => "status is required"];
+        $status = $data["status"] ?? null;
+
+        if (!$status || !in_array($status, $allowedStatuses)) {
+
+            return [
+                "success" => false,
+                "message" => "Invalid status"
+            ];
         }
 
-        $stmt = $this->conn->prepare(
-            "UPDATE Report SET status = ? WHERE report_id = ?"
-        );
+        $stmt = $this->conn->prepare("
+            UPDATE Report
+            SET status = ?,
+                resolved_at = NOW(),
+                handled_by = 2
+            WHERE report_id = ?
+        ");
 
         $stmt->bind_param("si", $status, $reportId);
 
         if ($stmt->execute()) {
+
             $stmt->close();
 
             return [
                 "success" => true,
-                "report_id" => $reportId
+                "message" => "Report updated"
             ];
         }
 
         $error = $stmt->error;
+
         $stmt->close();
 
-        return ["error" => $error];
+        return [
+            "success" => false,
+            "message" => $error
+        ];
     }
-   
+
+    // =========================
+    // GET ALL DISPUTES (ADMIN VIEW)
+    // =========================
+    public function getDisputes()
+    {
+        $result = $this->conn->query("
+            SELECT
+                dispute_id,
+                order_id,
+                request_id,
+                reason,
+                status
+            FROM Dispute
+            ORDER BY dispute_id DESC
+        ");
+
+        $disputes = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $disputes[] = $row;
+        }
+
+        return $disputes;
+    }
     
     // =========================
-    // REOVE DISPUTE
+    // RESOLVE DISPUTE
     // =========================
     public function resolveDispute($disputeId)
-{
-    $stmt = $this->conn->prepare("
-        UPDATE Dispute
-        SET status = 'resolved'
-        WHERE dispute_id = ?
-    ");
+    {
+        $stmt = $this->conn->prepare("
+            UPDATE Dispute
+            SET
+                status = 'resolved',
+                resolved_at = NOW(),
+                resolved_by = 2
+            WHERE dispute_id = ?
+        ");
 
-    $stmt->bind_param("i", $disputeId);
-    $stmt->execute();
-    $stmt->close();
+        $stmt->bind_param("i", $disputeId);
 
-    return [
-        "success" => true,
-        "message" => "Dispute resolved",
-        "dispute_id" => $disputeId
-    ];
-}
+        if ($stmt->execute()) {
+
+            $stmt->close();
+
+            return [
+                "success" => true
+            ];
+        }
+
+        $error = $stmt->error;
+
+        $stmt->close();
+
+        return [
+            "success" => false,
+            "message" => $error
+        ];
+    }
     // =========================
     // SELLER ANALYTICS
     // =========================

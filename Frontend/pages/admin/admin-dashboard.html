@@ -63,14 +63,7 @@
       .main-content.expanded {
         margin-left: var(--sidebar-collapsed-width);
       }
-      .section-tab {
-        display: none;
-      }
-      .section-tab.active {
-        display: block;
-        animation: fadeIn 0.4s ease;
-      }
-
+      
       /* ================= COMPONENTS (BUTTONS, CARDS, FORMS) ================= */
       .toggle-btn {
         background: none;
@@ -184,7 +177,7 @@
         </div>
     </header>
     <main class="main-content" id="mainContent">
-      <section id="dashboard" class="section-tab active">
+      <section id="dashboard">
         <h2 class="page-header">Platform Overview</h2>
         <div class="stats-grid">
           <div class="stat-card">
@@ -202,7 +195,7 @@
         </div>
       </section>
 
-      <section id="users" class="section-tab">
+      <section id="users">
         <div class="card">
           <h2 class="page-header">User Management</h2>
           <table>
@@ -219,7 +212,7 @@
         </div>
       </section>
 
-      <section id="disputes" class="section-tab">
+      <section id="disputes">
         <div class="card">
           <h2 class="page-header">Dispute Management</h2>
           <table>
@@ -237,7 +230,7 @@
         </div>
       </section>
 
-      <section id="reports" class="section-tab">
+      <section id="reports">
         <div class="card">
           <h2 class="page-header">Reports Management</h2>
           <table>
