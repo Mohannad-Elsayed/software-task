@@ -70,6 +70,9 @@ function renderProducts(productsToRender) {
                                 <i class="ti ti-shopping-cart"></i> Buy Now
                             </button>
                         ` : ''}
+                        <button class="btn-report" style="margin:0; padding:10px; width: auto; font-size:14px; background:none; color:#ef4444; border:1px solid #ef4444; border-radius:6px; cursor:pointer;" onclick="event.preventDefault();event.stopPropagation();location.href='report.html?listing_id=${p.listing_id}'" title="Report this listing">
+                            <i class="ti ti-report"></i>
+                        </button>
                     </div>
                 </div>
             </a>
@@ -272,7 +275,19 @@ document.addEventListener("DOMContentLoaded", () => {
             // Handle button visibility
             const buyBtn = document.getElementById('buyBtn');
             const swapBtn = document.getElementById('swapBtn');
+            const reportBtn = document.getElementById('reportBtn');
             const ecoBenefit = document.querySelector('.eco-benefit');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+            // Show report button only if it's not the user's listing
+            if (reportBtn) {
+                if (user.user_id && parseInt(item.user_id) !== parseInt(user.user_id)) {
+                    reportBtn.style.display = 'flex';
+                    reportBtn.onclick = () => { window.location.href = `report.html?listing_id=${listingId}`; };
+                } else {
+                    reportBtn.style.display = 'none';
+                }
+            }
 
             if (item.listing_type === 'sale') {
                 if (buyBtn) buyBtn.style.display = 'flex';
