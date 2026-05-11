@@ -46,7 +46,6 @@
 
         .swap-deal { display: flex; align-items: center; gap: 20px; }
         .deal-item { text-align: center; }
-        .deal-item img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; border: 1px solid #f1f5f9; }
         .deal-item p { margin: 5px 0 0; font-size: 13px; font-weight: 600; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
         .exchange-icon { color: var(--primary); font-size: 20px; }
@@ -137,7 +136,6 @@
                         <div class="swap-deal">
                             <div class="deal-item">
                                 <p style="font-size:10px; color:#94a3b8; text-transform:uppercase;">${currentTab === 'incoming' ? offer.initiator_name : 'Me'}</p>
-                                <img src="https://via.placeholder.com/70" alt="Item">
                                 <p title="${offer.offered_title}">${offer.offered_title || 'N/A'}</p>
                             </div>
                             
@@ -147,7 +145,6 @@
 
                             <div class="deal-item">
                                 <p style="font-size:10px; color:#94a3b8; text-transform:uppercase;">${currentTab === 'incoming' ? 'Me' : offer.partner_name}</p>
-                                <img src="https://via.placeholder.com/70" alt="Item">
                                 <p title="${offer.requested_title}">${offer.requested_title}</p>
                             </div>
                         </div>

@@ -360,12 +360,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!others.length) { similarGrid.innerHTML = '<p style="color:#94a3b8;">No similar items found.</p>'; return; }
             similarGrid.innerHTML = others.map(item => `
                 <a href="listing-details.html?id=${item.listing_id}" style="text-decoration:none;color:inherit;">
-                    <div style="background:white;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
-                        <img src="${item.image || 'https://via.placeholder.com/400x200'}" style="width:100%;height:200px;object-fit:cover;">
-                        <div style="padding:12px;">
-                            <div style="font-weight:800;">$${item.price || 0}</div>
-                            <div style="font-size:13px;color:var(--muted);">${item.title || ''}</div>
-                        </div>
+                    <div style="background:white;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;padding:12px;">
+                        <div style="font-weight:800;">$${item.price || 0}</div>
+                        <div style="font-size:13px;color:var(--muted);">${item.title || ''}</div>
                     </div>
                 </a>
             `).join('');
@@ -405,7 +402,6 @@ function openSwapModal() {
         }
         listContainer.innerHTML = myItems.map(item => `
             <div class="selectable-item" onclick="selectItem(this, ${item.listing_id})">
-                <img src="${item.image || 'https://via.placeholder.com/60'}" alt="${item.title || ''}">
                 <div class="item-details">
                     <h4>${item.title || ''}</h4>
                     <p>${item.condition_status || '—'}</p>
@@ -511,7 +507,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         container.innerHTML = items.map(item => `
             <div class="item-row" id="row-${item.listing_id}">
-                <div><img src="${item.image || 'https://via.placeholder.com/60'}" class="item-img"></div>
                 <div>
                     <div style="font-weight:700;">${item.title}</div>
                     <div style="font-size:12px;color:#64748b;">${item.category} • ID: ${item.listing_id}</div>
