@@ -108,4 +108,49 @@ class CommunityService {
 
         return $result->fetch_all(MYSQLI_ASSOC);
     }
+    public function notifyAllUsers($type, $message, $excludeUserId = null)
+    {
+        if ($excludeUserId) {
+            $stmt = $this->conn->prepare("
+                INSERT INTO Notification (user_id, type, message)
+                SELECT user_id, ?, ? FROM User WHERE user_id != ?
+            ");
+            $stmt->bind_param("ssi", $type, $message, $excludeUserId);
+        } else {
+            $stmt = $this->conn->prepare("
+                INSERT INTO Notification (user_id, type, message)
+                SELECT user_id, ?, ? FROM User
+            ");
+            $stmt->bind_param("ss", $type, $message);
+        }
+
+        return $stmt->execute();
+    }
+
+    public function getNotifications($userId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT notification_id, type, message, is_read, created_at
+            FROM Notification
+            WHERE user_id = ?
+            ORDER BY created_at DESC
+        ");
+
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function markNotificationAsRead($notificationId, $userId)
+    {
+        $stmt = $this->conn->prepare("
+            UPDATE Notification
+            SET is_read = TRUE
+            WHERE notification_id = ? AND user_id = ?
+        ");
+
+        $stmt->bind_param("ii", $notificationId, $userId);
+        return $stmt->execute();
+    }
 }

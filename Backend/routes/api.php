@@ -664,8 +664,25 @@ if (preg_match('#^/api/community/comments/(\d+)/?$#', $requestUri, $matches)) {
 if (preg_match('#^/api/community/notifications/?$#', $requestUri)) {
     $controller = new CommunityController();
 
-    if ($method === 'POST') {
+    if ($method === 'GET') {
+        $controller->getNotifications();
+    } elseif ($method === 'POST') {
         $controller->notifyUser();
+    } else {
+        http_response_code(405);
+        echo json_encode([
+            "error" => "Method Not Allowed",
+            "method_received" => $method
+        ]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/community/notifications/all/?$#', $requestUri)) {
+    $controller = new CommunityController();
+
+    if ($method === 'POST') {
+        $controller->notifyAllUsers();
     } else {
         http_response_code(405);
         echo json_encode(["error" => "Method Not Allowed"]);
@@ -673,6 +690,17 @@ if (preg_match('#^/api/community/notifications/?$#', $requestUri)) {
     exit;
 }
 
+if (preg_match('#^/api/community/notifications/([0-9]+)/read/?$#', $requestUri, $matches)) {
+    $controller = new CommunityController();
+
+    if ($method === 'PUT') {
+        $controller->markNotificationAsRead($matches[1]);
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
 
 // =========================
 // AUTH endpoints

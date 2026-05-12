@@ -92,4 +92,52 @@ class CommunityController
 
         echo json_encode(["success" => $success]);
     }
+    public function notifyAllUsers()
+    {
+        header("Content-Type: application/json");
+
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        $success = $this->communityService->notifyAllUsers(
+            $data["type"],
+            $data["message"],
+            $data["exclude_user_id"] ?? null
+        );
+
+        echo json_encode(["success" => $success]);
+    }
+
+    public function getNotifications()
+    {
+        header("Content-Type: application/json");
+
+        $userId = $_GET["user_id"] ?? null;
+
+        if (!$userId) {
+            echo json_encode([
+                "success" => false,
+                "message" => "user_id is required"
+            ]);
+            return;
+        }
+
+        echo json_encode([
+            "success" => true,
+            "notifications" => $this->communityService->getNotifications($userId)
+        ]);
+    }
+
+    public function markNotificationAsRead($notificationId)
+    {
+        header("Content-Type: application/json");
+
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        $success = $this->communityService->markNotificationAsRead(
+            $notificationId,
+            $data["user_id"]
+        );
+
+        echo json_encode(["success" => $success]);
+    }
 }
