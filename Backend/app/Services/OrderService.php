@@ -128,6 +128,30 @@ class OrderService
         return $orders;
     }
 
+    public function getOrdersByBuyer($userId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                o.order_id, 
+                o.total_amount, 
+                o.status, 
+                o.order_date,
+                (SELECT l.title FROM OrderItem oi JOIN Listing l ON oi.listing_id = l.listing_id WHERE oi.order_id = o.order_id LIMIT 1) as title
+            FROM Orders o
+            WHERE o.buyer_id = ?
+            ORDER BY o.order_id DESC
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $orders = [];
+        while ($row = $result->fetch_assoc()) {
+            $orders[] = $row;
+        }
+        return $orders;
+    }
+
     public function removeItemFromOrder($orderItemId)
     {
         $this->conn->begin_transaction();

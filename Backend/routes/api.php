@@ -17,6 +17,7 @@ require_once __DIR__ . '/../app/Http/Controllers/OrderController.php';
 require_once __DIR__ . '/../app/Http/Controllers/AdminController.php';
 require_once __DIR__ . '/../app/Http/Controllers/ReportController.php';
 require_once __DIR__ . '/../app/Http/Controllers/SwapController.php';
+require_once __DIR__ . '/../app/Http/Controllers/DisputeController.php';
 
 
 $requestUri = $_GET["route"] ?? '/';
@@ -756,6 +757,31 @@ if (preg_match('#^/api/health/?$#', $requestUri)) {
         "success" => true,
         "message" => "Backend connected successfully"
     ]);
+    exit;
+}
+
+if (preg_match('#^/api/orders/buyer/?$#', $requestUri)) {
+    $controller = new \app\Http\Controllers\OrderController();
+    if ($method === 'GET') {
+        $controller->getBuyerOrders();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
+    exit;
+}
+
+if (preg_match('#^/api/disputes/?$#', $requestUri)) {
+    $controller = new \app\Http\Controllers\DisputeController();
+
+    if ($method === 'POST') {
+        $controller->store();
+    } elseif ($method === 'GET') {
+        $controller->index();
+    } else {
+        http_response_code(405);
+        echo json_encode(["error" => "Method Not Allowed"]);
+    }
     exit;
 }
 
