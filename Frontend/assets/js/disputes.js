@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
         // Fetch all orders for the current user
-        const orders = await request(`/orders/buyer?user_id=${user.user_id}`);
+        const orders = await request(`/api/orders/buyer&user_id=${user.user_id}`);
         
         if (orders.status === 'success' && orders.data.length > 0) {
             orderSelect.innerHTML = '<option value="" disabled selected>-- Choose an Order --</option>';
@@ -54,7 +54,7 @@ document.getElementById('disputeForm').addEventListener('submit', async (e) => {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
 
-        const result = await request('/disputes', 'POST', {
+        const result = await request('/api/disputes', 'POST', {
             initiator_id: user.user_id,
             order_id: parseInt(orderId),
             reason: reason

@@ -52,8 +52,13 @@ class OrderController
             return;
         }
 
-        $orders = $this->orderService->getOrdersByBuyer($userId);
-        echo json_encode(["status" => "success", "data" => $orders]);
+        try {
+            $orders = $this->orderService->getOrdersByBuyer($userId);
+            echo json_encode(["status" => "success", "data" => $orders]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => "Server error: " . $e->getMessage()]);
+        }
     }
 
     /*

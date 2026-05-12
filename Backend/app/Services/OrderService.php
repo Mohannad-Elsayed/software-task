@@ -135,7 +135,7 @@ class OrderService
                 o.order_id, 
                 o.total_amount, 
                 o.status, 
-                o.created_at,
+                o.order_date,
                 (SELECT l.title FROM OrderItem oi JOIN Listing l ON oi.listing_id = l.listing_id WHERE oi.order_id = o.order_id LIMIT 1) as title
             FROM Orders o
             WHERE o.buyer_id = ?
