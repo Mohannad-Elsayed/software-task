@@ -38,6 +38,26 @@ class OrderController
 
     /*
     =========================================
+    GET /api/orders/buyer?user_id=X
+    =========================================
+    */
+    public function getBuyerOrders()
+    {
+        header('Content-Type: application/json');
+        $userId = $_GET['user_id'] ?? null;
+
+        if (!$userId) {
+            http_response_code(400);
+            echo json_encode(["error" => "user_id is required"]);
+            return;
+        }
+
+        $orders = $this->orderService->getOrdersByBuyer($userId);
+        echo json_encode(["status" => "success", "data" => $orders]);
+    }
+
+    /*
+    =========================================
     GET /api/orders
     =========================================
     */

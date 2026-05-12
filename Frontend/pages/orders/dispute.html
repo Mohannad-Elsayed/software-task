@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Dispute | EcoSwap</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .dispute-container {
+            max-width: 600px;
+            margin: 60px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+        }
+        .dispute-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .dispute-header i {
+            font-size: 48px;
+            color: #f59e0b;
+            margin-bottom: 15px;
+        }
+        .dispute-header h1 {
+            font-size: 24px;
+            color: var(--text);
+            margin: 0;
+        }
+        .dispute-header p {
+            color: var(--muted);
+            margin-top: 10px;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+        .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.2s;
+            background-color: white;
+        }
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        .form-group select:focus, .form-group textarea:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+        }
+        .btn-submit-dispute {
+            width: 100%;
+            padding: 15px;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-submit-dispute:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+        }
+        .btn-cancel {
+            width: 100%;
+            margin-top: 10px;
+            background: none;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 12px;
+            color: #64748b;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-cancel:hover {
+            background: #f8fafc;
+            color: #334155;
+        }
+        .empty-orders {
+            text-align: center;
+            padding: 20px;
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-radius: 12px;
+            color: #92400e;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dispute-container">
+        <div class="dispute-header">
+            <i class="ti ti-alert-triangle"></i>
+            <h1>Report a Dispute</h1>
+            <p>If something went wrong with your order, let us know and we'll help resolve it.</p>
+        </div>
+
+        <form id="disputeForm">
+            <div class="form-group">
+                <label for="orderSelect">Select Order</label>
+                <select id="orderSelect" required>
+                    <option value="" disabled selected>Loading your orders...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="disputeReason">Reason for Dispute</label>
+                <textarea id="disputeReason" placeholder="Please describe the issue in detail (e.g., item not as described, never arrived, payment issue)..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit-dispute" id="submitBtn">Submit Dispute</button>
+            <button type="button" class="btn-cancel" onclick="window.history.back()">Cancel</button>
+        </form>
+
+        <div id="noOrdersMessage" class="empty-orders" style="display: none;">
+            <p>You don't have any orders to dispute yet.</p>
+            <button class="btn-cancel" onclick="window.location.href='../listings/marketplace.html'" style="margin-top: 10px;">Browse Marketplace</button>
+        </div>
+    </div>
+
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/navbar.js"></script>
+    <script src="../../assets/js/disputes.js"></script>
+</body>
+</html>
