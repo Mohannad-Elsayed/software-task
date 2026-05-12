@@ -11,8 +11,29 @@ class AdminController
         $this->adminService = new AdminService();
     }
 
+    private function authorize()
+    {
+        // For demonstration, we'll check for user_id in the query string or body
+        $userId = $_GET["user_id"] ?? null;
+        
+        if (!$userId) {
+            $data = json_decode(file_get_contents("php://input"), true);
+            $userId = $data["user_id"] ?? null;
+        }
+
+        if (!$userId || !$this->adminService->isUserAdmin($userId)) {
+            http_response_code(403);
+            echo json_encode([
+                "success" => false,
+                "message" => "Unauthorized: Admin access required"
+            ]);
+            exit;
+        }
+    }
+
     public function getUsers()
     {
+        $this->authorize();
         header("Content-Type: application/json");
 
         echo json_encode([

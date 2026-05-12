@@ -145,6 +145,10 @@ class AdminService
     // =========================
     // GET ALL DISPUTES (ADMIN VIEW)
     // =========================
+    public function getReportsByDispute() {
+        // Mocked as requested or similar
+    }
+
     public function getDisputes()
     {
         $result = $this->conn->query("
@@ -275,4 +279,22 @@ public function generateSustainabilityReport()
         ]
     ];
 }
+
+    // =========================
+    // AUTHORIZATION CHECK
+    // =========================
+    public function isUserAdmin($userId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT role_name 
+            FROM UserRole 
+            WHERE user_id = ? AND role_name = 'admin'
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $isAdmin = $result->num_rows > 0;
+        $stmt->close();
+        return $isAdmin;
+    }
 }
