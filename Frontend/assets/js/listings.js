@@ -170,16 +170,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             container.innerHTML = upcycled.map(log => `
                 <div class="upcycle-card">
-                    <div class="transformation-box">
-                        <div class="image-container">
-                            <span class="label label-before">Before</span>
-                            <img src="${log.before_image_url || 'https://via.placeholder.com/500x350?text=Before'}" alt="Before">
-                        </div>
-                        <div class="image-container">
-                            <span class="label label-after">After</span>
-                            <img src="${log.after_image_url || 'https://via.placeholder.com/500x350?text=After'}" alt="After">
-                        </div>
-                    </div>
                     <div class="content-body">
                         <div class="meta-info">
                             <h2 class="project-title">${log.title || 'Upcycle Project'}</h2>
@@ -205,8 +195,6 @@ document.addEventListener("DOMContentLoaded", () => {
             title: 'Log Upcycle Transformation',
             html: `
                 <input id="swal-listing-id" class="swal2-input" placeholder="Listing ID to upcycle" type="number">
-                <input id="swal-before" class="swal2-input" placeholder="Before image URL">
-                <input id="swal-after" class="swal2-input" placeholder="After image URL">
                 <textarea id="swal-steps" class="swal2-textarea" placeholder="Steps taken..."></textarea>
                 <input id="swal-materials" class="swal2-input" placeholder="Materials used">
             `,
@@ -218,8 +206,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!listingId) { Swal.showValidationMessage('Listing ID is required'); return false; }
                 return {
                     user_id: user.user_id,
-                    before_image_url: document.getElementById('swal-before').value,
-                    after_image_url: document.getElementById('swal-after').value,
                     steps: document.getElementById('swal-steps').value,
                     materials_used: document.getElementById('swal-materials').value,
                     listingId

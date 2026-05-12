@@ -152,11 +152,11 @@
       }
 
       .transformation-box {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2px;
-        background: var(--border);
-        height: 300px;
+        display: block;
+        padding: 20px;
+        background: var(--bg);
+        text-align: center;
+        border-bottom: 1px solid var(--border);
       }
 
       .image-container {
@@ -269,16 +269,6 @@
                             </select>
                         </div>
 
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label for="beforeImageUrl">Before Image URL *</label>
-                                <input type="url" id="beforeImageUrl" name="before_image_url" placeholder="https://example.com/image.jpg" required />
-                            </div>
-                            <div class="form-group">
-                                <label for="afterImageUrl">After Image URL *</label>
-                                <input type="url" id="afterImageUrl" name="after_image_url" placeholder="https://example.com/image.jpg" required />
-                            </div>
-                        </div>
 
                         <div class="form-group">
                             <label for="materialsUsed">Materials Used</label>
@@ -394,14 +384,7 @@
                         html += `
                             <div class="upcycle-card">
                                 <div class="transformation-box">
-                                    <div class="image-container">
-                                        <span class="label label-before">Before</span>
-                                        <img src="${transformation.before_image_url || 'https://via.placeholder.com/500x300?text=Before'}" alt="Before transformation">
-                                    </div>
-                                    <div class="image-container">
-                                        <span class="label label-after">After</span>
-                                        <img src="${transformation.after_image_url || 'https://via.placeholder.com/500x300?text=After'}" alt="After transformation">
-                                    </div>
+                                    <span style="font-size: 14px; font-weight: 700; color: var(--primary);">Creative Transformation Log</span>
                                 </div>
                                 <div class="content-body">
                                     <h3 class="project-title">${listingTitle}</h3>
@@ -448,8 +431,6 @@
 
                 const payload = {
                     user_id: user.user_id,
-                    before_image_url: document.getElementById('beforeImageUrl').value,
-                    after_image_url: document.getElementById('afterImageUrl').value,
                     steps: document.getElementById('steps').value,
                     materials_used: materialsSelected
                 };

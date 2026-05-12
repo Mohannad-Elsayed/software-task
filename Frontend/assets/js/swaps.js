@@ -47,7 +47,6 @@ function generateProposalHTML(p, tab) {
             <div class="swap-deal">
                 <div class="deal-item">
                     <p style="font-size:11px; color:#64748b; margin-bottom:5px;">${initiatorName}</p>
-                    <img src="https://via.placeholder.com/80" alt="Offered">
                     <p title="${p.offered_title}">${p.offered_title || 'N/A'}</p>
                 </div>
                 
@@ -57,7 +56,6 @@ function generateProposalHTML(p, tab) {
 
                 <div class="deal-item">
                     <p style="font-size:11px; color:#64748b; margin-bottom:5px;">${partnerName}</p>
-                    <img src="https://via.placeholder.com/80" alt="Requested">
                     <p title="${p.requested_title}">${p.requested_title}</p>
                 </div>
             </div>
@@ -96,6 +94,7 @@ function setupEventListeners() {
 
 async function loadProposals() {
     const proposalsList = document.getElementById("proposalsList");
+    const pendingCount = document.getElementById("pendingCount");
     const user = getLoggedUser();
 
     if (!proposalsList) return;
@@ -107,6 +106,15 @@ async function loadProposals() {
 
     if (result.status === 'success' || result.data) {
         const proposals = result.data || [];
+        
+        // Update pending count for incoming tab
+        if (currentTab === 'incoming' && pendingCount) {
+            const pending = proposals.filter(p => p.status === 'pending').length;
+            pendingCount.innerHTML = pending > 0 ? `<i class="ti ti-leaf"></i> ${pending} New Offers` : '';
+        } else if (pendingCount) {
+            pendingCount.innerHTML = '';
+        }
+
         renderProposals(proposals);
     } else {
         proposalsList.innerHTML = '<p style="text-align:center; padding:50px; color:#ef4444;">Failed to load proposals.</p>';
