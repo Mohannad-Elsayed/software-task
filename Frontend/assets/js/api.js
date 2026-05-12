@@ -1,22 +1,41 @@
 const API_BASE_URL = 'http://localhost:8000/Backend/index.php?route=';
 
-async function request(endpoint, method = 'GET', body = null) {
+async function request(endpoint, method = "GET", body = null) {
+    const url = API_BASE_URL + endpoint;
+
+    console.log("API CALL:", method, url);
+    if (body) console.log("REQUEST BODY:", body);
+
     try {
-        const response = await fetch(API_BASE_URL + endpoint, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
+        const response = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
             body: body ? JSON.stringify(body) : null
         });
 
-        return await response.json();
+        const text = await response.text();
+
+        console.log("STATUS:", response.status);
+        console.log("RAW RESPONSE:", text);
+
+        try {
+            return JSON.parse(text);
+        } catch {
+            return {
+                success: false,
+                message: "Backend returned invalid JSON",
+                raw: text,
+                url: url
+            };
+        }
 
     } catch (error) {
-        console.error('Failed API request:', error);
+        console.error("FAILED API REQUEST:", error);
         return {
             success: false,
-            message: 'Failed to connect to backend'
+            message: "Failed to connect to backend",
+            error: error.message,
+            url: url
         };
     }
 }

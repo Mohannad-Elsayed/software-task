@@ -712,12 +712,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (btn) { btn.innerHTML = 'List Item Now'; btn.disabled = false; }
                 return;
             }
-            const notificationResult = await request("/api/community/notifications/all", "POST", {
-                type: "New Listing",
-                message: `${user.username || "A user"} added a new listing: ${formData.title}`,
-                exclude_user_id: user.user_id
+            const notificationRes = await fetch(`${API_BASE}/community/notifications/all`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    type: "New Listing",
+                    message: `${user.username || "A user"} added a new listing: ${formData.title}`,
+                    exclude_user_id: user.user_id
+                })
             });
 
+            const notificationResult = await notificationRes.json();
             console.log("Notification result:", notificationResult);
             Swal.fire({ title: 'EcoSwap', text: data.message || 'Your item is now live!', icon: 'success', confirmButtonColor: '#09b1ba', confirmButtonText: 'Great!' })
                 .then(r => { if (r.isConfirmed) window.location.href = "marketplace.html"; });

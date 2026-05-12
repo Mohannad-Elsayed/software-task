@@ -1,7 +1,6 @@
 <?php
-namespace app\Http\Controllers;
+require_once __DIR__ . '/../../Services/ListingService.php';
 
-use app\Services\ListingService;
 
 class ListingController {
     
@@ -30,7 +29,7 @@ class ListingController {
             return;
         }
         try {
-            $listings = $this->listingService->getListingsByUser((int) $userId);
+            $listings = $this->listingService->listListings((int) $userId);
             http_response_code(200);
             echo json_encode(["status" => "success", "data" => $listings]);
         } catch (\Exception $e) {

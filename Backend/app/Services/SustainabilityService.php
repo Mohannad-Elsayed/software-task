@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . "/../../database/connection.php";
+
+
 class SustainabilityService {
 
     public function calculateCarbonFootprint($material, $actionType) {

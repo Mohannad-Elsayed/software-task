@@ -1,10 +1,5 @@
 <?php
 
-namespace app\Http\Controllers;
-
-use app\Services\OrderService;
-use app\Http\Middleware\RoleMiddleware;
-
 require_once __DIR__ . '/../../Services/OrderService.php';
 require_once __DIR__ . '/../Middleware/RoleMiddleware.php';
 class OrderController
@@ -101,13 +96,13 @@ class OrderController
         $buyerId = $data['buyer_id'] ?? null;
         $items = $data['items'] ?? [];
         
-        $check = RoleMiddleware::checkNotBanned($buyerId);
+        // $check = RoleMiddleware::checkNotBanned($buyerId);
 
-            if (!$check['allowed']) {
-                http_response_code(403);
-                echo json_encode($check);
-                return;
-            }
+        //     if (!$check['allowed']) {
+        //         http_response_code(403);
+        //         echo json_encode($check);
+        //         return;
+        //     }
         
 
         $shippingStreet = $data['shipping_street'] ?? null;

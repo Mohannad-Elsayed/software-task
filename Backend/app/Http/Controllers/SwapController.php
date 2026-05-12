@@ -1,8 +1,5 @@
 <?php
 
-namespace app\Http\Controllers;
-
-use app\Services\SwapService;
 require_once __DIR__ . '/../../Services/SwapService.php';
 
 class SwapController {

@@ -1,9 +1,5 @@
 <?php
 
-namespace app\Http\Controllers;
-
-use app\Services\DisputeService;
-
 require_once __DIR__ . '/../../Services/DisputeService.php';
 
 class DisputeController

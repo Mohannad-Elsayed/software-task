@@ -1,6 +1,5 @@
 <?php
 
-namespace app\Services;
 
 require_once __DIR__ . '/../../database/connection.php';
 

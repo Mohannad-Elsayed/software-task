@@ -1,9 +1,5 @@
 <?php
 
-namespace app\Services;
-
-use app\Models\Order;
-use app\Models\OrderItem;
 
 require_once __DIR__ . '/../../database/connection.php';
 
@@ -288,7 +284,7 @@ class OrderService
                 // lock listing (important business rule)
                 $stmt = $this->conn->prepare("
                     UPDATE Listing 
-                    SET status = 'locked'
+                    SET status = 'sold'
                     WHERE listing_id = ?
                 ");
                 $stmt->bind_param("i", $listingId);
