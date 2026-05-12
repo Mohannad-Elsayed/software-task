@@ -68,6 +68,7 @@
             <button onclick="togglePages('navOrders', this)"><b>Orders</b></button>
             <div class="pages" id="navOrders">
                 <a href="../../pages/orders/cart.html">Cart</a>
+                <a href="../../pages/orders/dispute.html">Report Dispute</a>
             </div>
         </div>
 
