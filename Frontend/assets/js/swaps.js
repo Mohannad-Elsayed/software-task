@@ -25,11 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
             emptyState.classList.add("hidden");
             contentWrapper.classList.add("hidden");
 
-            const endpoint = `${API_BASE}/swap-requests&user_id=${user.user_id}&type=${currentTab}`;
-            const response = await fetch(endpoint);
-            if (!response.ok) throw new Error("Network response was not ok");
-
-            const result = await response.json();
+            const result = await request(`/api/swap-requests&user_id=${user.user_id}&type=${currentTab}`);
             const proposals = result.data || [];
 
             // Update pending count for incoming tab
@@ -105,10 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (confirm.isConfirmed) {
             try {
-                const response = await fetch(`${API_BASE}/swap-requests/${requestId}/${action}`, {
-                    method: 'POST'
-                });
-                const result = await response.json();
+                const result = await request(`/api/swap-requests/${requestId}/${action}`, 'POST');
 
                 if (result.status === 'success') {
                     Swal.fire('Success', result.message, 'success');
