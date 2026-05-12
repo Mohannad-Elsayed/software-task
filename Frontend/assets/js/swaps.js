@@ -1,177 +1,136 @@
-/**
- * Swaps Module
- * Architecture follows the pattern established in community.js
- * Separation of concerns: UI rendering, API communication, and Event Handling
- */
-
 let currentTab = 'incoming';
 
 document.addEventListener("DOMContentLoaded", () => {
-    const user = getLoggedUser();
+    const proposalsList = document.getElementById("proposalsList");
+    const pendingCount = document.getElementById("pendingCount");
+    const loadingState = document.getElementById("loadingState");
+    const errorState = document.getElementById("errorState");
+    const emptyState = document.getElementById("emptyState");
+    const contentWrapper = document.getElementById("contentWrapper");
 
-    if (!user.user_id) {
-        window.location.href = '../auth/login.html';
-        return;
-    }
-
-    setupEventListeners();
-    loadProposals();
-});
-
-/**
- * --- CORE BUSINESS LOGIC (Pure Functions) ---
- */
-
-function getLoggedUser() {
-    try {
-        return JSON.parse(localStorage.getItem('user') || '{}');
-    } catch (e) {
-        return {};
-    }
-}
-
-/**
- * Generates HTML for a single proposal card.
- * @param {Object} p - Proposal data
- * @param {string} tab - Current active tab ('incoming' or 'outgoing')
- * @returns {string} HTML string
- */
-function generateProposalHTML(p, tab) {
-    const isPending = p.status === 'pending';
-    const statusClass = `status-${p.status}`;
-    const initiatorName = tab === 'incoming' ? (p.initiator_name || 'User') : 'Me';
-    const partnerName = tab === 'incoming' ? 'Me' : (p.partner_name || 'User');
-
-    return `
-        <div class="proposal-card">
-            <div class="swap-deal">
-                <div class="deal-item">
-                    <p style="font-size:11px; color:#64748b; margin-bottom:5px;">${initiatorName}</p>
-                    <p title="${p.offered_title}">${p.offered_title || 'N/A'}</p>
-                </div>
-                
-                <div class="swap-icon">
-                    <i class="ti ti-arrows-exchange"></i>
-                </div>
-
-                <div class="deal-item">
-                    <p style="font-size:11px; color:#64748b; margin-bottom:5px;">${partnerName}</p>
-                    <p title="${p.requested_title}">${p.requested_title}</p>
-                </div>
-            </div>
-
-            <div style="text-align: right;">
-                <div style="margin-bottom: 15px;">
-                    <span class="status-badge ${statusClass}">${p.status}</span>
-                </div>
-                
-                ${tab === 'incoming' && isPending ? `
-                    <div class="actions">
-                        <button class="btn-deny" onclick="respondSwap(${p.request_id}, 'reject')">Deny</button>
-                        <button class="btn-approve" onclick="respondSwap(${p.request_id}, 'accept')">Approve</button>
-                    </div>
-                ` : ''}
-            </div>
-        </div>
-    `;
-}
-
-/**
- * --- SIDE EFFECTS (DOM Manipulation & API) ---
- */
-
-function setupEventListeners() {
     const incomingTab = document.getElementById("incomingTab");
     const outgoingTab = document.getElementById("outgoingTab");
 
-    if (incomingTab) {
-        incomingTab.addEventListener("click", () => switchTab('incoming', incomingTab));
-    }
-    if (outgoingTab) {
-        outgoingTab.addEventListener("click", () => switchTab('outgoing', outgoingTab));
-    }
-}
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-async function loadProposals() {
-    const proposalsList = document.getElementById("proposalsList");
-    const pendingCount = document.getElementById("pendingCount");
-    const user = getLoggedUser();
-
-    if (!proposalsList) return;
-
-    proposalsList.innerHTML = '<p style="text-align:center; padding:50px; color:#6b7280;">Loading proposals...</p>';
-
-    const endpoint = `/api/swap-requests&user_id=${user.user_id}&type=${currentTab}`;
-    const result = await request(endpoint);
-
-    if (result.status === 'success' || result.data) {
-        const proposals = result.data || [];
-        
-        // Update pending count for incoming tab
-        if (currentTab === 'incoming' && pendingCount) {
-            const pending = proposals.filter(p => p.status === 'pending').length;
-            pendingCount.innerHTML = pending > 0 ? `<i class="ti ti-leaf"></i> ${pending} New Offers` : '';
-        } else if (pendingCount) {
-            pendingCount.innerHTML = '';
+    async function loadProposals() {
+        if (!user.user_id) {
+            window.location.href = '../auth/login.html';
+            return;
         }
 
-        renderProposals(proposals);
-    } else {
-        proposalsList.innerHTML = '<p style="text-align:center; padding:50px; color:#ef4444;">Failed to load proposals.</p>';
+        try {
+            loadingState.classList.remove("hidden");
+            errorState.classList.add("hidden");
+            emptyState.classList.add("hidden");
+            contentWrapper.classList.add("hidden");
+
+            const endpoint = `${API_BASE}/swap-requests&user_id=${user.user_id}&type=${currentTab}`;
+            const response = await fetch(endpoint);
+            if (!response.ok) throw new Error("Network response was not ok");
+
+            const result = await response.json();
+            const proposals = result.data || [];
+
+            // Update pending count for incoming tab
+            if (currentTab === 'incoming' && pendingCount) {
+                const pending = proposals.filter(p => p.status === 'pending').length;
+                pendingCount.innerHTML = pending > 0 ? `<i class="ti ti-leaf"></i> ${pending} New Offers` : '';
+            } else if (pendingCount) {
+                pendingCount.innerHTML = '';
+            }
+
+            if (proposals.length === 0) {
+                loadingState.classList.add("hidden");
+                emptyState.classList.remove("hidden");
+                return;
+            }
+
+            renderProposals(proposals);
+            loadingState.classList.add("hidden");
+            contentWrapper.classList.remove("hidden");
+
+        } catch (err) {
+            console.error("Failed to load proposals:", err);
+            loadingState.classList.add("hidden");
+            errorState.classList.remove("hidden");
+        }
     }
-}
 
-function renderProposals(proposals) {
-    const proposalsList = document.getElementById("proposalsList");
-    if (!proposalsList) return;
+    function renderProposals(proposals) {
+        proposalsList.innerHTML = "";
+        proposals.forEach(p => {
+            const tr = document.createElement("tr");
+            const isPending = p.status === 'pending';
+            const initiatorName = currentTab === 'incoming' ? (p.initiator_name || 'User') : 'Me';
+            const partnerName = currentTab === 'incoming' ? 'Me' : (p.partner_name || 'User');
 
-    if (proposals.length === 0) {
-        proposalsList.innerHTML = `
-            <div style="text-align:center; padding:50px; color:#6b7280;">
-                <i class="ti ti-arrows-exchange" style="font-size:48px; opacity:0.3;"></i>
-                <p>No ${currentTab} proposals found.</p>
-            </div>`;
-        return;
+            tr.innerHTML = `
+                <td>
+                    <div style="font-weight: 600; margin-bottom: 4px;">
+                        ${initiatorName} <i class="ti ti-arrows-exchange" style="color: var(--primary-green);"></i> ${partnerName}
+                    </div>
+                    <div style="font-size: 13px; color: #6b7280;">
+                        Offering: <strong>${p.offered_title || 'N/A'}</strong>
+                    </div>
+                    <div style="font-size: 13px; color: #6b7280;">
+                        Requested: <strong>${p.requested_title || 'N/A'}</strong>
+                    </div>
+                </td>
+                <td>
+                    <span class="status-badge status-${p.status}">${p.status}</span>
+                </td>
+                <td>
+                    ${currentTab === 'incoming' && isPending ? `
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn" onclick="respondSwap(${p.request_id}, 'accept')">Accept</button>
+                            <button class="btn btn-danger" onclick="respondSwap(${p.request_id}, 'reject')">Deny</button>
+                        </div>
+                    ` : '<span style="color:#94a3b8; font-size:12px;">No actions</span>'}
+                </td>
+            `;
+            proposalsList.appendChild(tr);
+        });
     }
 
-    proposalsList.innerHTML = proposals.map(p => generateProposalHTML(p, currentTab)).join('');
-}
+    window.respondSwap = async (requestId, action) => {
+        const confirm = await Swal.fire({
+            title: action === 'accept' ? 'Approve Swap?' : 'Deny Swap?',
+            text: action === 'accept' ? 'Ownership will be swapped immediately.' : 'This proposal will be rejected.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: action === 'accept' ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)',
+            confirmButtonText: action === 'accept' ? 'Yes, swap!' : 'Yes, deny'
+        });
 
-function switchTab(tab, element) {
-    currentTab = tab;
-    
-    // Update UI
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    element.classList.add('active');
-    
-    // Reload data
+        if (confirm.isConfirmed) {
+            try {
+                const response = await fetch(`${API_BASE}/swap-requests/${requestId}/${action}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    Swal.fire('Success', result.message, 'success');
+                    loadProposals();
+                } else {
+                    Swal.fire('Error', result.message || 'Failed to update swap request', 'error');
+                }
+            } catch (err) {
+                Swal.fire('Error', 'Connection failed', 'error');
+            }
+        }
+    };
+
+    function switchTab(tab, element) {
+        currentTab = tab;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        element.classList.add('active');
+        loadProposals();
+    }
+
+    if (incomingTab) incomingTab.addEventListener("click", () => switchTab('incoming', incomingTab));
+    if (outgoingTab) outgoingTab.addEventListener("click", () => switchTab('outgoing', outgoingTab));
+
     loadProposals();
-}
-
-/**
- * Handles responding to a swap request.
- * Exposing to window as it's called from inline HTML generated in generateProposalHTML
- * (Matches pattern in community.js where functions like submitReview are top-level)
- */
-window.respondSwap = async (requestId, action) => {
-    const confirm = await Swal.fire({
-        title: action === 'accept' ? 'Approve Swap?' : 'Deny Swap?',
-        text: action === 'accept' ? 'Ownership will be swapped immediately.' : 'This proposal will be rejected.',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: action === 'accept' ? '#22c55e' : '#ef4444',
-        confirmButtonText: action === 'accept' ? 'Yes, swap!' : 'Yes, deny'
-    });
-
-    if (confirm.isConfirmed) {
-        const endpoint = `/api/swap-requests/${requestId}/${action}`;
-        const result = await request(endpoint, 'POST');
-
-        if (result.status === 'success') {
-            Swal.fire('Success', result.message, 'success');
-            loadProposals();
-        } else {
-            Swal.fire('Error', result.message || 'Failed to update swap request', 'error');
-        }
-    }
-};
+});
